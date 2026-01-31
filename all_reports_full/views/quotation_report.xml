@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <template id="quotation_report_document">
+        <t t-call="web.basic_layout">
+  <meta charset="utf-8"/>
+            <style>
+                /* REMOVE DEFAULT ODOO PAGE BORDER */
+                .page {
+                    border: none !important;
+                }
+
+                /* MAIN PAGE BORDER */
+                .quotation-page {
+                    border: 1px solid #262424;
+                    padding: 10px;
+                    box-sizing: border-box;
+                    font-size: 14px;
+                }
+
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                }
+
+                table:first-child {
+                    border-top: none;
+                }
+
+
+                td, th {
+                    border: 1px solid #262424;
+                    padding: 6px;
+                    vertical-align: middle;
+                }
+
+                .no-border {
+                    border: none !important;
+                }
+
+                .header-title {
+                    font-size: 26px;
+                    font-weight: bold;
+                    color: #5b7bd5;
+                    text-align: right;
+                    margin-bottom: 3px;
+                }
+
+                .section-title {
+                    background: #cfe2f3;
+                    font-weight: bold;
+                    text-align: center;
+                    font-size: 20px;
+                    border-top: none !important;
+                }
+
+                .no-top-border {
+                    border-top: none !important;
+                }
+
+
+
+                .table-header {
+                    background: #cfe2f3;
+                    font-weight: bold;
+                    text-align: center;
+                }
+
+                .right {
+                    text-align: right;
+                }
+
+                .center {
+                    text-align: center;
+                }
+
+                .no-page-break {
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+                    page-break-before: avoid;
+                }
+
+                .header-box {
+                    border: 1px solid #262424;   
+                    border-top: 1px solid #262424;
+                }
+
+
+            </style>
+
+            <t t-foreach="docs" t-as="o">
+
+                <div class="page quotation-page">
+
+                    <!-- HEADER -->
+                    
+                    <table class="header-box">
+                        <tr class="no-border">
+                            <td class="no-border" style="width:40%; border-top: 1px solid black;">
+                                <img t-if="o.company_id.logo"
+                                    t-att-src="image_data_uri(o.company_id.logo)"
+                                    style="width:160px;"/>
+                            </td>
+                            <td class="no-border" style="width:60%;">
+                                <div class="header-title">
+                                    Duisport Packing Logistics India Pvt. Ltd
+                                </div>
+                                <div class="right">
+                                    Plot No.-576, Sector-8, IMT Manesar, Gurugram, Haryana<br/>
+                                    Gurugram-122050 (India). GSTIN: 06AAECD5705A1Z9<br/>
+                                    CIN: U20299PN2013FTC146359
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+
+                    <!-- QUOTATION TITLE -->
+                    <table>
+                        <tr>
+                            <td class="section-title no-top-border">Quotation</td>
+                        </tr>
+                    </table>
+
+
+                    <!-- CUSTOMER + QUOTATION INFO -->
+                    <table>
+                        <tr>
+                            <!-- LEFT BLOCK -->
+                            <td style="width:20%;"><b>Customer Name:-</b></td>
+                            <td style="width:40%;">
+                                <t t-esc="o.partner_id.name"/>
+                            </td>
+
+                            <!-- RIGHT BLOCK (DATE) -->
+                            <td style="width:20%;" rowspan="2" class="center">
+                                <b>Date:</b>
+                            </td>
+                            <td style="width:20%;" rowspan="2" class="center">
+                                <t t-esc="o.date_order.strftime('%d-%m-%Y')"/>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td><b>Address:-</b></td>
+                            <td>
+                                <t t-esc="o.partner_id.contact_address"/>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <!-- LEFT BLOCK -->
+                            <td><b>Contact Person:-</b></td>
+                            <td>
+                                <t t-esc="o.partner_id.name"/>
+                            </td>
+
+                            <!-- RIGHT BLOCK (QUOTATION REF) -->
+                            <td rowspan="2" class="center">
+                                <b>Quotation Ref No:</b>
+                            </td>
+                            <td rowspan="2" class="center">
+                                <t t-esc="o.name"/>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td><b>Contact Details:-</b></td>
+                            <td>
+                                <t t-esc="o.partner_id.phone or ''"/>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <!-- LEFT BLOCK -->
+                            <td><b>E-mail Address:-</b></td>
+                            <td>
+                                <t t-esc="o.partner_id.email or ''"/>
+                            </td>
+
+                            <!-- RIGHT BLOCK (REVISION) -->
+                            <td class="center">
+                                <b>Revision no-</b>
+                            </td>
+                            <td class="center">
+                                DPL/DEL/03 Rev 00
+                            </td>
+                        </tr>
+                    </table>
+
+
+                    <!-- PRODUCT + TERMS TABLE (SINGLE FLOW – NO FORCED PAGE BREAK) -->
+                    <table>
+
+                        <!-- PRODUCT HEADER -->
+                        <tr class="table-header">
+                            <td class="no-top-border" style="width:5%;">S.No</td>
+                            <td class="no-top-border" style="width:10%;">MOQ</td>
+                            <td class="no-top-border" style="width:45%;">Description</td>
+                            <td class="no-top-border" style="width:10%;">UOM</td>
+                            <td class="no-top-border" style="width:10%;">Qty</td>
+                            <td class="no-top-border" style="width:20%;">Price / Nos</td>
+                        </tr>
+
+                        <t t-set="i" t-value="1"/>
+                        <t t-foreach="o.order_line" t-as="line">
+                            <tr>
+                                <td class="center"><t t-esc="i"/></td>
+                                <td class="center"><t t-esc="line.product_uom_qty"/></td>
+                                <td><t t-esc="line.name"/></td>
+                                <td class="center"><t t-esc="line.product_uom.name"/></td>
+                                <td class="center"><t t-esc="line.product_uom_qty"/></td>
+                                <td class="cell center">
+                                        <span t-field="line.price_unit" t-options="{'widget':'monetary','display_currency':o.currency_id}"/>
+                                    </td>
+                            </tr>
+                            <t t-set="i" t-value="i + 1"/>
+                        </t>
+
+                        <!-- TERMS TITLE -->
+                        <tr>
+                            <td colspan="6" class="section-title">
+                                Terms &amp; Conditions:
+                            </td>
+                        </tr>
+
+                        <!-- TERMS CONTENT -->
+                        <tr>
+                            <td colspan="6" style="border-top:none; padding:10px;">
+                                <t t-if="o.quotation_terms">
+                                    <t t-raw="o.quotation_terms"/>
+                                </t>
+                                <t t-else="">
+                                    <i>No Terms &amp; Conditions defined.</i>
+                                </t>
+                            </td>
+                        </tr>
+
+                    </table>
+
+
+
+
+                </div>
+
+            </t>
+
+        </t>
+    </template>
+
+</odoo>

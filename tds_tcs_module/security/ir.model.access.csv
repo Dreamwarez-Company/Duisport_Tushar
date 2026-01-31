@@ -1,0 +1,10 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_tds_section_master,access_tds_section_master,model_tds_section_master,,1,1,1,1
+access_tds_section_wise_report_user,tds.section.wise.report user,model_tds_section_wise_report,base.group_user,1,1,1,1
+access_tds_section_wise_line_user,tds.section.wise.line user,model_tds_section_wise_line,base.group_user,1,1,1,1
+access_tds_section_wise_detail_user,tds.section.wise.detail user,model_tds_section_wise_detail,base.group_user,1,1,1,1
+access_tds_register_user,tds.register user,model_tds_register,base.group_user,1,1,1,1
+access_tds_register_line_user,tds.register.line user,model_tds_register_line,base.group_user,1,1,1,1
+access_tds_summary_report_user,tds.summary.report.user,model_tds_summary_report,base.group_user,1,1,1,1
+access_tds_summary_vendor_user,tds.summary.vendor.user,model_tds_summary_vendor,base.group_user,1,1,1,1
+access_tds_summary_detail_user,tds.summary.detail.user,model_tds_summary_detail,base.group_user,1,1,1,1

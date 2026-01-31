@@ -1,0 +1,12 @@
+<odoo>
+    <record id="mail_template_vendor_rfq" model="mail.template">
+        <field name="name">Vendor RFQ Email</field>
+        <field name="model_id" ref="purchase.model_purchase_order"/>
+        <field name="email_from">${object.user_id.email|safe}</field>
+        <field name="subject">RFQ for ${object.order_line[0].product_id.name}</field>
+        <field name="body_html"><![CDATA[
+            <p>Hello ${object.partner_id.name},</p>
+            <p>Please find the RFQ for ${object.order_line[0].product_id.name}.</p>
+        ]]></field>
+    </record>
+</odoo>

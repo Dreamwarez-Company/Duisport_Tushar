@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Wizard Form View -->
+    <record id="view_bank_reconciliation_wizard" model="ir.ui.view">
+        <field name="name">bank.reconciliation.wizard.form</field>
+        <field name="model">bank.reconciliation.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Bank Reconciliation Report">
+                <group>
+                    <field name="journal_id"/>
+                    <field name="date_to"/>
+                </group>
+                <footer>
+                    <button name="print_report" string="Print" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Wizard Action -->
+    <record id="action_bank_reconciliation_wizard" model="ir.actions.act_window">
+        <field name="name">Bank Reconciliation Report</field>
+        <field name="res_model">bank.reconciliation.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_bank_reconciliation_report"
+              name="Bank Reconciliation"
+              parent="account.menu_finance_reports"
+              action="action_bank_reconciliation_wizard"
+              sequence="50"/>
+
+    <!-- Report Template -->
+    <template id="bank_reconciliation_template">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <div class="text-center">
+                        <h2>Bank Reconciliation Report</h2>
+                        <!-- <h4><span t-esc="company.name"/></h4> -->
+                        <p>
+                            <strong>Bank Journal:</strong> <span t-field="journal.name"/><br/>
+                            <strong>As of Date:</strong> <span t-esc="date_to"/>
+                        </p>
+                    </div>
+
+                    <div class="mt-4">
+                        <h4>Balance Summary</h4>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Bank Statement Balance:</strong></td>
+                                <td class="text-end">
+                                    <span t-esc="'{:,.2f}'.format(statement_balance)"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Less: Outstanding Checks</strong></td>
+                                <td class="text-end">
+                                    (<span t-esc="'{:,.2f}'.format(total_outstanding_checks)"/>)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Add: Outstanding Deposits</strong></td>
+                                <td class="text-end">
+                                    <span t-esc="'{:,.2f}'.format(total_outstanding_deposits)"/>
+                                </td>
+                            </tr>
+                            <tr class="table-active">
+                                <td><strong>Adjusted Bank Balance:</strong></td>
+                                <td class="text-end">
+                                    <strong><span t-esc="'{:,.2f}'.format(adjusted_balance)"/></strong>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Book Balance:</strong></td>
+                                <td class="text-end">
+                                    <span t-esc="'{:,.2f}'.format(book_balance)"/>
+                                </td>
+                            </tr>
+                            <tr t-if="abs(adjusted_balance - book_balance) &gt; 0.01" style="background-color: #ffe6e6;">
+                                <td><strong>Difference:</strong></td>
+                                <td class="text-end">
+                                    <strong><span t-esc="'{:,.2f}'.format(adjusted_balance - book_balance)"/></strong>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Outstanding Checks -->
+                    <div class="mt-5" t-if="outstanding_checks">
+                        <h4>Outstanding Checks</h4>
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr class="table-light">
+                                    <th>Date</th>
+                                    <th>Reference</th>
+                                    <th>Partner</th>
+                                    <th>Label</th>
+                                    <th class="text-end">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="outstanding_checks" t-as="line">
+                                    <td><span t-field="line.date"/></td>
+                                    <td><span t-field="line.move_id.name"/></td>
+                                    <td><span t-field="line.partner_id.name"/></td>
+                                    <td><span t-field="line.name"/></td>
+                                    <td class="text-end"><span t-esc="'{:,.2f}'.format(line.debit)"/></td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-active">
+                                    <td colspan="4" class="text-end"><strong>Total Outstanding Checks:</strong></td>
+                                    <td class="text-end"><strong><span t-esc="'{:,.2f}'.format(total_outstanding_checks)"/></strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <!-- Outstanding Deposits -->
+                    <div class="mt-5" t-if="outstanding_deposits">
+                        <h4>Outstanding Deposits</h4>
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr class="table-light">
+                                    <th>Date</th>
+                                    <th>Reference</th>
+                                    <th>Partner</th>
+                                    <th>Label</th>
+                                    <th class="text-end">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="outstanding_deposits" t-as="line">
+                                    <td><span t-field="line.date"/></td>
+                                    <td><span t-field="line.move_id.name"/></td>
+                                    <td><span t-field="line.partner_id.name"/></td>
+                                    <td><span t-field="line.name"/></td>
+                                    <td class="text-end"><span t-esc="'{:,.2f}'.format(line.credit)"/></td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-active">
+                                    <td colspan="4" class="text-end"><strong>Total Outstanding Deposits:</strong></td>
+                                    <td class="text-end"><strong><span t-esc="'{:,.2f}'.format(total_outstanding_deposits)"/></strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <!-- Footer Note -->
+                    <div class="mt-5">
+                        <p class="text-muted">
+                            <small>
+                                <strong>Note:</strong> This report shows unreconciled transactions as of <span t-esc="date_to"/>.
+                                The adjusted bank balance should match the book balance when all transactions are properly reconciled.
+                            </small>
+                        </p>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Action -->
+    <record id="action_bank_reconciliation_report" model="ir.actions.report">
+        <field name="name">Bank Reconciliation Report</field>
+        <field name="model">bank.reconciliation.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">all_reports_full.bank_reconciliation_template</field>
+        <field name="report_file">all_reports_full.bank_reconciliation_template</field>
+        <field name="binding_model_id" ref="model_bank_reconciliation_wizard"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

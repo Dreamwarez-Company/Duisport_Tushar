@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Simple Report Template -->
+    <template id="report_vouchers_template">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h2>Vouchers Report</h2>
+                    <h3><span t-field="o.name"/></h3>
+                    <p>Period: <span t-field="o.date_from"/> to <span t-field="o.date_to"/></p>
+                    
+                    <div style="margin: 20px 0;">
+                        <h4>Summary</h4>
+                        <table style="width: 50%; border-collapse: collapse;">
+                            <tr>
+                                <td style="padding: 8px; border: 1px solid #ddd;"><strong>Total Debit</strong></td>
+                                <td style="padding: 8px; border: 1px solid #ddd;"><span t-field="o.total_debit"/></td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px; border: 1px solid #ddd;"><strong>Total Credit</strong></td>
+                                <td style="padding: 8px; border: 1px solid #ddd;"><span t-field="o.total_credit"/></td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px; border: 1px solid #ddd;"><strong>Total Balance</strong></td>
+                                <td style="padding: 8px; border: 1px solid #ddd;"><span t-field="o.total_balance"/></td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px; border: 1px solid #ddd;"><strong>Total Vouchers</strong></td>
+                                <td style="padding: 8px; border: 1px solid #ddd;"><span t-field="o.total_vouchers"/></td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div t-if="o.line_ids">
+                        <h4>Voucher Details</h4>
+                        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                            <thead>
+                                <tr>
+                                    <th style="padding: 8px; border: 1px solid #ddd;">Date</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd;">Voucher No.</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd;">Partner</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd;">Journal</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd;">Type</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd;">Debit</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd;">Credit</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd;">Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="o.line_ids" t-as="line">
+                                    <tr>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><span t-field="line.accounting_date"/></td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><span t-field="line.voucher_number"/></td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><span t-field="line.partner_id.name"/></td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><span t-field="line.journal"/></td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><span t-field="line.voucher_type"/></td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><span t-field="line.debit_amount"/></td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><span t-field="line.credit_amount"/></td>
+                                        <td style="padding: 8px; border: 1px solid #ddd;"><span t-field="line.balance_amount"/></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="5" style="padding: 8px; border: 1px solid #ddd;"><strong>Totals</strong></td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;"><strong><span t-field="o.total_debit"/></strong></td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;"><strong><span t-field="o.total_credit"/></strong></td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;"><strong><span t-field="o.total_balance"/></strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    
+                    <div style="margin-top: 30px; font-size: 11px; color: #666;">
+                        <p>Generated on: <span t-esc="datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')"/></p>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Action -->
+    <report
+        id="report_vouchers"
+        name="journalentry.report_vouchers"
+        model="vouchers.report"
+        report_type="qweb-pdf"
+        string="Vouchers Report"
+        file="journalentry.report_vouchers_template"
+    />
+</odoo>

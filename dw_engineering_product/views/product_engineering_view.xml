@@ -1,0 +1,64 @@
+<odoo>
+    <!-- Inherit Product Template Form -->
+    <record id="view_product_template_form_inherit_engineering" model="ir.ui.view">
+        <field name="name">product.template.form.engineering</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Engineering Details">
+                    <header>
+                    <!-- Analysis Done Button -->
+                    <button name="action_analysis_done" 
+                        string="Analysis Done" 
+                        type="object" 
+                        class="btn-primary"
+                        groups="dw_engineering_product.group_engineering_team"/>
+                    </header>
+
+                    <group string="Engineering Information">
+                        <!-- Cost Price - editable by engineering team, view by others -->
+                        <field name="list_price" string="Cost Price"
+                               groups="dw_engineering_product.group_engineering_team"/>
+                        <field name="list_price" string="Cost Price" readonly="1" 
+                               groups="!dw_engineering_product.group_engineering_team"/>
+                        
+                        <!-- Cost Price M - ONLY visible and editable by management team (hidden for others) -->
+                        <field name="cost_price_mgnt" 
+                               groups="dw_engineering_product.group_management_team"/>
+                        
+                        <!-- Other engineering fields - editable by engineering team -->
+                        <field name="design_ref" filename="design_ref_filename" 
+                               groups="dw_engineering_product.group_engineering_team"/>
+                        <field name="estimation_time" 
+                               groups="dw_engineering_product.group_engineering_team"/>
+                        <field name="engineering_notes" 
+                               groups="dw_engineering_product.group_engineering_team"/>
+                        
+                        <!-- Readonly fields for non-engineering users -->
+                        <field name="design_ref" filename="design_ref_filename" readonly="1" 
+                               groups="!dw_engineering_product.group_engineering_team"/>
+                        <field name="estimation_time" readonly="1" 
+                               groups="!dw_engineering_product.group_engineering_team"/>
+                        <field name="engineering_notes" readonly="1" 
+                               groups="!dw_engineering_product.group_engineering_team"/>
+                    </group>
+                    <group string="Bill of Materials" groups="dw_engineering_product.group_engineering_team,dw_engineering_product.group_production_team">
+                        <field name="bom_ids" readonly="1">
+                            <tree readonly="1">
+                                <field name="display_name" string="Bill of Materials" readonly="1"/>
+                                <field name="product_id" string="Product" readonly="1"/>
+                                <field name="code" string="Reference" readonly="1"/>
+                                <field name="product_qty" string="Quantity" readonly="1"/>
+                                <field name="type" string="Type" readonly="1"/>
+                                <!-- Add overall availability status -->
+                                <field name="availability_status" string="Overall Availability" widget="badge" 
+                                    options="{'background_color:availability_status':'Fully Available:success,Partially Available:warning,Not Available:danger,Unknown:muted'}" readonly="1"/>
+                            </tree>
+                        </field>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

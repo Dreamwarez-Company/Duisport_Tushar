@@ -1,0 +1,23 @@
+<odoo>
+    <record id="view_partner_form_msme" model="ir.ui.view">
+        <field name="name">res.partner.msme.form</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Insert new MSME fields below Tax ID -->
+            <xpath expr="//field[@name='vat']" position="after">
+                <group string="MSME Details">
+                    <field name="is_msme_user" string="MSME Vendor?" />
+                    
+                    <field name="udyam_number_user"
+                        string="Udyam Registration Number"
+                        placeholder="Enter Udyam Registration Number"
+                        modifiers="{'invisible': [['is_msme_user', '=', false]], 'required': [['is_msme_user', '=', true]]}"/>
+
+                </group>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

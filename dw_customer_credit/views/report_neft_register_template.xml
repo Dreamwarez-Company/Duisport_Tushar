@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_neft_register_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <html>
+                    <head>
+                        <meta charset="utf-8"/>
+                        <style>
+                            /* Keep your existing styles, they're good */
+                            body { 
+                                font-family: 'Segoe UI', Arial, sans-serif; 
+                                font-size: 12px; 
+                                margin: 0;
+                                padding: 0;
+                            }
+                            
+                            .header { 
+                                text-align: center; 
+                                margin-bottom: 25px;
+                                padding-bottom: 15px;
+                                border-bottom: 2px solid #4a6fa5;
+                            }
+                            .header h2 { 
+                                margin: 0 0 5px 0; 
+                                color: #4a6fa5;
+                                font-size: 22px;
+                            }
+                            .header p { 
+                                margin: 3px 0; 
+                                color: #555;
+                            }
+                            
+                            .report-info {
+                                text-align: left;
+                                margin-bottom: 10px;
+                                padding: 10px;
+                                background-color: #f8f9fa;
+                                border-radius: 5px;
+                                border: 1px solid #dee2e6;
+                            }
+                            
+                            table { 
+                                width: 100%; 
+                                border-collapse: collapse; 
+                                margin-top: 15px;
+                            }
+                            th { 
+                                background-color: #4a6fa5; 
+                                color: white;
+                                padding: 10px 8px; 
+                                text-align: left; 
+                                border: 1px solid #ddd; 
+                                font-weight: bold;
+                                font-size: 11px;
+                            }
+                            td { 
+                                padding: 8px; 
+                                border: 1px solid #ddd;
+                                font-size: 11px;
+                            }
+                            .text-right { text-align: right; }
+                            .text-center { text-align: center; }
+                            
+                            .vendor-payment { background-color: #fff3f3; }
+                            .transfer-payment { background-color: #e8f4f8; }
+                            .customer-payment { background-color: #f0fff0; }
+                            
+                            .total-row { 
+                                font-weight: bold; 
+                                background-color: #e8f4f8;
+                                border-top: 2px solid #4a6fa5;
+                            }
+                            
+                            .no-data { 
+                                text-align: center; 
+                                padding: 40px 20px; 
+                                color: #666;
+                                font-style: italic;
+                            }
+                            
+                            .summary-box {
+                                background-color: #f8f9fa;
+                                border: 1px solid #dee2e6;
+                                border-radius: 5px;
+                                padding: 15px;
+                                margin-top: 20px;
+                            }
+                            .summary-box h4 {
+                                margin-top: 0;
+                                color: #4a6fa5;
+                                border-bottom: 1px solid #dee2e6;
+                                padding-bottom: 5px;
+                            }
+                            .negative-amount { color: red; font-weight: bold; }
+                            .positive-amount { color: green; font-weight: bold; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <h2>Fund Transfer / NEFT Register</h2>
+                            <p>
+                                <t t-if="date_from and date_to">
+                                    Period: <strong><t t-esc="date_from"/></strong> to <strong><t t-esc="date_to"/></strong>
+                                </t>
+                            </p>
+                            <t t-if="journal_id">
+                                <p>Bank Journal: <strong><t t-esc="journal_id.name"/></strong></p>
+                            </t>
+                        </div>
+                        
+                        <div class="report-info">
+                            <p>
+                                <strong>Report Type:</strong> Outgoing Payments &amp; Transfers
+                            </p>
+                            <p>
+                                <strong>Included Transaction Types:</strong>
+                                <t t-if="vendor_count > 0"> Vendor Payments (<t t-esc="vendor_count"/>),</t>
+                                <t t-if="transfer_count > 0"> Internal Transfers (<t t-esc="transfer_count"/>),</t>
+                                <t t-if="customer_count > 0"> Customer Payments (<t t-esc="customer_count"/>)</t>
+                            </p>
+                        </div>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th width="8%">Date</th>
+                                    <th width="10%">Voucher No.</th>
+                                    <th width="10%">Type</th>
+                                    <th width="20%">From Account</th>
+                                    <th width="20%">To Account</th>
+                                    <th width="12%" class="text-right">Amount</th>
+                                    <th width="15%">Reference</th>
+                                    <th width="5%">Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-if="not lines">
+                                    <tr>
+                                        <td colspan="8" class="no-data">
+                                            No outgoing payment transactions found for the selected criteria
+                                        </td>
+                                    </tr>
+                                </t>
+                                
+                                <t t-foreach="lines" t-as="line">
+                                    <t t-set="amount" t-value="line.get('amount', 0)"/>
+                                    
+                                    <t t-set="row_class">
+                                        <t t-if="line.get('payment_type') == 'outbound'">vendor-payment</t>
+                                        <t t-elif="line.get('payment_type') == 'transfer'">transfer-payment</t>
+                                        <t t-else="">customer-payment</t>
+                                    </t>
+                                    <tr t-att-class="row_class">
+                                        <td class="text-center"><t t-esc="line.get('date', '')"/></td>
+                                        <td><t t-esc="line.get('voucher_no', '')"/></td>
+                                        <td class="text-center"><t t-esc="line.get('transaction_type', '')"/></td>
+                                        <td><t t-esc="line.get('from_account', '')"/></td>
+                                        <td><t t-esc="line.get('to_account', '')"/></td>
+                                        <td class="text-right">
+                                            <t t-if="amount &lt; 0">
+                                                <span class="negative-amount">(<t t-esc="'%.2f' % abs(amount)"/>)</span>
+                                            </t>
+                                            <t t-else="">
+                                                <span class="positive-amount"><t t-esc="'%.2f' % amount"/></span>
+                                            </t>
+                                        </td>
+                                        <td><t t-esc="line.get('reference', '')"/></td>
+                                        <td><t t-esc="line.get('remarks', '') or '-'"/></td>
+                                    </tr>
+                                </t>
+                                
+                                <!-- Total Row -->
+                                <t t-if="lines">
+                                    <tr class="total-row">
+                                        <td colspan="5" style="text-align: right; padding-right: 20px;">
+                                            <strong>Net Cash Flow:</strong>
+                                        </td>
+                                        <td class="text-right">
+                                            <strong>
+                                                <t t-if="total_amount &lt; 0">
+                                                    <span class="negative-amount">(<t t-esc="'%.2f' % abs(total_amount)"/>)</span>
+                                                </t>
+                                                <t t-else="">
+                                                    <span class="positive-amount"><t t-esc="'%.2f' % total_amount"/></span>
+                                                </t>
+                                            </strong>
+                                        </td>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                        
+                        <!-- Summary Section -->
+                        <t t-if="lines">
+                            <div class="summary-box">
+                                <h4>Summary</h4>
+                                <table style="border: none; background: none;">
+                                    <tr>
+                                        <td><strong>Vendor Payments:</strong></td>
+                                        <td><t t-esc="vendor_count"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Internal Transfers:</strong></td>
+                                        <td><t t-esc="transfer_count"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Customer Payments:</strong></td>
+                                        <td><t t-esc="customer_count"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Total Transactions:</strong></td>
+                                        <td><t t-esc="len(lines)"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" style="padding-top: 10px;">
+                                            <t t-if="total_amount &lt; 0">
+                                                <span class="negative-amount" style="font-size: 14px;">Net Outflow: (<t t-esc="'%.2f' % abs(total_amount)"/>)</span>
+                                            </t>
+                                            <t t-elif="total_amount > 0">
+                                                <span class="positive-amount" style="font-size: 14px;">Net Inflow: <t t-esc="'%.2f' % total_amount"/></span>
+                                            </t>
+                                            <t t-else="">
+                                                <span style="font-size: 14px;">Balanced: <t t-esc="'%.2f' % total_amount"/></span>
+                                            </t>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </t>
+
+                    </body>
+                </html>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_neft_register" model="ir.actions.report">
+        <field name="name">Fund Transfer / NEFT Register</field>
+        <field name="model">neft.register.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">dw_customer_credit.report_neft_register_template</field>
+        <field name="print_report_name">
+            'Fund Transfer Report - %s' % (object.date_from)
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_journal_voucher_tree" model="ir.ui.view">
+        <field name="name">journal.voucher.tree</field>
+        <field name="model">account.move</field>
+        <field name="arch" type="xml">
+            <tree string="Journal Vouchers"
+                  default_order="date desc, id desc"
+                  decoration-info="state=='draft'"
+                  decoration-success="state=='posted'"
+                  decoration-danger="state=='cancel'">
+
+                <field name="is_journal_voucher" column_invisible="1"/>
+                <field name="move_type" column_invisible="1"/>
+                <field name="company_id" column_invisible="1"/>
+
+                <field name="name" string="Voucher No"/>
+                <field name="date"/>
+                <field name="journal_id"/>
+                <field name="partner_id"/>
+                <field name="voucher_type" string="Type"/>
+                <field name="mode"/>
+                <field name="amount_total" widget="monetary"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_journal_voucher_form" model="ir.ui.view">
+        <field name="name">journal.voucher.form</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="priority">2000</field>
+
+        <field name="arch" type="xml">
+
+            
+            <xpath expr="//sheet" position="inside">
+                <field name="is_journal_voucher" invisible="1"/>
+            </xpath>
+
+            
+            <xpath expr="//div[contains(@class, 'oe_title')]" position="attributes">
+                <attribute name="invisible">is_journal_voucher</attribute>
+            </xpath>
+
+            
+            <xpath expr="//group[@id='header_left_group']" position="attributes">
+                <attribute name="invisible">is_journal_voucher</attribute>
+            </xpath>
+            
+            <xpath expr="//group[@id='header_right_group']" position="attributes">
+                <attribute name="invisible">is_journal_voucher</attribute>
+            </xpath>
+
+            
+            <xpath expr="//sheet/notebook" position="before">
+                
+                <div invisible="not is_journal_voucher">
+                    
+                    
+                    <group col="2">
+                        
+                        <group>
+                            <label for="partner_id" string="Partner"/>
+                            <field name="partner_id" nolabel="1"/>
+                        </group>
+                        
+                        
+                        <group>
+                            <label for="journal_id" string="Journal"/>
+                            <field name="journal_id" nolabel="1"/>
+                        </group>
+                    </group>
+
+                    
+                    <group>
+                        <label for="date" string="Accounting Date"/>
+                        <field name="date" nolabel="1"/>
+                    </group>
+
+                    
+                    <div>
+                        <h2>
+                            <field name="name" readonly="1"/>
+                        </h2>
+                    </div>
+
+                    
+                    <group col="2">
+                       
+                        <group string="Voucher Information">
+                            <field name="voucher_type" string="Default Type"/>
+                            <field name="mode"/>
+                            <field name="is_cheque"/>
+                            <field name="ref" string="Ref / Cheque No"/>
+                            <field name="cheque_ref" invisible="not is_cheque"/>
+                        </group>
+                        
+                        
+                        <group string="Status &amp; Sales">
+                            <field name="form_status"/>
+                            <field name="salesperson_id"/>
+                            <field name="sales_team_id"/>
+                            <field name="memo"/>
+                        </group>
+                    </group>
+
+                    
+                </div>
+            </xpath>
+
+           
+            <xpath expr="//notebook/page[.//field[@name='line_ids']]" position="attributes">
+                <attribute name="string">Voucher Entry</attribute>
+                <attribute name="invisible">not is_journal_voucher</attribute>
+            </xpath>
+
+            
+            <xpath expr="//page[@name='other_info']" position="attributes">
+                <attribute name="invisible">is_journal_voucher</attribute>
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="action_journal_voucher" model="ir.actions.act_window">
+        <field name="name">Journal Vouchers</field>
+        <field name="res_model">account.move</field>
+        <field name="view_mode">tree,form</field>
+
+        <field name="views" eval="[
+            (ref('view_journal_voucher_tree'), 'tree'),
+            (ref('view_journal_voucher_form'), 'form')
+        ]"/>
+
+        <field name="domain">
+            [('is_journal_voucher','=',True)]
+        </field>
+
+        <field name="context">
+            {'default_is_journal_voucher': True, 'default_move_type': 'entry'}
+        </field>
+    </record>
+
+</odoo>

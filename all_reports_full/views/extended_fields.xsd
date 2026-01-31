@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="odoo">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="record" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="field" maxOccurs="unbounded">
+                                <xs:complexType mixed="true">
+                                    <xs:sequence minOccurs="0">
+                                        <xs:element name="xpath" minOccurs="0">
+                                            <xs:complexType>
+                                                <xs:sequence minOccurs="0">
+                                                    <xs:element name="page" minOccurs="0">
+                                                        <xs:complexType>
+                                                            <xs:sequence>
+                                                                <xs:element name="group"
+                                                                    maxOccurs="unbounded">
+                                                                    <xs:complexType>
+                                                                        <xs:sequence minOccurs="0">
+                                                                            <xs:element name="group"
+                                                                                minOccurs="0">
+                                                                                <xs:complexType>
+                                                                                    <xs:sequence>
+                                                                                        <xs:element
+                                                                                            name="field"
+                                                                                            maxOccurs="unbounded">
+                                                                                            <xs:complexType>
+                                                                                                <xs:attribute
+                                                                                                    name="name"
+                                                                                                    use="required" />
+                                                                                            </xs:complexType>
+                                                                                        </xs:element>
+                                                                                    </xs:sequence>
+                                                                                </xs:complexType>
+                                                                            </xs:element>
+                                                                            <xs:element name="field"
+                                                                                minOccurs="0">
+                                                                                <xs:complexType>
+                                                                                    <xs:attribute
+                                                                                        name="name"
+                                                                                        use="required" />
+                                                                                </xs:complexType>
+                                                                            </xs:element>
+                                                                        </xs:sequence>
+                                                                    </xs:complexType>
+                                                                </xs:element>
+                                                            </xs:sequence>
+                                                            <xs:attribute name="string"
+                                                                use="required" />
+                                                            <xs:attribute name="name" use="required" />
+                                                            <xs:attribute name="invisible"
+                                                                use="required" />
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                    <xs:element name="field" minOccurs="0">
+                                                        <xs:complexType>
+                                                            <xs:attribute name="name" use="required" />
+                                                            <xs:attribute name="string" />
+                                                            <xs:attribute name="readonly" />
+                                                            <xs:attribute name="widget" />
+                                                            <xs:attribute name="nolabel"
+                                                                type="xs:integer" />
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                    <xs:element name="group" minOccurs="0">
+                                                        <xs:complexType>
+                                                            <xs:sequence>
+                                                                <xs:element name="field"
+                                                                    maxOccurs="unbounded">
+                                                                    <xs:complexType>
+                                                                        <xs:attribute name="name"
+                                                                            use="required" />
+                                                                    </xs:complexType>
+                                                                </xs:element>
+                                                            </xs:sequence>
+                                                            <xs:attribute name="string"
+                                                                use="required" />
+                                                            <xs:attribute name="invisible" />
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                    <xs:element name="label" minOccurs="0">
+                                                        <xs:complexType>
+                                                            <xs:attribute name="for" use="required" />
+                                                            <xs:attribute name="string"
+                                                                use="required" />
+                                                            <xs:attribute name="style"
+                                                                use="required" />
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                </xs:sequence>
+                                                <xs:attribute name="expr" use="required" />
+                                                <xs:attribute name="position" use="required" />
+                                            </xs:complexType>
+                                        </xs:element>
+                                    </xs:sequence>
+                                    <xs:attribute name="name" use="required">
+                                        <xs:simpleType>
+                                            <xs:restriction base="xs:string">
+                                                <xs:enumeration value="arch" />
+                                                <xs:enumeration value="inherit_id" />
+                                                <xs:enumeration value="model" />
+                                                <xs:enumeration value="name" />
+                                            </xs:restriction>
+                                        </xs:simpleType>
+                                    </xs:attribute>
+                                    <xs:attribute name="ref" />
+                                    <xs:attribute name="type" />
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                        <xs:attribute name="id" use="required" />
+                        <xs:attribute name="model" use="required" />
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

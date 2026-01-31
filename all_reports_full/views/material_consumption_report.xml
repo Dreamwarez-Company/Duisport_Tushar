@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Material Consumption Report Form View -->
+    <record id="view_material_consumption_report_form" model="ir.ui.view">
+        <field name="name">material.consumption.report.form</field>
+        <field name="model">material.consumption.report</field>
+        <field name="arch" type="xml">
+            <form string="Material Consumption Report">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                        <group>
+                            <field name="product_id" placeholder="Leave empty for all products"/>
+                            <field name="categ_id" placeholder="Leave empty for all categories"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Consumption Details">
+                            <field name="line_ids">
+                                <tree>
+                                    <field name="date"/>
+                                    <field name="product_name"/>
+                                    <field name="product_code"/>
+                                    <field name="category"/>
+                                    <field name="quantity" sum="Total Quantity"/>
+                                    <field name="uom"/>
+                                    <field name="used_in"/>
+                                    <field name="reference"/>
+                                    <field name="produced_product"/>
+                                    <field name="source_location"/>
+                                    <field name="dest_location"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                
+                <footer>
+                    <button string="View Report" type="object" name="action_view_report" class="btn-primary"/>
+                    <button string="Download Excel" type="object" name="action_download_xlsx" class="btn-success"/>
+                    <button string="Download PDF" type="object" name="action_download_pdf" class="btn-info"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Material Consumption Report Action -->
+    <record id="action_material_consumption_reports" model="ir.actions.act_window">
+        <field name="name">Material Consumption</field>
+        <field name="res_model">material.consumption.report</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_material_consumption_report" 
+              name="Material Consumption" 
+              parent="stock.menu_warehouse_report" 
+              action="action_material_consumption_reports" 
+              sequence="20"/>
+
+    <!-- PDF Report Definition -->
+    <record id="report_material_consumption_pdf" model="ir.actions.report">
+        <field name="name">Material Consumption PDF</field>
+        <field name="model">material.consumption.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">all_reports_full.material_consumption_pdf_template</field>
+        <field name="report_file">all_reports_full.material_consumption_pdf_template</field>
+        <field name="binding_model_id" ref="model_material_consumption_report"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- PDF Template -->
+    <template id="material_consumption_pdf_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Material Consumption Report</h2>
+                        <p>
+                            <strong>From Date:</strong> <span t-esc="o.date_from"/> 
+                            <strong>To Date:</strong> <span t-esc="o.date_to"/>
+                        </p>
+                        <t t-if="o.product_id">
+                            <p><strong>Product:</strong> <span t-esc="o.product_id.name"/></p>
+                        </t>
+                        <t t-if="o.categ_id">
+                            <p><strong>Category:</strong> <span t-esc="o.categ_id.name"/></p>
+                        </t>
+                        
+                        <table class="table table-bordered table-sm mt-4">
+                            <thead style="background-color: #f0f0f0;">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Product</th>
+                                    <th>Code</th>
+                                    <th>Category</th>
+                                    <th class="text-right">Qty</th>
+                                    <th>UOM</th>
+                                    <th>Used In</th>
+                                    <th>Reference</th>
+                                    <th>For Product/Location</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="total_qty" t-value="0"/>
+                                
+                                <t t-foreach="o.line_ids" t-as="line">
+                                    <t t-set="total_qty" t-value="total_qty + line.quantity"/>
+                                    
+                                    <tr>
+                                        <td><span t-esc="line.date.strftime('%Y-%m-%d %H:%M') if line.date else ''"/></td>
+                                        <td><span t-esc="line.product_name"/></td>
+                                        <td><span t-esc="line.product_code"/></td>
+                                        <td><span t-esc="line.category"/></td>
+                                        <td class="text-right"><span t-esc="'%.2f' % line.quantity"/></td>
+                                        <td><span t-esc="line.uom"/></td>
+                                        <td><span t-esc="line.used_in"/></td>
+                                        <td><span t-esc="line.reference"/></td>
+                                        <td><span t-esc="line.produced_product"/></td>
+                                    </tr>
+                                </t>
+                                
+                                <tr style="font-weight: bold; background-color: #e9ecef;">
+                                    <td colspan="4" class="text-right">Total Quantity Consumed:</td>
+                                    <td class="text-right"><span t-esc="'%.2f' % total_qty"/></td>
+                                    <td colspan="4"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div class="mt-3">
+                            <h4>Summary by Product:</h4>
+                            <table class="table table-bordered table-sm">
+                                <thead style="background-color: #f0f0f0;">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Category</th>
+                                        <th class="text-right">Total Consumed</th>
+                                        <th>UOM</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-set="product_summary" t-value="{}"/>
+                                    <t t-foreach="o.line_ids" t-as="line">
+                                        <t t-set="key" t-value="(line.product_name, line.uom, line.category)"/>
+                                        <t t-set="current" t-value="product_summary.get(key, 0)"/>
+                                        <t t-set="dummy" t-value="product_summary.update({key: current + line.quantity})"/>
+                                    </t>
+                                    
+                                    <t t-foreach="sorted(product_summary.items())" t-as="item">
+                                        <tr>
+                                            <td><span t-esc="item[0][0]"/></td>
+                                            <td><span t-esc="item[0][2]"/></td>
+                                            <td class="text-right"><span t-esc="'%.2f' % item[1]"/></td>
+                                            <td><span t-esc="item[0][1]"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

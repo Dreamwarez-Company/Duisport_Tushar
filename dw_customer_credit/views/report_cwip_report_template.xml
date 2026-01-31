@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_cwip_report_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <html>
+                    <head>
+                        <meta charset="utf-8"/>
+                        <style>
+                            body { font-family: Arial, sans-serif; font-size: 10px; margin: 20px; }
+                            .header { text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #333; }
+                            .header h2 { margin-bottom: 5px; color: #2c3e50; }
+                            .header p { margin: 3px 0; color: #555; }
+                            .company-info { text-align: left; margin-bottom: 15px; }
+                            .company-info p { margin: 2px 0; }
+                            table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 9px; }
+                            th { background-color: #2c3e50; color: white; padding: 6px; text-align: left; border: 1px solid #ddd; font-weight: bold; }
+                            td { padding: 4px; border: 1px solid #ddd; }
+                            .text-right { text-align: right; }
+                            .text-center { text-align: center; }
+                            .text-left { text-align: left; }
+                            .total-row { font-weight: bold; background-color: #e8f4f8; }
+                            .category-header { background-color: #d9edf7; font-weight: bold; color: #31708f; }
+                            .no-data { text-align: center; padding: 30px; color: #666; font-style: italic; }
+                            .summary-box { margin-top: 25px; padding: 15px; border: 1px solid #bce8f1; background-color: #d9edf7; border-radius: 5px; }
+                            .summary-box h4 { margin-top: 0; color: #31708f; border-bottom: 1px solid #bce8f1; padding-bottom: 5px; }
+                            .footer { margin-top: 30px; padding-top: 10px; border-top: 1px solid #ddd; text-align: center; color: #777; font-size: 8px; }
+                            .currency { font-family: monospace; }
+                            .positive { color: #27ae60; }
+                            .warning { color: #e74c3c; }
+                            .info { color: #3498db; }
+                            .cwip-inprogress { background-color: #fff3cd; color: #856404; }
+                            .cwip-notstarted { background-color: #f8d7da; color: #721c24; }
+                            .cwip-completed { background-color: #d1ecf1; color: #0c5460; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="company-info">
+                            <h3 t-esc="doc.env.company.name"/>
+                            <p t-esc="doc.env.company.street or ''"/>
+                            <p t-if="doc.env.company.street2" t-esc="doc.env.company.street2"/>
+                            <p>
+                                <span t-if="doc.env.company.city" t-esc="doc.env.company.city + ', '"/>
+                                <span t-if="doc.env.company.state_id" t-esc="doc.env.company.state_id.name + ' '"/>
+                                <span t-if="doc.env.company.zip" t-esc="doc.env.company.zip + ' '"/>
+                                <span t-if="doc.env.company.country_id" t-esc="doc.env.company.country_id.name"/>
+                            </p>
+                        </div>
+                        <div class="header">
+                            <h2>CAPITAL WORK IN PROGRESS (CWIP) REPORT</h2>
+                            <p>As of Date: <strong><t t-esc="date_as_of"/></strong></p>
+                            <t t-set="today" t-value="datetime.datetime.now().strftime('%Y-%m-%d')"/>
+                            <p>Generated On: <strong><t t-esc="today"/></strong></p>
+                        </div>
+
+                        <div style="margin-bottom: 15px; padding: 8px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; font-size: 8px;">
+                            <strong>Filters Applied:</strong>
+                            <t t-set="filters" t-value="[]"/>
+                            <t t-if="status and status != 'all'">
+                                <t t-set="status_name">
+                                    <t t-if="status == 'draft'">Draft Assets</t>
+                                    <t t-if="status == 'open'">Running Assets</t>
+                                    <t t-if="status == 'all'">All Status</t>
+                                </t>
+                                <t t-set="filters" t-value="filters + ['Status: ' + status_name]"/>
+                            </t>
+                            <t t-if="category_id">
+                                <t t-set="filters" t-value="filters + ['Category: ' + category_id.name]"/>
+                            </t>
+                            <t t-if="partner_id">
+                                <t t-set="filters" t-value="filters + ['Vendor: ' + partner_id.name]"/>
+                            </t>
+                            <t t-if="project_ref">
+                                <t t-set="filters" t-value="filters + ['Project Ref: ' + project_ref]"/>
+                            </t>
+                            <t t-if="location">
+                                <t t-set="filters" t-value="filters + ['Location: ' + location]"/>
+                            </t>
+                            <t t-if="not filters">
+                                <span>No filters applied</span>
+                            </t>
+                            <t t-if="filters">
+                                <t t-foreach="filters" t-as="filter" t-index="filter_index">
+                                    <span class="info" style="margin-left: 10px;">
+                                        <t t-esc="filter"/>
+                                        <t t-if="filter_index != len(filters) - 1"> | </t>
+                                    </span>
+                                </t>
+                            </t>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th width="3%">#</th>
+                                    <th width="10%">Asset Code</th>
+                                    <th width="20%">Asset Name</th>
+                                    <th width="15%">Category</th>
+                                    <th width="10%" class="text-center">Acq. Date</th>
+                                    <th width="12%" class="text-right">CWIP Value</th>
+                                    <th width="15%">Vendor</th>
+                                    <th width="15%">CWIP Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="serial_no" t-value="1"/>
+                                
+                                <t t-if="not lines or (lines and len(lines) == 1 and lines[0].get('asset_code') == 'NO-CWIP-FOUND')">
+                                    <tr>
+                                        <td colspan="8" class="no-data">
+                                            <h4>No Capital Work in Progress Found</h4>
+                                            <p>No CWIP assets found for the selected criteria.</p>
+                                            <p>Please create assets with draft or running status.</p>
+                                        </td>
+                                    </tr>
+                                </t>
+                                
+                                <t t-if="lines and len(lines) > 0 and not (len(lines) == 1 and lines[0].get('asset_code') == 'NO-CWIP-FOUND')">
+                                    <t t-foreach="lines" t-as="line">
+                                        <t t-set="cwip_val" t-value="float(line.get('cwip_value', 0))"/>
+                                        <t t-set="cwip_status" t-value="line.get('cwip_status', '')"/>
+                                        
+                                        <tr>
+                                            <td class="text-center"><t t-esc="serial_no"/></td>
+                                            <td><t t-esc="line.get('asset_code', '')"/></td>
+                                            <td><t t-esc="line.get('asset_name', '')"/></td>
+                                            <td><t t-esc="line.get('category', '')"/></td>
+                                            <td class="text-center"><t t-esc="line.get('acquisition_date', '')"/></td>
+                                            <td class="text-right currency"><t t-esc="'%.2f' % cwip_val"/></td>
+                                            <td><t t-esc="line.get('vendor', '')"/></td>
+                                            <td class="text-center">
+                                                <span t-att-class="'cwip-inprogress' if cwip_status == 'In Progress' else 'cwip-notstarted' if cwip_status == 'Not Started' else 'cwip-completed'">
+                                                    <t t-esc="cwip_status"/>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        
+                                        <t t-set="serial_no" t-value="serial_no + 1"/>
+                                    </t>
+                                  
+                                    <tr class="total-row" style="background-color: #d4edda; border-top: 2px solid #155724;">
+                                        <td colspan="5" style="text-align: right; padding-right: 10px; font-size: 10px;">
+                                            <strong>GRAND TOTAL (<t t-esc="total_assets"/> Assets):</strong>
+                                        </td>
+                                        <td class="text-right" style="font-size: 10px;">
+                                            <strong><t t-esc="'%.2f' % total_cwip_value"/></strong>
+                                        </td>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                        <t t-if="lines and len(lines) > 0 and not (len(lines) == 1 and lines[0].get('asset_code') == 'NO-CWIP-FOUND')">
+                            <div class="summary-box">
+                                <h4>Summary Statistics</h4>
+                                <div style="display: flex; flex-wrap: wrap; justify-content: space-between;">
+                                    <div style="flex: 0 0 48%; margin-bottom: 8px;">
+                                        <strong>Total CWIP Assets:</strong> <t t-esc="total_assets"/>
+                                    </div>
+                                    <div style="flex: 0 0 48%; margin-bottom: 8px;">
+                                        <strong>Total CWIP Value:</strong> <t t-esc="'%.2f' % total_cwip_value"/>
+                                    </div>
+                                    <div style="flex: 0 0 48%; margin-bottom: 8px;">
+                                        <strong>Report Date:</strong> <t t-esc="date_as_of"/>
+                                    </div>
+                                    <div style="flex: 0 0 48%; margin-bottom: 8px;">
+                                        <strong>Average CWIP Value per Asset:</strong> 
+                                        <t t-esc="'%.2f' % (total_cwip_value/total_assets if total_assets else 0)"/>
+                                    </div>
+                                    <div style="flex: 0 0 100%; margin-bottom: 8px; margin-top: 10px;">
+                                        <strong>CWIP Status Distribution:</strong>
+                                        <t t-if="status_count.get('Not Started', 0) > 0">
+                                            <span style="display: inline-block; margin-left: 15px; margin-right: 15px;">
+                                                Not Started: <t t-esc="status_count.get('Not Started', 0)"/> (<t t-esc="'%.1f' % (status_count.get('Not Started', 0)/total_assets*100 if total_assets else 0)"/>%)
+                                            </span>
+                                        </t>
+                                        <t t-if="status_count.get('In Progress', 0) > 0">
+                                            <span style="display: inline-block; margin-left: 15px; margin-right: 15px;">
+                                                In Progress: <t t-esc="status_count.get('In Progress', 0)"/> (<t t-esc="'%.1f' % (status_count.get('In Progress', 0)/total_assets*100 if total_assets else 0)"/>%)
+                                            </span>
+                                        </t>
+                                        <t t-if="status_count.get('Depreciation Started', 0) > 0">
+                                            <span style="display: inline-block; margin-left: 15px; margin-right: 15px;">
+                                                Depreciation Started: <t t-esc="status_count.get('Depreciation Started', 0)"/> (<t t-esc="'%.1f' % (status_count.get('Depreciation Started', 0)/total_assets*100 if total_assets else 0)"/>%)
+                                            </span>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                        <div class="footer">
+                            <p>Capital Work in Progress (CWIP) Report | Generated by <t t-esc="doc.env.user.name"/> | Page 1 of 1</p>
+                            <p>This report shows capital work in progress as of <t t-esc="date_as_of"/></p>
+                        </div>
+                    </body>
+                </html>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_cwip_report" model="ir.actions.report">
+        <field name="name">CWIP Report</field>
+        <field name="model">cwip.report.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">dw_customer_credit.report_cwip_report_template</field>
+        <field name="print_report_name">'CWIP Report - {date_as_of}'</field>
+    </record>
+</odoo>

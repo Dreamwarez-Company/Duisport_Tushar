@@ -1,0 +1,20 @@
+
+<odoo>
+    <record id="view_dpt3_tree" model="ir.ui.view">
+        <field name="name">mca.dpt3.tree</field>
+        <field name="model">mca.dpt3</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="financial_year"/>
+                <field name="outstanding_amount"/>
+            </tree>
+        </field>
+    </record>
+    <record id="action_dpt3" model="ir.actions.act_window">
+        <field name="name">MCA DPT-3</field>
+        <field name="res_model">mca.dpt3</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem id="menu_dpt3" name="MCA DPT-3" parent="menu_india_compliance"  groups = "group_admin" action="action_dpt3"/>
+
+</odoo>

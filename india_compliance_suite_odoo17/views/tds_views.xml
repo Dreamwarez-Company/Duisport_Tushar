@@ -1,0 +1,21 @@
+
+<odoo>
+    <record id="view_tds_tree" model="ir.ui.view">
+        <field name="name">tds.return.tree</field>
+        <field name="model">tds.return</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="form_type"/>
+                <field name="quarter"/>
+                <field name="year"/>
+            </tree>
+        </field>
+    </record>
+    <record id="action_tds" model="ir.actions.act_window">
+        <field name="name">TDS Returns</field>
+        <field name="res_model">tds.return</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+        <menuitem id="menu_tds" name="TDS Returns" parent="menu_india_compliance"  groups = "group_admin" action="action_tds"/>
+</odoo>

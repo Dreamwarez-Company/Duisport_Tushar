@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_gst_itc_reversal,GST ITC Reversal,model_gst_itc_reversal,,1,1,1,1
+access_tds_return,TDS Return,model_tds_return,,1,1,1,1
+access_mca_dpt3,MCA DPT-3,model_mca_dpt3,,1,1,1,1

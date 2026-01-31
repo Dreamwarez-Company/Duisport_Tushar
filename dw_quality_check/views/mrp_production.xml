@@ -1,0 +1,17 @@
+<odoo>
+    <record id="view_mrp_production_form_qc_inherit" model="ir.ui.view">
+        <field name="name">mrp.production.form.qc.inherit</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <field name="show_qc_button" invisible="1"/>
+                <button name="action_send_for_qc"
+                        string="Send for Quality Check"
+                        type="object"
+                        class="btn-primary"
+                        invisible="not show_qc_button"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

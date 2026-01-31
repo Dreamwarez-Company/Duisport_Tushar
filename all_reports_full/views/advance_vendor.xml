@@ -1,0 +1,101 @@
+<odoo>
+    <!-- Wizard View -->
+    <record id="view_advance_vendor_report_wizard" model="ir.ui.view">
+        <field name="name">Advance Vendor Wizard</field>
+        <field name="model">advance.vendor.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Advance to Vendors Report">
+                <group>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                </group>
+                <footer>
+                    <button name="action_print_pdf" type="object" string="Print PDF" class="btn-primary"/>
+                    <button special="cancel" string="Cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Wizard Action -->
+    <record id="action_advance_vendor_report_wizard" model="ir.actions.act_window">
+        <field name="name">Advance to Vendors</field>
+        <field name="res_model">advance.vendor.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_advance_vendor_report"
+              name="Advance to Vendors"
+              parent="account.account_reports_management_menu"
+              action="action_advance_vendor_report_wizard"/>
+
+    <!-- PDF Report Action -->
+    <record id="action_advance_vendor_report_pdf" model="ir.actions.report">
+        <field name="name">Advance to Vendors Report</field>
+        <field name="model">advance.vendor.report.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">all_reports_full.advance_vendor_report_pdf</field>
+        <field name="report_file">all_reports_full.advance_vendor_report_pdf</field>
+        <field name="binding_model_id" ref="model_advance_vendor_report_wizard"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- Report Template -->
+    <template id="advance_vendor_report_pdf">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2 class="text-center">Advance to Vendors Report</h2>
+                        <div class="row mt-4 mb-4">
+                            <div class="col-12">
+                                <strong>Period:</strong> 
+                                <span t-esc="doc.date_from"/> to <span t-esc="doc.date_to"/>
+                            </div>
+                        </div>
+                        
+                        <t t-set="report_data" t-value="doc.get_report_data()"/>
+                        
+
+                        
+                        <t t-foreach="report_data" t-as="vendor">
+                            <h4 class="mt-4"><strong><t t-esc="vendor['vendor_name']"/></strong></h4>
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Journal</th>
+                                        <th>Reference</th>
+                                        <th class="text-end">Advance Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="vendor['entries']" t-as="line">
+                                        <tr>
+                                            <td><t t-esc="line['date']"/></td>
+                                            <td><t t-esc="line['journal']"/></td>
+                                            <td><t t-esc="line['ref']"/></td>
+                                            <td class="text-end">
+                                                <t t-esc="'%.2f' % line['amount']"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                                <tfoot class="table-light">
+                                    <tr>
+                                        <td colspan="3"><strong>Total Advance</strong></td>
+                                        <td class="text-end">
+                                            <strong><t t-esc="'%.2f' % vendor['total_advance']"/></strong>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </t>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

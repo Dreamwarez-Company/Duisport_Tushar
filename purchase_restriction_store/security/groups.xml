@@ -1,0 +1,7 @@
+<odoo>
+    <record id="group_store_department" model="res.groups">
+        <field name="name">Store Department (Create RFQs Only)</field>
+        <field name="category_id" ref="base.module_category_inventory"/>
+        <field name="comment">Users in this group can only create RFQs in draft state.</field>
+    </record>
+</odoo>

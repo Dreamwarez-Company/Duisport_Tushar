@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cashflow_forecast_wizard_form" model="ir.ui.view">
+        <field name="name">dw.cashflow.forecast.wizard.form</field>
+        <field name="model">dw.cashflow.forecast.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Cash Flow Forecast">
+                <header>
+                    <!-- Remove Generate button from header -->
+                    <button name="action_print_cashflow" type="object" string="Print" class="btn-secondary" invisible="not has_data"/>
+                    <button string="Cancel" special="cancel" class="btn-link"/>
+                </header>
+                
+                <sheet>
+                    <!-- Remove oe_button_box if you don't want it -->
+                    <!-- <div class="oe_button_box" name="button_box">
+                        <button name="action_generate_cashflow" type="object" string="Generate" class="oe_stat_button" icon="fa-refresh"/>
+                    </div> -->
+                    
+                    <div class="oe_title">
+                        <h1>Cash Flow Forecast</h1>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                    </group>
+                    
+                    <!-- Cash Flow Lines Table -->
+                    <div class="oe_title" invisible="not has_data">
+                        <h3>Cash Flow Lines</h3>
+                    </div>
+                    
+                    <div invisible="not has_data">
+                        <t t-if="has_data">
+                            <table class="table table-striped table-bordered" style="width: 100%;">
+                                <thead>
+                                    <tr style="background-color: #f2f2f2;">
+                                        <th style="padding: 8px; text-align: left;">Date</th>
+                                        <th style="padding: 8px; text-align: left;">Description</th>
+                                        <th style="padding: 8px; text-align: right;">Inflow</th>
+                                        <th style="padding: 8px; text-align: right;">Outflow</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-set="lines" t-value="get_cashflow_lines()"/>
+                                    <t t-set="total_inflow" t-value="0"/>
+                                    <t t-set="total_outflow" t-value="0"/>
+                                    
+                                    <t t-foreach="lines" t-as="line">
+                                        <t t-set="inflow" t-value="line.get('inflow', 0)"/>
+                                        <t t-set="outflow" t-value="line.get('outflow', 0)"/>
+                                        <t t-set="total_inflow" t-value="total_inflow + inflow"/>
+                                        <t t-set="total_outflow" t-value="total_outflow + outflow"/>
+                                        
+                                        <tr>
+                                            <td style="padding: 8px;">
+                                                <t t-esc="line.get('date', '')"/>
+                                            </td>
+                                            <td style="padding: 8px;">
+                                                <t t-esc="line.get('description', '')"/>
+                                            </td>
+                                            <td style="padding: 8px; text-align: right;">
+                                                <t t-esc="'%.2f' % inflow"/>
+                                            </td>
+                                            <td style="padding: 8px; text-align: right;">
+                                                <t t-esc="'%.2f' % outflow"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    
+                                    <!-- Totals Row -->
+                                    <tr style="border-top: 2px solid #333; font-weight: bold;">
+                                        <td colspan="2" style="padding: 8px; text-align: right;">Total:</td>
+                                        <td style="padding: 8px; text-align: right;">
+                                            <t t-esc="'%.2f' % total_inflow"/>
+                                        </td>
+                                        <td style="padding: 8px; text-align: right;">
+                                            <t t-esc="'%.2f' % total_outflow"/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+                    </div>
+                    
+                    <!-- Summary Section -->
+                    <div class="oe_title" invisible="not has_data">
+                        <h3>Summary</h3>
+                    </div>
+                    
+                    <group invisible="not has_data">
+                        <group>
+                            <field name="total_inflow" widget="monetary" string="Total Inflow"/>
+                            <field name="total_outflow" widget="monetary" string="Total Outflow"/>
+                            <field name="net_cash_flow" widget="monetary" string="Net Cash Flow"/>
+                        </group>
+                    </group>
+                    
+                    <!-- FOOTER WITH GENERATE BUTTON -->
+                    <footer>
+                        <button name="action_generate_cashflow" type="object" string="Generate" class="btn-primary"/>
+                        <button name="action_print_cashflow" type="object" string="Print" class="btn-secondary" invisible="not has_data"/>
+                        <button string="Cancel" class="btn-link" special="cancel"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Action to open the wizard -->
+    <record id="action_cashflow_forecast_wizard" model="ir.actions.act_window">
+        <field name="name">Cash Flow Forecast</field>
+        <field name="res_model">dw.cashflow.forecast.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>
+
+
+
+
+<!-- <?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_cashflow_forecast_wizard_form" model="ir.ui.view">
+        <field name="name">dw.cashflow.forecast.wizard.form</field>
+        <field name="model">dw.cashflow.forecast.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Cash Flow Forecast">
+                <header>
+                    <button name="action_generate_cashflow" type="object" string="Generate" class="btn-primary"/>
+                    <button name="action_print_cashflow" type="object" string="Print" class="btn-secondary" invisible="not has_data"/>
+                    <button string="Cancel" special="cancel" class="btn-link"/>
+                </header>
+                
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_generate_cashflow" type="object" string="Generate" class="oe_stat_button" icon="fa-refresh"/>
+                    </div>
+                    
+                    <div class="oe_title">
+                        <h1>Cash Flow Forecast</h1>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                    </group>
+                    
+                    
+                    <div class="oe_title" invisible="not has_data">
+                        <h3>Cash Flow Lines</h3>
+                    </div>
+                    
+                    <div invisible="not has_data">
+                        <t t-if="has_data">
+                            <table class="table table-striped table-bordered" style="width: 100%;">
+                                <thead>
+                                    <tr style="background-color: #f2f2f2;">
+                                        <th style="padding: 8px; text-align: left;">Date</th>
+                                        <th style="padding: 8px; text-align: left;">Description</th>
+                                        <th style="padding: 8px; text-align: right;">Inflow</th>
+                                        <th style="padding: 8px; text-align: right;">Outflow</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-set="lines" t-value="get_cashflow_lines()"/>
+                                    <t t-set="total_inflow" t-value="0"/>
+                                    <t t-set="total_outflow" t-value="0"/>
+                                    
+                                    <t t-foreach="lines" t-as="line">
+                                        <t t-set="inflow" t-value="line.get('inflow', 0)"/>
+                                        <t t-set="outflow" t-value="line.get('outflow', 0)"/>
+                                        <t t-set="total_inflow" t-value="total_inflow + inflow"/>
+                                        <t t-set="total_outflow" t-value="total_outflow + outflow"/>
+                                        
+                                        <tr>
+                                            <td style="padding: 8px;">
+                                                <t t-esc="line.get('date', '')"/>
+                                            </td>
+                                            <td style="padding: 8px;">
+                                                <t t-esc="line.get('description', '')"/>
+                                            </td>
+                                            <td style="padding: 8px; text-align: right;">
+                                                <t t-esc="'%.2f' % inflow"/>
+                                            </td>
+                                            <td style="padding: 8px; text-align: right;">
+                                                <t t-esc="'%.2f' % outflow"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    
+                                    
+                                    <tr style="border-top: 2px solid #333; font-weight: bold;">
+                                        <td colspan="2" style="padding: 8px; text-align: right;">Total:</td>
+                                        <td style="padding: 8px; text-align: right;">
+                                            <t t-esc="'%.2f' % total_inflow"/>
+                                        </td>
+                                        <td style="padding: 8px; text-align: right;">
+                                            <t t-esc="'%.2f' % total_outflow"/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+                    </div>
+                    
+                    
+                    <div class="oe_title" invisible="not has_data">
+                        <h3>Summary</h3>
+                    </div>
+                    
+                    <group invisible="not has_data">
+                        <group>
+                            <field name="total_inflow" widget="monetary" string="Total Inflow"/>
+                            <field name="total_outflow" widget="monetary" string="Total Outflow"/>
+                            <field name="net_cash_flow" widget="monetary" string="Net Cash Flow"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    
+    <record id="action_cashflow_forecast_wizard" model="ir.actions.act_window">
+        <field name="name">Cash Flow Forecast</field>
+        <field name="res_model">dw.cashflow.forecast.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo> -->

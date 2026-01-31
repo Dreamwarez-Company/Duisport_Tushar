@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Production Request Tree View -->
+    <record id="view_production_request_tree" model="ir.ui.view">
+        <field name="name">production.request.tree</field>
+        <field name="model">production.request</field>
+        <field name="arch" type="xml">
+            <tree string="Production Requests" decoration-info="state=='draft'" decoration-warning="state=='in_progress'" decoration-success="state=='done'" decoration-muted="state=='cancelled'">
+                <field name="name"/>
+                <field name="sale_order_id"/>
+                <field name="partner_id"/>
+                <field name="salesperson_id"/>
+                <field name="request_date"/>
+                <field name="assigned_to"/>
+                <field name="state" widget="badge" decoration-info="state=='draft'" decoration-warning="state=='in_progress'" decoration-success="state=='done'" decoration-danger="state=='cancelled'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Production Request Form View -->
+    <record id="view_production_request_form" model="ir.ui.view">
+        <field name="name">production.request.form</field>
+        <field name="model">production.request</field>
+        <field name="arch" type="xml">
+            <form string="Production Request">
+                <header>
+                    <button name="action_start_production" string="Start Production" type="object" class="btn-primary" invisible="state != 'draft'" groups="mfg_flow_integration.group_store_department"/>
+                    <button name="action_open_mo_po_wizard" string="Create MO/PO" type="object" class="btn-primary" invisible="state == 'done' or state == 'cancelled'" groups="mfg_flow_integration.group_store_department"/>
+                    <button name="action_mark_done" string="Mark as Done" type="object" class="btn-success" invisible="state != 'in_progress'" groups="mfg_flow_integration.group_store_department"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ('done', 'cancelled')" groups="mfg_flow_integration.group_store_department"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,in_progress,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_sale_order" type="object" class="oe_stat_button" icon="fa-shopping-cart">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Sale Order</span>
+                            </div>
+                        </button>
+                    </div>
+                    
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="sale_order_id" readonly="1"/>
+                            <field name="partner_id" readonly="1"/>
+                            <field name="salesperson_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="request_date" readonly="1"/>
+                            <field name="assigned_to"/>
+                            <field name="completion_date" readonly="1" invisible="state != 'done'"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Products to Produce/Purchase">
+                            <field name="line_ids">
+                                <tree editable="bottom">
+                                    <field name="product_id" readonly="1"/>
+                                    <field name="quantity_needed" readonly="1"/>
+                                    <field name="quantity_available" readonly="1"/>
+                                    <field name="product_uom_id" readonly="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                        
+                        <page string="Manufacturing Orders" invisible="not manufacturing_order_ids">
+                            <field name="manufacturing_order_ids">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="product_id"/>
+                                    <field name="product_qty"/>
+                                    <field name="state"/>
+                                </tree>
+                            </field>
+                        </page>
+                        
+                        <page string="Purchase Orders" invisible="not purchase_order_ids">
+                            <field name="purchase_order_ids">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="partner_id"/>
+                                    <field name="amount_total"/>
+                                    <field name="state"/>
+                                </tree>
+                            </field>
+                        </page>
+                        
+                        <page string="Notes">
+                            <field name="notes" placeholder="Add any notes or instructions..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Production Request Search View -->
+    <record id="view_production_request_search" model="ir.ui.view">
+        <field name="name">production.request.search</field>
+        <field name="model">production.request</field>
+        <field name="arch" type="xml">
+            <search string="Search Production Requests">
+                <field name="name"/>
+                <field name="sale_order_id"/>
+                <field name="partner_id"/>
+                <field name="salesperson_id"/>
+                <field name="assigned_to"/>
+                <separator/>
+                <filter string="New" name="filter_draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="In Progress" name="filter_in_progress" domain="[('state', '=', 'in_progress')]"/>
+                <filter string="Completed" name="filter_done" domain="[('state', '=', 'done')]"/>
+                <filter string="Cancelled" name="filter_cancelled" domain="[('state', '=', 'cancelled')]"/>
+                <separator/>
+                <filter string="My Requests" name="filter_my_requests" domain="[('assigned_to', '=', uid)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Salesperson" name="group_salesperson" context="{'group_by': 'salesperson_id'}"/>
+                    <filter string="Assigned To" name="group_assigned" context="{'group_by': 'assigned_to'}"/>
+                    <filter string="Request Date" name="group_request_date" context="{'group_by': 'request_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Production Request Action -->
+    <record id="action_production_request" model="ir.actions.act_window">
+        <field name="name">Production Requests</field>
+        <field name="res_model">production.request</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_filter_draft': 1, 'search_default_filter_in_progress': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No production requests yet
+            </p>
+            <p>
+                Production requests are created when sales team sends orders to production.
+            </p>
+        </field>
+    </record>
+
+  <!-- Root Menu -->
+<menuitem id="menu_production_root"
+          name="Production"
+          sequence="40"
+          groups="mfg_flow_integration.group_store_department"/>
+
+<!-- Production Requests under Production -->
+<menuitem id="menu_production_request"
+          name="Production Requests"
+          parent="menu_production_root"
+          action="action_production_request"
+          sequence="10"
+          groups="mfg_flow_integration.group_store_department"/>
+</odoo>

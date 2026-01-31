@@ -1,0 +1,417 @@
+<!-- reports/tds_summary_report_templates.xml -->
+
+<odoo>
+    <!-- ========================================= -->
+    <!-- SUMMARY REPORT (Vendor-wise Summary) -->
+    <!-- ========================================= -->
+    
+    <record id="action_report_tds_summary" model="ir.actions.report">
+        <field name="name">TDS Summary - Vendor Wise</field>
+        <field name="model">tds.summary.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">tds_tcs_module.report_tds_summary_vendor_wise</field>
+        <field name="report_file">tds_tcs_module.report_tds_summary_vendor_wise</field>
+        <field name="binding_model_id" ref="model_tds_summary_report"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+
+    <template id="report_tds_summary_vendor_wise">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <style>
+                            .report-header {
+                                text-align: center;
+                                margin-bottom: 25px;
+                                padding-bottom: 15px;
+                                border-bottom: 3px solid #2c3e50;
+                            }
+                            .summary-table {
+                                width: 100%;
+                                border-collapse: collapse;
+                                margin-top: 20px;
+                            }
+                            .summary-table th {
+                                background-color: #2c3e50;
+                                color: white;
+                                border: 1px solid #000;
+                                padding: 10px;
+                                text-align: left;
+                                font-weight: bold;
+                                font-size: 10pt;
+                            }
+                            .summary-table td {
+                                border: 1px solid #bdc3c7;
+                                padding: 8px;
+                                font-size: 9pt;
+                            }
+                            .summary-table tbody tr:nth-child(even) {
+                                background-color: #f8f9fa;
+                            }
+                            .summary-table tbody tr:hover {
+                                background-color: #e8f4f8;
+                            }
+                            .summary-table tfoot td {
+                                background-color: #34495e;
+                                color: white;
+                                font-weight: bold;
+                                padding: 10px;
+                            }
+                            .text-right { text-align: right; }
+                            .text-center { text-align: center; }
+                            .info-box {
+                                background-color: #ecf0f1;
+                                padding: 15px;
+                                margin: 20px 0;
+                                border-left: 4px solid #3498db;
+                            }
+                            .highlight-amount {
+                                font-weight: bold;
+                                color: #e74c3c;
+                            }
+                        </style>
+
+                        <!-- Report Header -->
+                        <div class="report-header">
+                            <h2 style="margin: 0; color: #2c3e50; font-size: 18pt;">
+                                TDS SUMMARY REPORT - VENDOR WISE
+                            </h2>
+                            <p style="margin: 10px 0 5px 0; font-size: 11pt;">
+                                <strong>Period: </strong>
+                                <span t-esc="doc.date_from.strftime('%d/%m/%Y')"/> to 
+                                <span t-esc="doc.date_to.strftime('%d/%m/%Y')"/>
+                            </p>
+                            <t t-if="doc.tds_section_id">
+                                <p style="margin: 5px 0; font-size: 10pt;">
+                                    <strong>Filtered by Section: </strong>
+                                    <span t-field="doc.tds_section_id.code"/> - 
+                                    <span t-field="doc.tds_section_id.name"/>
+                                </p>
+                            </t>
+                            <t t-if="doc.company_id">
+                                <p style="margin: 5px 0; font-size: 10pt;">
+                                    <strong>Company: </strong>
+                                    <span t-field="doc.company_id.name"/>
+                                </p>
+                            </t>
+                        </div>
+
+                        <!-- Summary Statistics -->
+                        <div class="info-box">
+                            <table style="width: 100%; border: none;">
+                                <tr>
+                                    <td style="width: 33%; border: none; padding: 5px;">
+                                        <strong>Total Vendors:</strong> 
+                                        <span t-esc="doc.total_vendors" style="font-size: 12pt; color: #2c3e50;"/>
+                                    </td>
+                                    <td style="width: 33%; border: none; padding: 5px;">
+                                        <strong>Total Invoices:</strong> 
+                                        <span t-esc="doc.total_invoices" style="font-size: 12pt; color: #2c3e50;"/>
+                                    </td>
+                                    <td style="width: 34%; border: none; padding: 5px; text-align: right;">
+                                        <strong>Total TDS:</strong> 
+                                        <span t-esc="'{:,.2f}'.format(doc.total_tds_amount)" 
+                                              style="font-size: 12pt; color: #e74c3c; font-weight: bold;"/>
+                                        <span t-field="doc.currency_id.symbol"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Vendor Summary Table -->
+                        <table class="summary-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 4%;" class="text-center">Sr.</th>
+                                    <th style="width: 22%;">Vendor Name</th>
+                                    <th style="width: 12%;">PAN Number</th>
+                                    <th style="width: 10%;" class="text-center">Section</th>
+                                    <th style="width: 7%;" class="text-center">Rate %</th>
+                                    <th style="width: 7%;" class="text-center">Bills</th>
+                                    <th style="width: 13%;" class="text-right">Taxable</th>
+                                    <th style="width: 12%;" class="text-right">TDS</th>
+                                    <th style="width: 13%;" class="text-right">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="sr_no" t-value="1"/>
+                                <t t-foreach="doc.vendor_summary_ids" t-as="vendor">
+                                    <tr>
+                                        <td class="text-center">
+                                            <span t-esc="sr_no"/>
+                                            <t t-set="sr_no" t-value="sr_no + 1"/>
+                                        </td>
+                                        <td>
+                                            <strong t-field="vendor.partner_id.name"/>
+                                        </td>
+                                        <td>
+                                            <span t-field="vendor.pan_number"/>
+                                        </td>
+                                        <td class="text-center">
+                                            <span t-field="vendor.tds_section_code"/>
+                                        </td>
+                                        <td class="text-center">
+                                            <span t-esc="'%.2f' % vendor.tds_rate"/>
+                                        </td>
+                                        <td class="text-center">
+                                            <span t-esc="vendor.invoice_count"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-esc="'{:,.2f}'.format(vendor.taxable_amount)"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span class="highlight-amount" t-esc="'{:,.2f}'.format(vendor.tds_amount)"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-esc="'{:,.2f}'.format(vendor.invoice_amount)"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                                
+                                <t t-if="not doc.vendor_summary_ids">
+                                    <tr>
+                                        <td colspan="9" class="text-center" style="padding: 20px;">
+                                            <em>No data found for the selected period</em>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            
+                            <tfoot t-if="doc.vendor_summary_ids">
+                                <tr>
+                                    <td colspan="6" class="text-right">
+                                        <strong>GRAND TOTAL:</strong>
+                                    </td>
+                                    <td class="text-right">
+                                        <strong t-esc="'{:,.2f}'.format(doc.total_taxable_amount)"/>
+                                    </td>
+                                    <td class="text-right">
+                                        <strong t-esc="'{:,.2f}'.format(doc.total_tds_amount)"/>
+                                    </td>
+                                    <td class="text-right">
+                                        <strong t-esc="'{:,.2f}'.format(doc.total_invoice_amount)"/>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                        <div style="margin-top: 40px; font-size: 8pt; color: #7f8c8d;">
+                            <p>
+                                <em>Generated on: 
+                                <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M:%S')"/>
+                                </em>
+                            </p>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+
+    <!-- ========================================= -->
+    <!-- DETAILED REPORT (All Vendors with Bills) -->
+    <!-- ========================================= -->
+    
+    <record id="action_report_tds_summary_detailed" model="ir.actions.report">
+        <field name="name">TDS Summary - Detailed</field>
+        <field name="model">tds.summary.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">tds_tcs_module.report_tds_summary_detailed</field>
+        <field name="report_file">tds_tcs_module.report_tds_summary_detailed</field>
+        <field name="binding_model_id" ref="model_tds_summary_report"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+
+    <template id="report_tds_summary_detailed">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <style>
+                            .detail-header {
+                                text-align: center;
+                                margin-bottom: 20px;
+                                padding-bottom: 10px;
+                                border-bottom: 3px solid #2c3e50;
+                            }
+                            .vendor-header {
+                                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                color: white;
+                                padding: 12px;
+                                margin-top: 25px;
+                                margin-bottom: 10px;
+                                font-weight: bold;
+                                font-size: 11pt;
+                                border-radius: 5px;
+                            }
+                            .detail-table {
+                                width: 100%;
+                                border-collapse: collapse;
+                                margin-bottom: 20px;
+                            }
+                            .detail-table th {
+                                background-color: #ecf0f1;
+                                border: 1px solid #bdc3c7;
+                                padding: 8px;
+                                text-align: left;
+                                font-weight: bold;
+                                font-size: 9pt;
+                            }
+                            .detail-table td {
+                                border: 1px solid #ddd;
+                                padding: 6px;
+                                font-size: 9pt;
+                            }
+                            .vendor-subtotal {
+                                background-color: #d5dbdb;
+                                font-weight: bold;
+                            }
+                            .text-right { text-align: right; }
+                            .text-center { text-align: center; }
+                        </style>
+
+                        <!-- Report Header -->
+                        <div class="detail-header">
+                            <h2 style="margin: 0; color: #2c3e50;">
+                                TDS SUMMARY REPORT - DETAILED
+                            </h2>
+                            <p style="margin: 10px 0 5px 0; font-size: 11pt;">
+                                <strong>Period: </strong>
+                                <span t-esc="doc.date_from.strftime('%d/%m/%Y')"/> to 
+                                <span t-esc="doc.date_to.strftime('%d/%m/%Y')"/>
+                            </p>
+                            <p style="margin: 5px 0; font-size: 10pt;">
+                                <strong>Total Vendors: </strong><span t-esc="doc.total_vendors"/> | 
+                                <strong>Total Bills: </strong><span t-esc="doc.total_invoices"/> | 
+                                <strong>Total TDS: </strong>
+                                <span t-esc="'{:,.2f}'.format(doc.total_tds_amount)" style="color: #e74c3c;"/>
+                            </p>
+                        </div>
+
+                        <!-- Group by Vendor -->
+                        <t t-foreach="doc.vendor_summary_ids" t-as="vendor">
+                            <!-- Vendor Header -->
+                            <div class="vendor-header">
+                                <table style="width: 100%; border: none; color: white;">
+                                    <tr>
+                                        <td style="border: none; width: 40%;">
+                                            <span t-field="vendor.partner_id.name"/> 
+                                        </td>
+                                        <td style="border: none; width: 20%;">
+                                            PAN: <span t-field="vendor.pan_number"/>
+                                        </td>
+                                        <td style="border: none; width: 20%;">
+                                            Section: <span t-field="vendor.tds_section_code"/>
+                                            (<span t-esc="'%.2f' % vendor.tds_rate"/>%)
+                                        </td>
+                                        <td style="border: none; width: 20%; text-align: right;">
+                                            Bills: <span t-esc="vendor.invoice_count"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <!-- Invoices for this vendor -->
+                            <table class="detail-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 5%;" class="text-center">Sr.</th>
+                                        <th style="width: 12%;">Date</th>
+                                        <th style="width: 20%;">Invoice Number</th>
+                                        <th style="width: 10%;" class="text-center">Section</th>
+                                        <th style="width: 8%;" class="text-right">Rate %</th>
+                                        <th style="width: 15%;" class="text-right">Taxable</th>
+                                        <th style="width: 15%;" class="text-right">TDS</th>
+                                        <th style="width: 15%;" class="text-right">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-set="vendor_sr" t-value="1"/>
+                                    <t t-set="invoices" t-value="doc.detail_line_ids.filtered(lambda l: l.partner_id == vendor.partner_id)"/>
+                                    <t t-foreach="invoices" t-as="invoice">
+                                        <tr>
+                                            <td class="text-center">
+                                                <span t-esc="vendor_sr"/>
+                                                <t t-set="vendor_sr" t-value="vendor_sr + 1"/>
+                                            </td>
+                                            <td>
+                                                <span t-esc="invoice.invoice_date.strftime('%d/%m/%Y')"/>
+                                            </td>
+                                            <td>
+                                                <span t-field="invoice.invoice_number"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <span t-field="invoice.tds_section_code"/>
+                                            </td>
+                                            <td class="text-right">
+                                                <span t-esc="'%.2f' % invoice.tds_rate"/>
+                                            </td>
+                                            <td class="text-right">
+                                                <span t-esc="'{:,.2f}'.format(invoice.taxable_amount)"/>
+                                            </td>
+                                            <td class="text-right">
+                                                <span t-esc="'{:,.2f}'.format(invoice.tds_amount)"/>
+                                            </td>
+                                            <td class="text-right">
+                                                <span t-esc="'{:,.2f}'.format(invoice.invoice_amount)"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="vendor-subtotal">
+                                        <td colspan="5" class="text-right">
+                                            <strong>Vendor Total:</strong>
+                                        </td>
+                                        <td class="text-right">
+                                            <strong t-esc="'{:,.2f}'.format(vendor.taxable_amount)"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <strong t-esc="'{:,.2f}'.format(vendor.tds_amount)"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <strong t-esc="'{:,.2f}'.format(vendor.invoice_amount)"/>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </t>
+
+                        <!-- Grand Total -->
+                        <t t-if="doc.vendor_summary_ids">
+                            <table style="width: 100%; margin-top: 30px; border: 2px solid #2c3e50;">
+                                <tr style="background-color: #2c3e50; color: white;">
+                                    <td style="padding: 12px; text-align: right; border: none; font-size: 11pt;" colspan="3">
+                                        <strong>GRAND TOTAL - ALL VENDORS:</strong>
+                                    </td>
+                                    <td style="padding: 12px; text-align: right; border: none; width: 15%; font-size: 11pt;">
+                                        <strong t-esc="'{:,.2f}'.format(doc.total_taxable_amount)"/>
+                                    </td>
+                                    <td style="padding: 12px; text-align: right; border: none; width: 15%; font-size: 11pt;">
+                                        <strong t-esc="'{:,.2f}'.format(doc.total_tds_amount)"/>
+                                    </td>
+                                    <td style="padding: 12px; text-align: right; border: none; width: 15%; font-size: 11pt;">
+                                        <strong t-esc="'{:,.2f}'.format(doc.total_invoice_amount)"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </t>
+
+                        <div style="margin-top: 30px; font-size: 8pt; color: #7f8c8d;">
+                            <p>
+                                <em>Detailed report generated on: 
+                                <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M:%S')"/>
+                                </em>
+                            </p>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Form view for Quality Check -->
+    <record id="view_dw_quality_check_form" model="ir.ui.view">
+        <field name="name">dw.quality.check.form</field>
+        <field name="model">dw.quality.check</field>
+        <field name="arch" type="xml">
+            <form string="Quality Check">
+                <header>
+                    <!-- Return File button -->
+                    <button name="action_return_file"
+                            string="Return File"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="(qc_status != 'received') or (qc_status == 'done')"/>
+
+                    <!-- QC Done button -->
+                    <button name="action_qc_done"
+                            string="QC Done"
+                            type="object"
+                            class="btn-primary"
+                            invisible="(qc_status != 'received') or (qc_status == 'returned')"/>
+
+                    <!-- Statusbar -->
+                    <field name="qc_status"
+                        widget="statusbar"
+                        statusbar_visible="returned,received,done"/>
+                </header>
+
+                <sheet>
+                    <group>
+                        <field name="source_reference" readonly="1"/>
+                        <field name="picking_id"/>
+                        <field name="mrp_id"/>
+                        <field name="product_id"/>
+                        <field name="quantity"/>
+                        <field name="passed"/>
+                        <field name="remarks"/>
+                        <field name="date"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Inherit Delivery Order form view to show Quality Check Boolean -->
+    <!-- <record id="view_picking_form_inherit_qc_boolean" model="ir.ui.view">
+        <field name="name">stock.picking.form.inherit.qc.boolean</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/group/group" position="inside">
+                <field name="quality_check_passed" readonly="1"/>
+            </xpath>
+        </field>
+    </record> -->
+
+    <record id="view_picking_form_inherit_qc_boolean" model="ir.ui.view">
+        <field name="name">stock.picking.form.inherit.qc.boolean</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="priority" eval="5"/> <!-- High priority to override -->
+        <field name="arch" type="xml">
+            <!-- Hidden field in header – FORCES compute on EVERY form load -->
+            <xpath expr="//header" position="inside">
+                <field name="quality_check_passed" invisible="1"/>
+            </xpath>
+
+            <!-- Visible plain checkbox – place in header for reliability -->
+            <xpath expr="//header" position="inside">
+                <field name="quality_check_passed" 
+                    readonly="1" 
+                    nolabel="1" 
+                    class="oe_inline" 
+                    options="{'no_label': true}"/>
+            </xpath>
+
+            <!-- Fallback visible placement if header doesn't show -->
+            <!--
+            <xpath expr="//sheet/group[1]" position="inside">
+                <field name="quality_check_passed" readonly="1"/>
+            </xpath>
+            -->
+        </field>
+    </record>
+
+    <!-- Tree/List view -->
+    <record id="view_dw_quality_check_tree" model="ir.ui.view">
+        <field name="name">dw.quality.check.tree</field>
+        <field name="model">dw.quality.check</field>
+        <field name="arch" type="xml">
+            <tree string="Quality Checks">
+                <field name="source_reference" readonly="1"/>
+                <field name="picking_id"/>
+                <field name="mrp_id"/>
+                <field name="product_id"/>
+                <!-- <field name="lot_id"/> -->
+                <field name="quantity"/>
+                <field name="passed"/>
+                <field name="date"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_dw_quality_check" model="ir.actions.act_window">
+        <field name="name">Quality Checks</field>
+        <field name="res_model">dw.quality.check</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="menu_dw_quality_check_root" name="Quality Control" sequence="10" groups="dw_quality_check.group_quality_check"/>
+    <menuitem id="menu_dw_quality_check" name="Quality Checks"
+              parent="menu_dw_quality_check_root"
+              action="action_dw_quality_check" groups="dw_quality_check.group_quality_check"/>
+</odoo>

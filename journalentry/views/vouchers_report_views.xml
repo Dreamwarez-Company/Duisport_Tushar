@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Main Vouchers Report Action -->
+    <record id="action_vouchers_report" model="ir.actions.act_window">
+        <field name="name">Vouchers Report</field>
+        <field name="res_model">vouchers.report</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create Vouchers Reports
+            </p>
+            <p>
+                Generate detailed vouchers reports for any period with various filters and grouping options.
+                You can generate, print, or export vouchers data.
+            </p>
+        </field>
+    </record>
+
+    <!-- Single Menu Item under Reports -->
+    <menuitem id="menu_vouchers_report"
+              name="Vouchers Report"
+              parent="account.menu_finance_reports"
+              action="action_vouchers_report"
+              sequence="20"/>
+
+    <!-- Vouchers Report Form View -->
+    <record id="view_vouchers_report_form" model="ir.ui.view">
+        <field name="name">vouchers.report.form</field>
+        <field name="model">vouchers.report</field>
+        <field name="arch" type="xml">
+            <form string="Vouchers Report">
+                <header>
+                    <button name="action_generate_report" string="Generate Report" 
+                            type="object" class="oe_highlight" 
+                            invisible="state == 'confirmed'"/>
+                    <button name="action_print_report" string="Print Report" 
+                            type="object" class="btn-primary" 
+                            invisible="state == 'draft'"/>
+                    <button name="action_export_excel" string="Export Excel" 
+                            type="object" class="oe_highlight" 
+                            invisible="state == 'draft'"/>
+                    <button name="action_reset_to_draft" string="Reset to Draft" 
+                            type="object" 
+                            invisible="state == 'draft'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                            <field name="journal_id"/>
+                        </group>
+                        <group>
+                            <field name="voucher_type"/>
+                            <field name="partner_id"/>
+                            <field name="mode"/>
+                            <field name="form_status"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Voucher Details">
+                            <field name="line_ids" readonly="state == 'confirmed'">
+                                <tree>
+                                    <field name="accounting_date"/>
+                                    <field name="voucher_number"/>
+                                    <field name="partner_id"/>
+                                    <field name="journal"/>
+                                    <field name="voucher_type"/>
+                                    <field name="debit_amount" sum="Total Debit"/>
+                                    <field name="credit_amount" sum="Total Credit"/>
+                                    <field name="balance_amount" sum="Balance"/>
+                                    <field name="memo"/>
+                                </tree>
+                            </field>
+                        </page>
+                        
+                        <page string="Summary">
+                            <group>
+                                <group>
+                                    <field name="total_debit" readonly="1"/>
+                                    <field name="total_credit" readonly="1"/>
+                                    <field name="total_balance" readonly="1"/>
+                                    <field name="total_vouchers" readonly="1"/>
+                                </group>
+                                <group>
+                                    <field name="cash_vouchers" readonly="1"/>
+                                    <field name="bank_vouchers" readonly="1"/>
+                                    <field name="journal_vouchers" readonly="1"/>
+                                    <field name="contra_vouchers" readonly="1"/>
+                                </group>
+                            </group>
+                        </page>
+                        
+                        <page string="Advanced Filters">
+                            <group>
+                                <group>
+                                    <field name="filter_by_account"/>
+                                    <field name="filter_by_partner"/>
+                                    <field name="filter_by_amount_range"/>
+                                    <field name="show_only_unbalanced"/>
+                                </group>
+                                <group>
+                                    <field name="group_by_account"/>
+                                    <field name="group_by_partner"/>
+                                    <field name="group_by_voucher_type"/>
+                                    <field name="include_drafts"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vouchers Report Tree View -->
+    <record id="view_vouchers_report_tree" model="ir.ui.view">
+        <field name="name">vouchers.report.tree</field>
+        <field name="model">vouchers.report</field>
+        <field name="arch" type="xml">
+            <tree string="Vouchers Reports">
+                <field name="name"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="journal_id"/>
+                <field name="total_debit"/>
+                <field name="total_credit"/>
+                <field name="total_vouchers"/>
+                <field name="state"/>
+                <!-- Action buttons in tree view -->
+                <button name="action_generate_report" string="Generate" 
+                        type="object" class="btn-secondary" 
+                        invisible="state == 'confirmed'"/>
+                <button name="action_print_report" string="Print" 
+                        type="object" class="btn-primary" 
+                        invisible="state == 'draft'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vouchers Report Search View -->
+    <record id="view_vouchers_report_search" model="ir.ui.view">
+        <field name="name">vouchers.report.search</field>
+        <field name="model">vouchers.report</field>
+        <field name="arch" type="xml">
+            <search string="Vouchers Reports">
+                <field name="name"/>
+                <field name="journal_id"/>
+                <field name="voucher_type"/>
+                <field name="partner_id"/>
+                <filter string="Draft" name="draft" domain="[('state','=','draft')]"/>
+                <filter string="Confirmed" name="confirmed" domain="[('state','=','confirmed')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Status" name="group_state" context="{'group_by':'state'}"/>
+                    <filter string="Journal" name="group_journal" context="{'group_by':'journal_id'}"/>
+                    <filter string="Voucher Type" name="group_voucher_type" context="{'group_by':'voucher_type'}"/>
+                    <filter string="Month" name="group_month" context="{'group_by':'date_from:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+</odoo>

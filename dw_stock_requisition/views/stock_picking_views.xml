@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Minimal inheritance - just add fields to header -->
+        <record id="view_picking_form_requisition_inherit" model="ir.ui.view">
+            <field name="name">stock.picking.form.requisition.inherit</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="arch" type="xml">
+                <!-- Add to form header section -->
+                <xpath expr="//header" position="inside">
+                    <div class="o_form_sheet_bg">
+                        <div class="clearfix position-relative o_form_sheet">
+                            <div class="oe_button_box" name="button_box">
+                                <!-- Your fields in header -->
+                            </div>
+                        </div>
+                    </div>
+                </xpath>
+                
+                <!-- OR simpler: just add fields to sheet -->
+                <xpath expr="//sheet" position="inside">
+                    <group>
+                        <group>
+                            <field name="requisition_number" string="Requisition Number"/>
+                            <field name="requisition_date" string="Requisition Date"/>
+                            <field name="created_by" string="Created By"/>
+                        </group>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

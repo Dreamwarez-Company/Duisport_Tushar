@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Tree view: List all department times -->
+        <record id="view_crm_lead_time_tree" model="ir.ui.view">
+            <field name="name">crm.lead.time.tree</field>
+            <field name="model">crm.lead.time</field>
+            <field name="arch" type="xml">
+                <tree string="Department Time Tracking">
+                    <field name="lead_id"/>
+                    <field name="department_id"/>
+                    <field name="employee_id"/>
+                    <field name="start_time"/>
+                    <field name="end_time"/>
+                    <field name="duration"/>
+                    <field name="status"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Form view: Add/Edit department time -->
+        <record id="view_crm_lead_time_form" model="ir.ui.view">
+            <field name="name">crm.lead.time.form</field>
+            <field name="model">crm.lead.time</field>
+            <field name="arch" type="xml">
+                <form string="Department Time Tracking">
+                    <sheet>
+                        <group>
+                            <field name="lead_id"/>
+                            <field name="department_id"/>
+                            <field name="employee_id"/>
+                            <field name="start_time"/>
+                            <field name="end_time"/>
+                            <field name="duration"/>
+                            <field name="status"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Action: Open tree/form view -->
+        <record id="action_crm_lead_time" model="ir.actions.act_window">
+            <field name="name">Department Time Tracking</field>
+            <field name="res_model">crm.lead.time</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <!-- Menu item: CRM -> Department Time Tracking -->
+        <menuitem id="menu_crm_department_time"
+                    name="Department Time Tracking"
+                    parent="crm.crm_menu_root"
+                    action="action_crm_lead_time"/>
+    </data>
+</odoo>

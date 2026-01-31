@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    
+    <!-- Define the custom category first -->
+    <record id="module_category_access" model="ir.module.category">
+        <field name="name">Report Access</field>
+        <field name="sequence">10</field> 
+    </record>
+    
+    <record id="group_admin" model="res.groups">
+        <field name="name">Report center</field>
+        <field name="category_id" ref="all_reports_full.module_category_access"/>
+    </record>
+
+
+</odoo>
+    

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_dw_mrp_requisition_search_purchase" model="ir.ui.view">
+        <field name="name">dw.mrp.requisition.search.purchase</field>
+        <field name="model">dw.mrp.requisition</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="manufacturing_order_id"/>
+                <field name="requested_by"/>
+                <filter name="submitted_to_purchase" string="Submitted to Purchase" 
+                    domain="[('state','=','requested_other_location'),('is_submitted_to_purchase','=',True)]"/>
+                <filter name="not_submitted" string="Not Submitted to Purchase" 
+                    domain="[('state','=','requested_other_location'),('is_submitted_to_purchase','=',False)]"/>
+            </search>
+        </field>
+    </record>
+
+   
+    <record id="view_dw_mrp_requisition_tree_purchase" model="ir.ui.view">
+        <field name="name">dw.mrp.requisition.tree.purchase</field>
+        <field name="model">dw.mrp.requisition</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="date"/>
+                <field name="manufacturing_order_id"/>
+                <field name="department"/>
+                <field name="requested_by"/>
+                <field name="state" widget="badge"/>
+                <field name="required_date"/>
+                <field name="is_submitted_to_purchase" string="Submitted to Purchase"/>
+            </tree>
+        </field>
+    </record>
+
+
+    <record id="action_dw_mrp_requisition_purchase" model="ir.actions.act_window">
+        <field name="name">Purchase Requisitions</field>
+        <field name="res_model">dw.mrp.requisition</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_dw_mrp_requisition_tree_purchase"/>
+        <field name="search_view_id" ref="view_dw_mrp_requisition_search_purchase"/>
+        
+        <field name="views">
+            [(ref('view_dw_mrp_requisition_tree_purchase'), 'tree'),
+            (ref('view_dw_mrp_requisition_form_purchase'), 'form')]  
+        </field>
+        <field name="context">{'from_purchase_menu': True}</field>
+        <!-- <field name="context">{'search_default_submitted_to_purchase': 1}</field> -->
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                View requisitions submitted to purchase!
+            </p>
+        </field>
+    </record>
+
+    
+    <menuitem 
+        id="menu_dw_mrp_requisition_purchase" 
+        name="Requisition" 
+        parent="purchase.menu_purchase_root"
+        action="action_dw_mrp_requisition_purchase"
+        sequence="25"
+    />
+</odoo>

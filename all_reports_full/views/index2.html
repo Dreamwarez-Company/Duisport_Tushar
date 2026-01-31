@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Credit Note</title>
+        <style>
+    @page {
+        size: A4;
+       
+        margin: 8mm;
+    }
+
+    body {
+        margin: auto;
+        margin-top: 100px;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 16px;
+        color: #000;
+        width: 1000px;
+    }
+
+    .page {
+        border: 2px solid #000;
+        padding: 6px;
+        height: 100%;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    td, th {
+        border: 1px solid #000;
+        padding: 4px;
+        vertical-align: top;
+    }
+
+    .no-border td, .no-border th {
+        border: none;
+    }
+
+    .center {
+        text-align: center;
+    }
+
+    .right {
+        text-align: right;
+    }
+
+    .bold {
+        font-weight: bold;
+    }
+
+    .small {
+        font-size: 14px;
+    }
+
+    .title {
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .qr {
+        width: 150px;
+        height: 150px;
+        /* border: 1px solid #000; */
+        /* text-align: center; */
+        /* font-size: 9px; */
+    }
+
+    .section-title {
+        background: #f0f0f0;
+        font-weight: bold;
+    }
+
+    .h-100 {
+        height: 100px;
+    }
+
+    .h-150 {
+        height: 150px;
+    }
+
+    .no-left-border {
+        border-left: none !important;
+    }
+
+    .no-right-border {
+        border-right: none !important;
+    }
+
+    .no-top-border {
+        border-top: none !important;
+    }
+
+    .no-bottom-border {
+        border-bottom: none !important;
+    }
+        </style>
+    </head>
+    <body>
+        <div class="page">
+            <!-- HEADER -->
+            <table class="no-border">
+                <tr colsapn="3">
+                    <td class="center title">Credit Note</td>
+                    <td class="center small">(ORIGINAL FOR RECIPIENT)</td>
+                    <td class="center bold">e-Invoice</td>
+                </tr>
+            </table>
+            <!-- IRN DETAILS -->
+            <table>
+                <tr colsapn="3">
+                    <td style="vertical-align: bottom; border:none;">
+                        <table>
+                            <tr style="border:none;">
+                                <td class="bold" style="border:none;">IRN :</td>
+                                <td style="border:none;">abcxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</td>
+                            </tr>
+                            <tr>
+                                <td class="bold" style="border:none;">Ack No :</td>
+                                <td style="border:none;">123456789</td>
+                            </tr>
+                            <tr>
+                                <td class="bold" style="border:none;">Ack Date :</td>
+                                <td style="border:none;">07-May-25</td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td style="align-items: right; border:none;">
+                        <div class="qr" style="text-align:right;">QR Code</div>
+                    </td>
+                </tr>
+            </table>
+            <!-- PARTY DETAILS -->
+            <table style="width:100%; border-collapse:collapse;">
+                <tr>
+                    <!-- LEFT BIG BLOCK -->
+                    <td style="width:60%; border:1px solid #000; vertical-align:top; padding:6px;">
+                        <div style="font-weight:bold;">
+                            DUISPORT PACKING LOGISTICS INDIA PVT LTD
+                        </div>
+                        <div>
+                            Plot No 576, Sector 8, IMT
+                            <br>
+                            Manesar, Gurgaon,
+                            <br>
+                            Haryana - 122050
+                        </div>
+                        <div>
+                            GSTIN/UIN : 06AAECD5705A1Z9
+                        </div>
+                        <div>
+                            State Name : Haryana, Code : 06
+                        </div>
+                        <div>
+                            CIN : U20299PN2013FTC146359
+                        </div>
+                        <br>
+                        <div style="font-weight:bold;">
+                            Consignee (Ship to)
+                        </div>
+                        <div style="font-weight:bold;">
+                            SONA BLW PRECISION FORGINGS LTD.
+                        </div>
+                        <div>
+                            Plot No. 13, Sector-2, Industrial Estate, , IMT
+                            <br>
+                            Manesar , Gurgaon,Haryana-122050
+                        </div>
+                        <div>
+                            GSTIN/UIN : 06AABCS4786P1ZN
+                        </div>
+                        <div>
+                            State Name : Haryana, Code : 06
+                        </div>
+                        <br>
+                        <div style="font-weight:bold;">
+                            Buyer (Bill to)
+                        </div>
+                        <div style="font-weight:bold;">
+                            SONA BLW PRECISION FORGINGS LTD.
+                        </div>
+                        <div>
+                            Plot No. 13, Sector-2, Industrial Estate, , IMT
+                            <br>
+                            Manesar , Gurgaon,Haryana-122050
+                        </div>
+                        <div>
+                            GSTIN/UIN : 06AABCS4786P1ZN
+                        </div>
+                        <div>
+                            State Name : Haryana, Code : 06
+                        </div>
+                        <div>
+                            Place of Supply : Haryana
+                        </div>
+                    </td>
+                    <!-- RIGHT BLOCK -->
+                    <td style="width:40%; border:1px solid #000; padding:0;">
+                        <table style="width:100%; border-collapse:collapse;">
+                            <tr>
+                                <td style="border:1px solid #000; padding:6px;">
+                                    Credit Note No.
+                                    <br>
+                                    <strong>DPL/2526/CN/0001</strong>
+                                </td>
+                                <td style="border:1px solid #000; padding:6px;">
+                                    e-Way Bill No.
+                                </td>
+                                <td style="border:1px solid #000; padding:6px;">
+                                    Dated
+                                    <br>
+                                    <strong>30-Apr-25</strong>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" style="border:1px solid #000; padding:6px;">
+                                    Mode/Terms of Payment
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" style="border:1px solid #000; padding:6px;">
+                                    Original Invoice No. &amp; Date.
+                                    <br>
+                                    <strong>DPL/DEL2425/1322 dt. 28-Feb-25</strong>
+                                </td>
+                                <td style="border:1px solid #000; padding:6px;">
+                                    Other References
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" style="border:1px solid #000; padding:6px;">
+                                    Buyer's Order No.
+                                </td>
+                                <td style="border:1px solid #000; padding:6px;">
+                                    Dated
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" style="border:1px solid #000; padding:6px;">
+                                    Dispatch Doc No.
+                                </td>
+                                <td style="border:1px solid #000; padding:6px;">
+                                    Destination
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" style="border:1px solid #000; padding:6px;">
+                                    Dispatched through
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" style="border:1px solid #000; padding:6px;">
+                                    Terms of Delivery
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+            <!-- PRODUCT TABLE -->
+            <table>
+                <tr class="section-title center">
+                    <td style="width:4%">Sl</td>
+                    <td>Description of Goods</td>
+                    <td style="width:10%">HSN/SAC</td>
+                    <td style="width:8%">Qty</td>
+                    <td style="width:8%">Unit</td>
+                    <td style="width:10%">Rate</td>
+                    <td style="width:6%">Disc%</td>
+                    <td style="width:12%">Amount</td>
+                </tr>
+                <tr class="h-100">
+                    <td class="center">1</td>
+                    <td>Corrugated Box Set for Housing Packing Kit</td>
+                    <td class="center">48191010</td>
+                    <td class="center">10.00</td>
+                    <td class="center">Set</td>
+                    <td class="right">₹ 500.00</td>
+                    <td class="center">-</td>
+                    <td class="right">₹ 5,000.00</td>
+                </tr>
+                <tr>
+                    <td colspan="7" class="right bold">Total</td>
+                    <td class="right bold">₹ 5,000.00</td>
+                </tr>
+            </table>
+            <!-- TAX SUMMARY -->
+            <table>
+                <tr class="section-title center">
+                    <td>HSN</td>
+                    <td>Taxable Value</td>
+                    <td>CGST</td>
+                    <td>SGST</td>
+                    <td>Total Tax</td>
+                </tr>
+                <tr>
+                    <td class="center">48191010</td>
+                    <td class="right">₹ 5,000.00</td>
+                    <td class="right">₹ 450.00</td>
+                    <td class="right">₹ 450.00</td>
+                    <td class="right">₹ 900.00</td>
+                </tr>
+            </table>
+            <!-- AMOUNT IN WORDS -->
+            <table>
+                <tr>
+                    <td class="bold">Amount Chargeable (in words)</td>
+                    <td>INR Five Thousand Nine Hundred Only</td>
+                </tr>
+            </table>
+            <!-- FOOTER -->
+            <table class="no-border">
+                <tr>
+                    <td style="width:70%">
+                        Company PAN: AAECD5705A
+                        <br>
+                        <br>
+                        This is a Computer Generated Document
+                    </td>
+                    <td class="center">
+                        For DUISPORT PACKING LOGISTICS INDIA PVT LTD
+                        <br>
+                        <br>
+                        <br>
+                        Authorised Signatory
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_engineering_team_analysis,Engineering Team Analysis,model_engineering_team,,1,1,1,1
+access_crm_lead_product_line_user,crm.lead.product.line,model_crm_lead_product_line,,1,1,1,1
+access_engineering_team_product_user,engineering.team.product,model_engineering_team_product,,1,1,1,1
+access_engineering_team_bom_line_engineer,engineering.team.bom.line,model_engineering_team_bom_line,dw_engineering_product.group_engineering_team,1,1,1,1

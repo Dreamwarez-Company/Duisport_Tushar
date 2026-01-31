@@ -1,0 +1,73 @@
+<odoo>
+
+    
+    <record id="view_move_form_irn_fields" model="ir.ui.view">
+        <field name="name">account.move.form.irn.fields</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <!-- Add fields to header -->
+            <xpath expr="//field[@name='invoice_date']" position="after">
+                <field name="irn_number" widget="char"/>
+                <field name="ack_number" widget="char"/>
+                <field name="ack_date" widget="datetime"/>
+                <field name="payment_terms_selection" widget="selection"/>
+                
+                <!-- Odoo 17 syntax for conditional visibility -->
+                <field name="payment_terms_custom" 
+                       invisible="payment_terms_selection != 'custom'"
+                       placeholder="Enter custom payment terms"/>
+            </xpath>
+            
+            <!-- Or create a new tab for e-Invoice details -->
+            <xpath expr="//notebook" position="inside">
+                <page string="e-Invoice Details" name="e_invoice_tab">
+                    <group>
+                        <group>
+                            <field name="irn_number"/>
+                            <field name="ack_number"/>
+                            <field name="ack_date"/>
+                            <field name="payment_terms_selection"/>
+                            <field name="payment_terms_custom" 
+                                   invisible="payment_terms_selection != 'custom'"
+                                   placeholder="Enter custom payment terms"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+       <!-- NEW: Add Other Fields Notebook Tab -->
+    <record id="view_move_form_other_fields" model="ir.ui.view">
+        <field name="name">account.move.form.other.fields</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <!-- Add new tab after invoice line tab -->
+            <xpath expr="//page[@id='invoice_tab']" position="after">
+                <page string="Other Fields" name="other_fields_tab"
+                      invisible="move_type not in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund')">
+                    <group>
+                        <group>
+                            <field name="delivery_note"/>
+                            <field name="other_references"/>
+                            <field name="buyers_order_no"/>
+                            <field name="buyers_order_date"/>
+                            <field name="dispatch_doc_no"/>
+                        </group>
+                        <group>
+                            <field name="delivery_note_date"/>
+                            <field name="dispatched_through"/>
+                            <field name="destination"/>
+                            <field name="terms_of_delivery"/>
+                            <field name="bill_of_lading_no"/>
+                            <field name="company_pan_no"/>
+                            <field name="invoice_reference_date"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

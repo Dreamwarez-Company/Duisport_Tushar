@@ -1,0 +1,146 @@
+<!-- reports/tds_register_report.xml -->
+
+<odoo>
+    <!-- Report Definition -->
+    <record id="action_report_tds_register" model="ir.actions.report">
+        <field name="name">TDS Register</field>
+        <field name="model">tds.register</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">tds_tcs_module.report_tds_register_document</field>
+        <field name="report_file">tds_tcs_module.report_tds_register_document</field>
+        <field name="binding_model_id" ref="model_tds_register"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- Report Template -->
+    <template id="report_tds_register_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="oe_structure"/>
+                        
+                        <!-- Report Header -->
+                        <div class="text-center">
+                            <h2>TDS Register Report</h2>
+                            <p>
+                                <strong>Period:</strong>
+                                <span t-field="doc.date_from"/> to <span t-field="doc.date_to"/>
+                            </p>
+                            <t t-if="doc.partner_id">
+                                <p><strong>Vendor:</strong> <span t-field="doc.partner_id.name"/></p>
+                            </t>
+                            <t t-if="doc.tds_section_id">
+                                <p><strong>TDS Section:</strong> <span t-field="doc.tds_section_id.code"/></p>
+                            </t>
+                        </div>
+                        
+                        <br/>
+                        
+                        <!-- Report Table -->
+                        <table class="table table-sm table-bordered">
+                            <thead style="background-color: #f8f9fa;">
+                                <tr>
+                                    <th class="text-center">Sr. No.</th>
+                                    <th>Invoice Date</th>
+                                    <th>Invoice Number</th>
+                                    <th>Vendor Name</th>
+                                    <th>PAN Number</th>
+                                    <th>TDS Section</th>
+                                    <th class="text-right">TDS Rate (%)</th>
+                                    <th class="text-right">Taxable Amount</th>
+                                    <th class="text-right">TDS Amount</th>
+                                    <th class="text-right">Invoice Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="sr_no" t-value="1"/>
+                                <t t-foreach="doc.line_ids" t-as="line">
+                                    <tr>
+                                        <td class="text-center">
+                                            <span t-esc="sr_no"/>
+                                            <t t-set="sr_no" t-value="sr_no + 1"/>
+                                        </td>
+                                        <td>
+                                            <span t-field="line.invoice_date"/>
+                                        </td>
+                                        <td>
+                                            <span t-field="line.invoice_number"/>
+                                        </td>
+                                        <td>
+                                            <span t-field="line.partner_id.name"/>
+                                        </td>
+                                        <td>
+                                            <span t-field="line.pan_number"/>
+                                        </td>
+                                        <td>
+                                            <span t-field="line.tds_section_code"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-esc="'%.2f' % line.tds_rate"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-esc="'%.2f' % line.taxable_amount"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-esc="'%.2f' % line.tds_amount"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-esc="'%.2f' % line.invoice_amount"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            <tfoot style="background-color: #f8f9fa; font-weight: bold;">
+                                <tr>
+                                    <td colspan="7" class="text-right">
+                                        <strong>Total:</strong>
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-esc="'%.2f' % doc.total_taxable_amount"/>
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-esc="'%.2f' % doc.total_tds_amount"/>
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-esc="'%.2f' % doc.total_invoice_amount"/>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                        
+                        <br/>
+                        
+                        <!-- Summary Section -->
+                        <div class="row mt-4">
+                            <div class="col-6">
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td><strong>Total Taxable Amount:</strong></td>
+                                        <td class="text-right">
+                                            <span t-esc="'%.2f' % doc.total_taxable_amount"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Total TDS Amount:</strong></td>
+                                        <td class="text-right">
+                                            <span t-esc="'%.2f' % doc.total_tds_amount"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Total Invoice Amount:</strong></td>
+                                        <td class="text-right">
+                                            <span t-esc="'%.2f' % doc.total_invoice_amount"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="oe_structure"/>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,401 @@
+<!-- reports/tds_section_wise_report_templates.xml -->
+
+<odoo>
+    <!-- ========================================= -->
+    <!-- Summary Report (Section-wise Summary) -->
+    <!-- ========================================= -->
+    
+    <record id="action_report_tds_section_wise" model="ir.actions.report">
+        <field name="name">TDS Section-Wise Summary</field>
+        <field name="model">tds.section.wise.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">tds_tcs_module.report_tds_section_wise_summary</field>
+        <field name="report_file">tds_tcs_module.report_tds_section_wise_summary</field>
+        <field name="binding_model_id" ref="model_tds_section_wise_report"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+
+    <template id="report_tds_section_wise_summary">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <style>
+                            .section-header {
+                                text-align: center;
+                                margin-bottom: 20px;
+                                padding-bottom: 10px;
+                                border-bottom: 3px solid #000;
+                            }
+                            .section-table {
+                                width: 100%;
+                                border-collapse: collapse;
+                                margin-top: 20px;
+                            }
+                            .section-table th {
+                                background-color: #2c3e50;
+                                color: white;
+                                border: 1px solid #000;
+                                padding: 10px;
+                                text-align: left;
+                                font-weight: bold;
+                                font-size: 10pt;
+                            }
+                            .section-table td {
+                                border: 1px solid #000;
+                                padding: 8px;
+                                font-size: 10pt;
+                            }
+                            .section-table tfoot td {
+                                background-color: #34495e;
+                                color: white;
+                                font-weight: bold;
+                            }
+                            .text-right { text-align: right; }
+                            .text-center { text-align: center; }
+                            .summary-section {
+                                margin-top: 30px;
+                                padding: 20px;
+                                background-color: #ecf0f1;
+                                border-left: 5px solid #3498db;
+                            }
+                            .highlight-row {
+                                background-color: #fff3cd;
+                            }
+                        </style>
+
+                        <!-- Report Header -->
+                        <div class="section-header">
+                            <h2 style="margin: 0; color: #2c3e50;">TDS SECTION-WISE SUMMARY REPORT</h2>
+                            <p style="margin: 10px 0 5px 0; font-size: 12pt;">
+                                <strong>Period: </strong>
+                                <span t-esc="doc.date_from.strftime('%d/%m/%Y')"/> to 
+                                <span t-esc="doc.date_to.strftime('%d/%m/%Y')"/>
+                            </p>
+                            <t t-if="doc.partner_id">
+                                <p style="margin: 5px 0;">
+                                    <strong>Vendor: </strong>
+                                    <span t-field="doc.partner_id.name"/>
+                                </p>
+                            </t>
+                            <t t-if="doc.company_id">
+                                <p style="margin: 5px 0;">
+                                    <strong>Company: </strong>
+                                    <span t-field="doc.company_id.name"/>
+                                </p>
+                            </t>
+                        </div>
+
+                        <!-- Section-wise Summary Table -->
+                        <table class="section-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%;" class="text-center">Sr.</th>
+                                    <th style="width: 12%;">Section Code</th>
+                                    <th style="width: 25%;">Section Name</th>
+                                    <th style="width: 8%;" class="text-center">Rate %</th>
+                                    <th style="width: 8%;" class="text-center">Vendors</th>
+                                    <th style="width: 8%;" class="text-center">Invoices</th>
+                                    <th style="width: 12%;" class="text-right">Taxable Amt</th>
+                                    <th style="width: 11%;" class="text-right">TDS Amt</th>
+                                    <th style="width: 11%;" class="text-right">Invoice Amt</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="sr_no" t-value="1"/>
+                                <t t-foreach="doc.section_line_ids" t-as="line">
+                                    <tr t-att-class="'highlight-row' if line.tds_amount &gt; 10000 else ''">
+                                        <td class="text-center">
+                                            <span t-esc="sr_no"/>
+                                            <t t-set="sr_no" t-value="sr_no + 1"/>
+                                        </td>
+                                        <td>
+                                            <strong t-field="line.section_code"/>
+                                        </td>
+                                        <td>
+                                            <span t-field="line.section_name"/>
+                                        </td>
+                                        <td class="text-center">
+                                            <span t-esc="'%.2f' % line.section_rate"/>
+                                        </td>
+                                        <td class="text-center">
+                                            <span t-esc="line.vendor_count"/>
+                                        </td>
+                                        <td class="text-center">
+                                            <span t-esc="line.invoice_count"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-esc="'{:,.2f}'.format(line.taxable_amount)"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <strong t-esc="'{:,.2f}'.format(line.tds_amount)"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-esc="'{:,.2f}'.format(line.invoice_amount)"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                                
+                                <t t-if="not doc.section_line_ids">
+                                    <tr>
+                                        <td colspan="9" class="text-center">
+                                            <em>No data found for the selected period</em>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            
+                            <tfoot t-if="doc.section_line_ids">
+                                <tr>
+                                    <td colspan="6" class="text-right">
+                                        <strong>GRAND TOTAL:</strong>
+                                    </td>
+                                    <td class="text-right">
+                                        <strong t-esc="'{:,.2f}'.format(doc.total_taxable_amount)"/>
+                                    </td>
+                                    <td class="text-right">
+                                        <strong t-esc="'{:,.2f}'.format(doc.total_tds_amount)"/>
+                                    </td>
+                                    <td class="text-right">
+                                        <strong t-esc="'{:,.2f}'.format(doc.total_invoice_amount)"/>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                        <!-- Summary Section -->
+                        <t t-if="doc.section_line_ids">
+                            <div class="summary-section">
+                                <h4 style="margin-top: 0; color: #2c3e50;">Report Summary</h4>
+                                <table style="width: 100%; border: none;">
+                                    <tr>
+                                        <td style="width: 50%; border: none; padding: 5px;">
+                                            <strong>Total TDS Sections:</strong>
+                                        </td>
+                                        <td style="border: none; padding: 5px; text-align: right;">
+                                            <span t-esc="doc.section_count"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="border: none; padding: 5px;">
+                                            <strong>Total Transactions:</strong>
+                                        </td>
+                                        <td style="border: none; padding: 5px; text-align: right;">
+                                            <span t-esc="doc.transaction_count"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="border: none; padding: 5px;">
+                                            <strong>Total TDS Deducted:</strong>
+                                        </td>
+                                        <td style="border: none; padding: 5px; text-align: right;">
+                                            <strong t-esc="'{:,.2f}'.format(doc.total_tds_amount)"/>
+                                            <span t-field="doc.currency_id.symbol"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </t>
+
+                        <div style="margin-top: 50px; font-size: 8pt; color: #666;">
+                            <p>
+                                <em>Report generated on: 
+                                <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M:%S')"/>
+                                </em>
+                            </p>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+
+    <!-- ========================================= -->
+    <!-- Detailed Report (Section-wise with Transactions) -->
+    <!-- ========================================= -->
+    
+    <record id="action_report_tds_section_wise_detailed" model="ir.actions.report">
+        <field name="name">TDS Section-Wise Detailed</field>
+        <field name="model">tds.section.wise.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">tds_tcs_module.report_tds_section_wise_detailed</field>
+        <field name="report_file">tds_tcs_module.report_tds_section_wise_detailed</field>
+        <field name="binding_model_id" ref="model_tds_section_wise_report"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+
+    <template id="report_tds_section_wise_detailed">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <style>
+                            .detail-header {
+                                text-align: center;
+                                margin-bottom: 20px;
+                                padding-bottom: 10px;
+                                border-bottom: 3px solid #000;
+                            }
+                            .section-break {
+                                background-color: #3498db;
+                                color: white;
+                                padding: 10px;
+                                margin-top: 20px;
+                                margin-bottom: 10px;
+                                font-weight: bold;
+                                font-size: 11pt;
+                            }
+                            .detail-table {
+                                width: 100%;
+                                border-collapse: collapse;
+                                margin-bottom: 15px;
+                            }
+                            .detail-table th {
+                                background-color: #ecf0f1;
+                                border: 1px solid #000;
+                                padding: 8px;
+                                text-align: left;
+                                font-weight: bold;
+                                font-size: 9pt;
+                            }
+                            .detail-table td {
+                                border: 1px solid #ddd;
+                                padding: 6px;
+                                font-size: 9pt;
+                            }
+                            .section-subtotal {
+                                background-color: #d5dbdb;
+                                font-weight: bold;
+                            }
+                            .text-right { text-align: right; }
+                            .text-center { text-align: center; }
+                        </style>
+
+                        <!-- Report Header -->
+                        <div class="detail-header">
+                            <h2 style="margin: 0; color: #2c3e50;">TDS SECTION-WISE DETAILED REPORT</h2>
+                            <p style="margin: 10px 0 5px 0; font-size: 12pt;">
+                                <strong>Period: </strong>
+                                <span t-esc="doc.date_from.strftime('%d/%m/%Y')"/> to 
+                                <span t-esc="doc.date_to.strftime('%d/%m/%Y')"/>
+                            </p>
+                        </div>
+
+                        <!-- Group by Section -->
+                        <t t-foreach="doc.section_line_ids" t-as="section">
+                            <!-- Section Header -->
+                            <div class="section-break">
+                                <span t-field="section.section_code"/> - 
+                                <span t-field="section.section_name"/> 
+                                (Rate: <span t-esc="'%.2f' % section.section_rate"/>%)
+                                | Vendors: <span t-esc="section.vendor_count"/>
+                                | Invoices: <span t-esc="section.invoice_count"/>
+                            </div>
+
+                            <!-- Transactions for this section -->
+                            <table class="detail-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 4%;" class="text-center">Sr.</th>
+                                        <th style="width: 10%;">Date</th>
+                                        <th style="width: 13%;">Invoice No.</th>
+                                        <th style="width: 20%;">Vendor</th>
+                                        <th style="width: 11%;">PAN</th>
+                                        <th style="width: 7%;" class="text-right">Rate %</th>
+                                        <th style="width: 13%;" class="text-right">Taxable</th>
+                                        <th style="width: 11%;" class="text-right">TDS</th>
+                                        <th style="width: 11%;" class="text-right">Invoice</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-set="section_sr" t-value="1"/>
+                                    <t t-set="details" t-value="doc.detail_line_ids.filtered(lambda l: l.tds_section_id == section.tds_section_id)"/>
+                                    <t t-foreach="details" t-as="detail">
+                                        <tr>
+                                            <td class="text-center">
+                                                <span t-esc="section_sr"/>
+                                                <t t-set="section_sr" t-value="section_sr + 1"/>
+                                            </td>
+                                            <td>
+                                                <span t-esc="detail.invoice_date.strftime('%d/%m/%Y')"/>
+                                            </td>
+                                            <td>
+                                                <span t-field="detail.invoice_number"/>
+                                            </td>
+                                            <td>
+                                                <span t-field="detail.partner_id.name"/>
+                                            </td>
+                                            <td>
+                                                <span t-field="detail.pan_number"/>
+                                            </td>
+                                            <td class="text-right">
+                                                <span t-esc="'%.2f' % detail.tds_rate"/>
+                                            </td>
+                                            <td class="text-right">
+                                                <span t-esc="'{:,.2f}'.format(detail.taxable_amount)"/>
+                                            </td>
+                                            <td class="text-right">
+                                                <span t-esc="'{:,.2f}'.format(detail.tds_amount)"/>
+                                            </td>
+                                            <td class="text-right">
+                                                <span t-esc="'{:,.2f}'.format(detail.invoice_amount)"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="section-subtotal">
+                                        <td colspan="6" class="text-right">
+                                            <strong>Section Total:</strong>
+                                        </td>
+                                        <td class="text-right">
+                                            <strong t-esc="'{:,.2f}'.format(section.taxable_amount)"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <strong t-esc="'{:,.2f}'.format(section.tds_amount)"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <strong t-esc="'{:,.2f}'.format(section.invoice_amount)"/>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </t>
+
+                        <!-- Grand Total -->
+                        <t t-if="doc.section_line_ids">
+                            <table style="width: 100%; margin-top: 20px; border: 2px solid #000;">
+                                <tr style="background-color: #2c3e50; color: white;">
+                                    <td style="padding: 10px; text-align: right; border: none;" colspan="3">
+                                        <strong>GRAND TOTAL:</strong>
+                                    </td>
+                                    <td style="padding: 10px; text-align: right; border: none; width: 13%;">
+                                        <strong t-esc="'{:,.2f}'.format(doc.total_taxable_amount)"/>
+                                    </td>
+                                    <td style="padding: 10px; text-align: right; border: none; width: 11%;">
+                                        <strong t-esc="'{:,.2f}'.format(doc.total_tds_amount)"/>
+                                    </td>
+                                    <td style="padding: 10px; text-align: right; border: none; width: 11%;">
+                                        <strong t-esc="'{:,.2f}'.format(doc.total_invoice_amount)"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </t>
+
+                        <div style="margin-top: 30px; font-size: 8pt; color: #666;">
+                            <p>
+                                <em>Detailed report generated on: 
+                                <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M:%S')"/>
+                                </em>
+                            </p>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

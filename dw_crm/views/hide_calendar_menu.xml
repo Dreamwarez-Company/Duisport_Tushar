@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo noupdate="1">
+    <!-- Example: hide the mail's activity calendar menu for everyone except admins -->
+    <record id="mail.mail_activity_calendar_menu" model="ir.ui.menu" check="True">
+        <field name="groups_id" eval="[(6, 0, [ref('base.group_system')])]"/>
+    </record>
+</odoo>

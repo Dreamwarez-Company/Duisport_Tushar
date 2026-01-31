@@ -1,0 +1,15 @@
+<odoo>
+    <!-- Dreamwarez Invoice Report Action -->
+    <record id="action_report_dreamwarez_invoice" model="ir.actions.report">
+        <field name="name">Dreamwarez Invoice</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">dw_customer_credit.dreamwarez_invoice_template</field>
+        <field name="report_file">dw_customer_credit.dreamwarez_invoice_template</field>
+        <field name="print_report_name">'Dreamwarez_Invoice_%s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_account_move"/>
+        <field name="binding_type">report</field>
+        <!-- Optional: Set paper format if needed -->
+        <!-- <field name="paperformat_id" ref="report.paperformat_euro"/> -->
+    </record>
+</odoo>

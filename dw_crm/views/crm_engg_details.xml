@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_crm_lead_form_inherit_engineering" model="ir.ui.view">
+        <field name="name">crm.lead.form.inherit.engineering</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Insert new notebook -->
+            <xpath expr="//notebook" position="inside">
+
+                <!-- ========================= -->
+                <!-- ENGINEERING DETAILS TAB -->
+                <!-- ========================= -->
+                <page string="Engineering Details">
+           
+                   <group>
+                        <field name="engineering_team_id" readonly="1"/>
+                        <field name="engineer_id" readonly="1" />
+                        <field name="estimation_time" readonly="1"/>
+                        <field name="engineering_notes" readonly="1"/>
+                        <field name="design_ref" readonly="1"
+                               filename="design_ref_filename"/>
+                    </group>
+
+                    <!-- <group string="BOM">
+                        <field name="bom_ids">
+                            <tree>
+                                <field name="display_name"/>
+                                <field name="availability_status"/>
+                            </tree>
+                        </field>
+                        <field name="bom_exploded_line_ids"/>
+                    </group> -->
+
+
+                </page>
+                
+                <page string="Bill of Materials" >
+
+                    <field name="bom_exploded_line_ids" nolabel="1" readonly="1">
+                        <tree create="0" edit="0" delete="0">
+
+                            <field name="main_product_display"
+                                string="Engineering Product"/>
+
+                            <field name="component_id" string="Component"/>
+                            <field name="bom_qty" string="BoM Qty"/>
+                            <field name="engineering_qty" string="Eng Qty"/>
+                            <field name="total_required_qty" string="Total Required"/>
+                            <field name="component_unit_price" string="Unit Price"/>
+                            <field name="component_total_price" string="Total Price"/>
+
+                        </tree>
+                    </field>
+
+                </page>
+
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

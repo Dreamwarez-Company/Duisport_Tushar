@@ -1,0 +1,783 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="dreamwarez_invoice_template">
+        <t t-call="web.html_container">
+                    <meta charset="utf-8"/>
+            <style>
+                @page {
+                    size: A4;
+                    margin: 6mm;
+                }
+
+                body {
+                    font-family: "DejaVu Sans", "Noto Sans", Arial, sans-serif;
+                    font-size: 15px;
+                    color: #000;
+                }
+
+                .cell {
+                    border: 0.6px solid #777;
+                    padding: 6px;
+                    vertical-align: top;
+                    font-size: 15px;
+                }
+
+                .center {
+                    text-align: center;
+                }
+
+                .right-cell {
+                    border: 0.6px solid #777;
+                    padding: 10px 8px;
+                    line-height: 1.6;
+                    vertical-align: top;
+                    font-size: 15px;
+                }
+            </style>
+   
+
+            <t t-foreach="docs" t-as="doc">
+
+               
+                <t t-set="delivery_contact" t-value="False"/>
+                <t t-foreach="doc.partner_id.child_ids" t-as="child">
+                    <t t-if="child.type == 'delivery'">
+                        <t t-set="delivery_contact" t-value="child"/>
+                    </t>
+                </t>
+                <t t-if="not delivery_contact">
+                    <t t-set="delivery_contact" t-value="doc.partner_id"/>
+                </t>
+
+               
+                <t t-set="invoice_contact" t-value="False"/>
+                <t t-foreach="doc.partner_id.child_ids" t-as="child">
+                    <t t-if="child.type == 'invoice'">
+                        <t t-set="invoice_contact" t-value="child"/>
+                    </t>
+                </t>
+                <t t-if="not invoice_contact">
+                    <t t-set="invoice_contact" t-value="doc.partner_id"/>
+                </t>
+
+
+                <div class="page">
+                    <table style="width:100%; border-collapse:collapse; margin-bottom:8px;">
+                        <tr>
+                            <td style="
+                                width:100%;
+                                text-align:center;
+                                font-size:22px;
+                                font-weight:bold;
+                            ">
+                                Tax Invoice
+                                <span style="
+                                    font-size:14px;
+                                    font-style:italic;
+                                    font-weight:normal;
+                                    margin-left:10px;
+                                ">
+                                    (ORIGINAL FOR RECIPIENT)
+                                </span>
+                            </td>
+                        </tr>
+                    </table>
+                    <!-- ================= GST TAX FETCH (FIXED) ================= -->
+
+                    <t t-set="cgst_tax"
+                    t-value="doc.line_ids
+                                .filtered(lambda l: l.tax_line_id and 'CGST' in (l.tax_line_id.name or ''))
+                                .mapped('tax_line_id')[:1]"/>
+
+                    <t t-set="sgst_tax"
+                    t-value="doc.line_ids
+                                .filtered(lambda l: l.tax_line_id and 'SGST' in (l.tax_line_id.name or ''))
+                                .mapped('tax_line_id')[:1]"/>
+
+
+                    <!-- ========================================================= -->
+                   
+                    <table style="width:100%; border-collapse:collapse; margin-bottom:6px;">
+                        <tr>
+                            <td style="width:40%;">
+                                <strong>IRN:</strong>
+                                <t t-esc="doc.irn_number or 'Not Generated'"/><br/>
+                                <strong>Ack No:</strong>
+                                <t t-esc="doc.ack_number or 'Not Generated'"/><br/>
+                                <strong>Ack Date:</strong>
+                                <t t-if="doc.ack_date">
+                                    <t t-esc="doc.ack_date.strftime('%d-%m-%Y %H:%M:%S')"/>
+                                </t>
+                                <t t-if="not doc.ack_date">Not Generated</t>
+                            </td>
+                        </tr>
+                    </table>
+
+                   
+                    <table style="width:100%; border-collapse:collapse; border:1px solid #777; font-size:16px;">
+
+                        <tr>
+                            
+                            <td rowspan="8" style="width:55%; vertical-align:top; border:1px solid #777; padding:6px;">
+
+                                
+                                <strong t-esc="doc.company_id.name"/><br/>
+                                <t t-esc="doc.company_id.street"/><br/>
+                                <t t-esc="doc.company_id.city"/> -
+                                <t t-esc="doc.company_id.zip"/><br/>
+                                GSTIN/UIN : <t t-esc="doc.company_id.vat"/><br/>
+                                State Name : <t t-esc="doc.company_id.state_id.name"/>,
+                                Code : <t t-esc="doc.company_id.state_id.l10n_in_tin"/><br/>
+                                CIN : <t t-esc="doc.company_id.company_registry"/>
+
+                                <div style="border-top:1px solid #777; margin:6px 0;"></div>
+
+                                
+                                <strong>Consignee (Ship to)</strong><br/>
+                                <strong t-esc="delivery_contact.name"/><br/>
+                                <t t-esc="delivery_contact.street"/><br/>
+                                <t t-esc="delivery_contact.city"/> -
+                                <t t-esc="delivery_contact.zip"/><br/>
+                                GSTIN/UIN : <t t-esc="delivery_contact.vat"/><br/>
+                                State Name : <t t-esc="delivery_contact.state_id.name"/>,
+                                Code : <t t-esc="delivery_contact.state_id.l10n_in_tin"/>
+
+                                <div style="border-top:1px solid #777; margin:6px 0;"></div>
+
+                                
+                                <strong>Buyer (Bill to)</strong><br/>
+                                <strong t-esc="invoice_contact.name"/><br/>
+                                <t t-esc="invoice_contact.street"/><br/>
+                                GSTIN/UIN : <t t-esc="invoice_contact.vat"/><br/>
+                                State Name : <t t-esc="invoice_contact.state_id.name"/><br/>
+                                Place of Supply : <t t-esc="invoice_contact.state_id.name"/>
+
+                            </td>
+
+                            
+                            <td style="border:1px solid #777; padding:5px;">
+                                Invoice No : <strong><t t-esc="doc.name"/></strong>
+                            </td>
+                            <!-- <td style="border:1px solid #777; padding:5px;">
+                                Dated : <strong><t t-esc="doc.invoice_date"/></strong>
+                            </td> -->
+                            <td style="border:1px solid #777; padding:5px; white-space: nowrap;">
+                                Dated :
+                                <br/>
+                                <strong>
+                                    <t t-esc="doc.invoice_date and doc.invoice_date.strftime('%d-%m-%Y') or ''"/>
+                                </strong>
+                            </td>
+                        </tr>
+
+                        <tr>
+                           
+                            <!-- <td style="border:1px solid #777; padding:5px;">
+                                Delivery Note :
+                                <strong><t t-esc="doc.delivery_note or ''"/></strong>
+                            </td> -->
+                            <td style="border:1px solid #777; padding:5px;">
+                                Delivery Note :
+                                <br/>
+                                <strong>
+                                    <t t-esc="doc.delivery_note or ''"/>
+                                </strong>
+                            </td>
+                            <td style="border:1px solid #777; padding:5px;">
+                                Mode / Terms of Payment :
+                                <strong><t t-esc="doc.payment_terms_selection"/></strong>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td style="border:1px solid #777; padding:5px;">
+                                Reference No. &amp; Date :
+                                <br/>
+                                <strong>
+                                    <t t-esc="doc.payment_reference or ''"/>
+                                </strong>
+                            </td>
+
+                            <td style="border:1px solid #777; padding:5px;">
+                                Other References :
+                                <br/>
+                                <strong>
+                                    <t t-esc="doc.other_references or ''"/>
+                                </strong>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td style="border:1px solid #777; padding:5px;">
+                                Buyers Order No:
+                                <br/>
+                                <strong>
+                                    <t t-esc="doc.buyers_order_no or ''"/>
+                                </strong>
+                            </td>
+
+                            <td style="border:1px solid #777; padding:5px;">
+                                Date:
+                                <br/>
+                                <strong>
+                                    <t t-esc="doc.invoice_reference_date and doc.invoice_reference_date.strftime('%d-%m-%Y') or ''"/>
+                                </strong>
+                            </td>
+
+                        </tr>
+
+                        <tr>
+                           
+                            <td style="border:1px solid #777; padding:5px;">
+                                Dispatch Doc No:
+                                <br/>
+                                <strong>
+                                    <t t-esc="doc.dispatch_doc_no or ''"/>
+                                </strong>
+                            </td>
+
+                            <td style="border:1px solid #777; padding:5px;">
+                                Delivery Note Date:
+                                <br/>
+                                <strong>
+                                    <t t-esc="doc.delivery_note_date and doc.delivery_note_date.strftime('%d-%m-%Y') or ''"/>
+                                </strong>
+                            </td>
+
+                        </tr>
+
+                        <tr>
+                            <td style="border:1px solid #777; padding:5px;">
+                                Dispatched through:
+                                <br/>
+                                <strong>
+                                    <t t-esc="doc.dispatched_through or ''"/>
+                                </strong>
+                            </td>
+
+                            <td style="border:1px solid #777; padding:5px;">
+                                Destination:
+                                <br/>
+                                <strong>
+                                    <t t-esc="doc.destination or ''"/>
+                                </strong>
+                            </td>
+
+                        </tr>
+
+                        <tr>
+                            <td style="border:1px solid #777; padding:5px;">
+                                Bill of Lading / LR-RR No:
+                                <br/>
+                                <strong>
+                                    <t t-esc="doc.bill_of_lading_no or ''"/>
+                                </strong>
+                            </td>
+
+                            <td style="border:1px solid #777; padding:5px;">
+                                Motor Vehicle No:
+                                <br/>
+                                <strong>
+                                    <t t-esc="doc.vehicle_no or ''"/>
+                                </strong>
+                            </td>
+
+                        </tr>
+
+                        <tr>
+                            <td colspan="2" style="border:1px solid #777; padding:5px;">
+                                Terms of Delivery:
+                                <br/>
+                                <strong>
+                                    <t t-esc="doc.terms_of_delivery or 'Door Delivery'"/>
+                                </strong>
+                            </td>
+                        </tr>
+
+
+                    </table>
+
+                    
+                   
+                    <table style="width:100%; border-collapse:collapse; margin-bottom:10px;">
+                        <thead>
+                            <tr>
+                                <th class="cell center" style="width:6%;">SI No.</th>
+                                <th class="cell" style="width:40%;">Description of Goods</th>
+                                <th class="cell center" style="width:12%;">HSN/SAC</th>
+                                <th class="cell center" style="width:8%;">Qty</th>
+                                <th class="cell center" style="width:10%;">Rate</th>
+                                <th class="cell center" style="width:8%;">Disc %</th>
+                                <th class="cell center" style="width:16%;">Amount</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+
+                            
+                            <t t-set="i" t-value="0"/>
+                            <t t-set="total_qty" t-value="0.0"/>
+                            <t t-set="total_amount" t-value="0.0"/>
+
+                            
+                            <t t-foreach="doc.invoice_line_ids" t-as="line">
+                                <t t-set="i" t-value="i + 1"/>
+                                <t t-set="total_qty" t-value="total_qty + (line.quantity or 0.0)"/>
+                                <t t-set="total_amount" t-value="total_amount + (line.price_subtotal or 0.0)"/>
+
+                                <tr>
+                                    <td class="cell center">
+                                        <t t-esc="i"/>
+                                    </td>
+
+                                    <td class="cell">
+                                        <strong t-esc="line.product_id.name"/>
+                                    </td>
+
+                                    <td class="cell center">
+                                        <t t-esc="line.product_id.l10n_in_hsn_code or ''"/>
+                                    </td>
+
+                                    <td class="cell center">
+                                        <t t-esc="'%.2f' % (line.quantity or 0.0)"/>
+                                    </td>
+
+                                    <td class="cell center">
+                                        <span t-field="line.price_unit" t-options="{'widget':'monetary','display_currency':doc.currency_id}"/>
+
+                                        <!-- <t t-esc="'%.2f' % (line.price_unit or 0.0)"/> -->
+                                    </td>
+
+                                    <td class="cell center">
+                                        <t t-esc="'%.0f' % (line.discount or 0.0)"/>%
+                                    </td>
+
+                                   
+                                    <td class="cell right">
+                                        <strong>
+                                                                                   <span t-field="line.price_subtotal" t-options="{'widget':'monetary','display_currency':doc.currency_id}"/>
+
+                                        </strong>
+                                    </td>
+                                </tr>
+                            </t>
+
+                            
+                            <tr>
+                                <td class="cell"></td>
+                                <td class="cell"><strong>CGST</strong></td>
+                                <td class="cell"></td>
+                                <td class="cell"></td>
+                                <td class="cell"></td>
+                                <td class="cell"></td>
+                                <td class="cell right">
+                                    <t t-esc="(doc.amount_tax / 2)" t-options="{'widget':'monetary','display_currency':doc.currency_id}"/>
+
+                                    <!-- <t t-esc="'%.2f' % ((doc.amount_tax or 0.0) / 2)"/> -->
+                                </td>
+                            </tr>
+
+                           
+                            <tr>
+                                <td class="cell"></td>
+                                <td class="cell"><strong>SGST</strong></td>
+                                <td class="cell"></td>
+                                <td class="cell"></td>
+                                <td class="cell"></td>
+                                <td class="cell"></td>
+                                <td class="cell right">
+                                    <t t-esc="(doc.amount_tax / 2)" t-options="{'widget':'monetary','display_currency':doc.currency_id}"/>
+
+                                    <!-- <t t-esc="'%.2f' % ((doc.amount_tax or 0.0) / 2)"/> -->
+                                </td>
+                            </tr>
+                            <t t-set="cgst" t-value="doc.amount_tax / 2"/>
+                            <t t-set="sgst" t-value="doc.amount_tax / 2"/>
+                            <t t-set="total_taxable_amount" t-value="total_amount + cgst + sgst"/>
+
+                            
+                            <tr>
+                                <td class="cell"></td>
+                                <td class="cell"><strong>Total</strong></td>
+                                <td class="cell"></td>
+                                <td class="cell center">
+                                    <strong>
+                                        <t t-esc="'%.0f' % total_qty"/> No
+                                    </strong>
+                                </td>
+                                <td class="cell"></td>
+                                <td class="cell"></td>
+
+                                
+                                <td class="cell right">
+                                    <strong>
+                                        <!-- <t t-esc="doc.currency_id.symbol"/>
+                                        <t t-esc="' %.2f' % (doc.amount_total or 0.0)"/> -->
+                                                                           <strong t-esc="total_taxable_amount" t-options="{'widget':'monetary','display_currency':doc.currency_id}"/>
+
+                                    </strong>
+                                </td>
+                            </tr>
+
+                            
+                            <!-- <tr>
+                                <td class="cell" colspan="7">
+                                    Amount Chargeable (in words):
+                                    <br/>
+                                    <strong>
+                                    <t t-esc="doc.currency_id.amount_to_text(doc.amount_total)"/>
+                                    </strong>
+                                </td>
+                            </tr> -->
+
+                            <tr>
+                                <td class="cell" colspan="6" style="border-right: none;">
+                                    Amount Chargeable (in words):
+                                    <br/>
+                                    <strong>
+                                        <t t-esc="doc.currency_id.amount_to_text(doc.amount_total)"/>
+                                    </strong>
+                                </td>
+                                <td class="cell" style="border-left: none; text-align: right; font-style: italic;">
+                                    E. &amp; O.E
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="cell" colspan="7" style="padding:0;">
+                                    <table style="width:100%; border-collapse:collapse; font-size:11px; border:none;">
+
+                                        
+                                        <tr>
+                                            <th class="cell center" rowspan="2"  >HSN/SAC</th>
+                                            <th class="cell center" rowspan="2" >Taxable<br/>Value</th>
+                                            <th class="cell center" colspan="2" >CGST</th>
+                                            <th class="cell center" colspan="2" >SGST / UTGST</th>
+                                            <th class="cell center" rowspan="2" >Total Tax Amount</th>
+                                        </tr>
+
+                                        
+                                        <tr>
+                                            <th class="cell center">Rate</th>
+                                            <th class="cell center">Amount</th>
+                                            <th class="cell center">Rate</th>
+                                            <th class="cell center">Amount</th>
+                                        </tr>
+
+                                        <t t-set="cgst_rate" t-value="0"/>
+                                            <t t-set="sgst_rate" t-value="0"/>
+
+
+                                            <t t-foreach="doc.line_ids.filtered(lambda l: l.tax_line_id)" t-as="tax_line">
+                                            <t t-if="'CGST' in (tax_line.name or '')">
+                                            <t t-set="cgst_rate" t-value="tax_line.tax_line_id.amount"/>
+                                            </t>
+                                            <t t-if="'SGST' in (tax_line.name or '')">
+                                            <t t-set="sgst_rate" t-value="tax_line.tax_line_id.amount"/>
+                                            </t>
+                                        </t>
+                                        <tr>
+                                            <td class="cell center">
+                                                <!-- <t t-esc="doc.invoice_line_ids and doc.invoice_line_ids[0].hsn_code or ''"/> -->
+                                                <t t-esc="doc.invoice_line_ids and doc.invoice_line_ids[0].product_id.l10n_in_hsn_code or ''"/>
+
+                                            </td>
+
+                                            <td class="cell center">
+                                                <span t-field="doc.amount_untaxed" t-options="{'widget':'monetary','display_currency':doc.currency_id}"/>
+                                            </td>
+
+                                            <td class="cell center">
+                                              <t t-esc="cgst_rate"/>%
+                                            </td>
+                                            <td class="cell center">
+                                                <t t-esc="(doc.amount_tax / 2)" t-options="{'widget':'monetary','display_currency':doc.currency_id}"/>
+                                            </td>
+
+                                            <td class="cell center">
+                                              <t t-esc="sgst_rate"/>%
+                                            </td>
+                                            <td class="cell center">
+                                                <t t-esc="(doc.amount_tax / 2)" t-options="{'widget':'monetary','display_currency':doc.currency_id}"/>
+                                            </td>
+
+                                            <td class="cell center">
+                                                <span t-field="doc.amount_tax" t-options="{'widget':'monetary','display_currency':doc.currency_id}"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="cell center">
+                                                <strong>Total</strong>
+                                            </td>
+
+                                            <td class="cell center">
+                                                <strong t-field="doc.amount_untaxed" t-options="{'widget':'monetary','display_currency':doc.currency_id}"/>
+                                            </td>
+
+                                            <td class="cell center">
+                                                
+                                            </td>
+
+                                            <td class="cell center">
+                                                <strong t-esc="(doc.amount_tax / 2)" t-options="{'widget':'monetary','display_currency':doc.currency_id}"/>
+                                            </td>
+
+                                            <td class="cell center">
+                                                
+                                            </td>
+
+                                            <td class="cell center">
+                                                <strong t-esc="(doc.amount_tax / 2)" t-options="{'widget':'monetary','display_currency':doc.currency_id}"/>
+                                            </td>
+
+                                            <td class="cell center">
+                                                <strong t-field="doc.amount_tax" t-options="{'widget':'monetary','display_currency':doc.currency_id}"/>
+                                            </td>
+                                        </tr>
+                                        
+
+
+
+                                    </table>
+                                </td>
+                            </tr>
+                            
+                            <!-- <tr>
+                                <td class="cell" colspan="7" style="padding:0;">
+                                    <table style="width:100%; border-collapse:collapse; font-size:11px;">
+
+                                        
+                                        <tr>
+                                            <th class="cell center" rowspan="2">HSN/SAC</th>
+                                            <th class="cell center" rowspan="2">Taxable<br/>Value</th>
+                                            <th class="cell center" colspan="2">CGST</th>
+                                            <th class="cell center" colspan="2">SGST / UTGST</th>
+                                            <th class="cell center" rowspan="2">Total Tax Amount</th>
+                                        </tr>
+
+                                        
+                                        <tr>
+                                            <th class="cell center">Rate</th>
+                                            <th class="cell center">Amount</th>
+                                            <th class="cell center">Rate</th>
+                                            <th class="cell center">Amount</th>
+                                        </tr>
+
+                                        
+                                        
+                                        <tr>
+                                            <td class="cell center">
+                                                <t t-esc="doc.invoice_line_ids and doc.invoice_line_ids[0].product_id.l10n_in_hsn_code or ''"/>
+                                            </td>
+
+                                            <td class="cell center">
+                                                <t t-esc="'%.2f' % doc.amount_untaxed"/>
+                                            </td>
+
+                                           
+                                            <td class="cell center">
+                                                <t t-if="cgst_tax">
+                                                    <t t-esc="'%.2f' % cgst_tax.amount"/>%
+                                                </t>
+                                            </td>
+
+                                            
+                                            <td class="cell center">
+                                                <t t-esc="'%.2f' % (doc.amount_tax / 2)"/>
+                                            </td>
+
+                                           
+                                            <td class="cell center">
+                                                <t t-if="sgst_tax">
+                                                    <t t-esc="'%.2f' % sgst_tax.amount"/>%
+                                                </t>
+                                            </td>
+
+
+                                            
+                                            <td class="cell center">
+                                                <t t-esc="'%.2f' % (doc.amount_tax / 2)"/>
+                                            </td>
+
+                                            
+                                            <td class="cell center">
+                                                <t t-esc="'%.2f' % doc.amount_tax"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="cell center">
+                                                <strong>Total</strong>
+                                            </td>
+
+                                            <td class="cell center">
+                                                <strong t-esc="'%.2f' % doc.amount_untaxed"/>
+                                            </td>
+
+                                            <td class="cell center">
+                                                
+                                            </td>
+
+                                            <td class="cell center">
+                                                <strong t-esc="'%.2f' % (doc.amount_tax / 2)"/>
+                                            </td>
+
+                                            <td class="cell center">
+                                                
+                                            </td>
+
+                                            <td class="cell center">
+                                                <strong t-esc="'%.2f' % (doc.amount_tax / 2)"/>
+                                            </td>
+
+                                            <td class="cell center">
+                                                <strong t-esc="'%.2f' % doc.amount_tax"/>
+                                            </td>
+                                        </tr>
+                                        
+
+
+
+                                    </table>
+                                </td>
+                            </tr> -->
+                            
+                            <tr>
+                                <td colspan="7" style="
+                                    border-top:1px solid #777;
+                                    border-left:1px solid #777;
+                                    border-right:1px solid #777;
+                                    border-bottom:none;
+                                    padding:6px;
+                                ">
+                                    Tax Amount (in words) :
+                                    <strong>
+                                        <t t-esc="doc.currency_id.amount_to_text(doc.amount_tax)"/> Only
+                                    </strong>
+                                </td>
+                            </tr>
+
+                            
+                            <tr>
+                                
+                                <td colspan="4" style="
+                                    border-left:1px solid #777;
+                                    border-right:none;
+                                    border-top:none;
+                                    border-bottom:none;
+                                    padding:6px;
+                                "></td>
+
+                            <td colspan="3" style="
+                                border-left:none;
+                                border-top:none;
+                                border-bottom:none;
+                                border-right:1px solid #777;
+                                padding:6px;
+                                vertical-align:top;
+                            ">
+                                <strong>Company Bank Details</strong><br/>
+
+                                <t t-foreach="doc.company_id.partner_id.bank_ids[:1]" t-as="bank">
+                                    Bank Name : <t t-esc="bank.bank_id.name"/><br/>
+                                    A/C No : <t t-esc="bank.acc_number"/><br/>
+                                    IFSC Code : <t t-esc="bank.bank_id.bic"/>
+                                </t>
+                            </td>
+
+                            </tr>
+
+                            
+                            <tr>
+                                
+                                <td colspan="3" style="
+                                    border-left:1px solid #777;
+                                    border-right:1px solid #777;
+                                    border-top:none;
+                                    border-bottom:none;
+                                    padding:6px;
+                                ">
+                                    Company PAN No :<strong><t t-esc="doc.company_pan_no"/></strong>
+
+                                    
+                                    
+                                </td>
+
+                               
+                                <td colspan="4" style="
+                                    
+                                    border-left:1px solid #777;
+                                    border-right:1px solid #777;
+                                    border-top:1px solid #777;
+                                    border-bottom:none;
+                                    padding:6px;
+                                    text-align:center;
+                                ">
+                                    <strong>for <t t-esc="doc.company_id.name"/></strong>
+                                </td>
+                            </tr>
+
+                            
+                            <tr>
+                                
+                                <td colspan="3" style="
+                                    border-left:1px solid #777;
+                                    border-right:1px solid #777;
+                                    border-top:none;
+                                    border-bottom:none;
+                                    padding:6px;
+                                    vertical-align:top;
+                                ">
+                                    <strong>Declaration</strong><br/>
+                                    We declare that this invoice shows the actual price of the goods
+                                    described and that all particulars are true and correct.
+                                </td>
+
+                                
+                                <td colspan="4" style="
+                                    border-left:1px solid #777;
+                                    border-right:1px solid #777;
+                                    
+                                    border-bottom:none;
+                                    padding:6px;
+                                    text-align:center;
+                                    vertical-align:bottom;
+                                    height:70px;
+                                ">
+                                    <strong>Authorised Signatory</strong>
+                                </td>
+                            </tr>
+
+                            
+                            <tr>
+                                <td colspan="7" style="
+                                    border-left:1px solid #777;
+                                    border-right:1px solid #777;
+                                    border-bottom:1px solid #777;
+                                    padding:0;
+                                    height:0;
+                                "></td>
+                            </tr>
+
+
+                        </tbody>
+                    </table>
+
+
+
+
+
+
+                    
+                    <div style="text-align:center; margin-top:25px;">
+                        <strong>FOR DUISPORT PACKING LOGISTICS INDIA PVT LTD</strong><br/><br/>
+                        <em>This is a Computer Generated Invoice</em>
+                    </div>
+
+                </div>
+            </t>
+
+        </t>
+    </template>
+
+</odoo>

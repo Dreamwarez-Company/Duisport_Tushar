@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_asset_disposal_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <html>
+                    <head>
+                        <meta charset="utf-8"/>
+                        <style>
+                            body { font-family: Arial, sans-serif; font-size: 12px; margin: 20px; }
+                            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                            th { background-color: #2c3e50; color: white; padding: 10px; text-align: left; border-bottom: 2px solid #ddd; font-weight: bold; }
+                            td { padding: 8px; border-bottom: 1px solid #ddd; }
+                            .text-right { text-align: right; }
+                            .text-center { text-align: center; }
+                            .header { text-align: center; margin-bottom: 20px; }
+                            .summary-table { width: 50%; margin-left: auto; margin-top: 30px; }
+                            .summary-row { font-weight: bold; }
+                            .total-row { border-top: 2px solid #333; background-color: #f9f9f9; }
+                            .no-data { text-align: center; padding: 40px; color: #666; font-style: italic; }
+                            .company-header { margin-bottom: 10px; }
+                            .report-title { font-size: 20px; font-weight: bold; color: #2c3e50; }
+                            .period-info { font-size: 14px; color: #555; margin-bottom: 20px; }
+                            .filter-info { background-color: #f8f9fa; padding: 10px; border: 1px solid #dee2e6; border-radius: 5px; margin-bottom: 20px; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <div class="company-header">
+                                <div class="report-title">ASSET DISPOSAL REPORT</div>
+                            </div>
+                            <div class="period-info">
+                                <p>
+                                    <t t-if="start_date">Period: <strong><t t-esc="start_date"/></strong></t>
+                                    <t t-if="end_date"> to <strong><t t-esc="end_date"/></strong></t>
+                                </p>
+                                <p>Generated on: <strong><t t-esc="current_date"/></strong></p>
+                            </div>
+                        </div>
+
+                        <!-- Filter Information -->
+                        <div class="filter-info">
+                            <strong>Filters Applied:</strong>
+                            <t t-set="filters" t-value="[]"/>
+                            <t t-if="journal_id">
+                                <t t-set="filters" t-value="filters + ['Journal: ' + journal_id.name]"/>
+                            </t>
+                            <t t-if="asset_category_id">
+                                <t t-set="filters" t-value="filters + ['Category: ' + asset_category_id.name]"/>
+                            </t>
+                            <t t-if="not journal_id and not asset_category_id">
+                                <t t-set="filters" t-value="filters + ['All Journals and Categories']"/>
+                            </t>
+                            <t t-if="filters">
+                                <t t-foreach="filters" t-as="filter">
+                                    <span style="margin-left: 10px;">
+                                        <t t-esc="filter"/>
+                                        <t t-if="filter_index != len(filters) - 1"> | </t>
+                                    </span>
+                                </t>
+                            </t>
+                        </div>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 10%;">Date</th>
+                                    <th style="width: 20%;">Asset Name</th>
+                                    <th style="width: 15%;">Category</th>
+                                    <th style="width: 15%;">Journal</th>
+                                    <th style="width: 15%;">Journal Entry</th>
+                                    <th style="width: 15%;">Partner</th>
+                                    <th style="width: 10%;" class="text-right">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-if="lines and len(lines) > 0">
+                                    <t t-foreach="lines" t-as="line">
+                                        <tr>
+                                            <td><t t-esc="line.get('date', '')"/></td>
+                                            <td><t t-esc="line.get('asset_name', '')"/></td>
+                                            <td><t t-esc="line.get('asset_category', '')"/></td>
+                                            <td><t t-esc="line.get('journal', '')"/></td>
+                                            <td><t t-esc="line.get('journal_entry', '')"/></td>
+                                            <td><t t-esc="line.get('partner', '')"/></td>
+                                            <td class="text-right">
+                                                <t t-esc="'%.2f' % line.get('disposal_amount', 0.0)"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    
+                                    <tr class="total-row">
+                                        <td colspan="6" style="text-align: right; font-weight: bold;">Total Disposal Amount:</td>
+                                        <td class="text-right" style="font-weight: bold;">
+                                            <t t-esc="'%.2f' % total_disposal_amount"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <t t-else="">
+                                    <tr>
+                                        <td colspan="7" class="no-data">
+                                            <h3>No Asset Disposal Records Found</h3>
+                                            <p>No asset disposal records were found for the selected period and filters.</p>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                        
+                        <!-- Summary Section -->
+                        <t t-if="lines and len(lines) > 0">
+                            <table class="summary-table">
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Report Period:</strong></td>
+                                        <td class="text-right">
+                                            <t t-esc="start_date"/> to <t t-esc="end_date"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Total Records:</strong></td>
+                                        <td class="text-right">
+                                            <t t-esc="total_records"/>
+                                        </td>
+                                    </tr>
+                                    <!-- Category Breakdown -->
+                                    <t t-if="category_count">
+                                        <tr>
+                                            <td colspan="2">
+                                                <strong>Category Breakdown:</strong>
+                                                <t t-foreach="category_count" t-as="category_item">
+                                                    <div style="margin-left: 10px;">
+                                                        <t t-esc="category_item[0]"/>: <t t-esc="category_item[1]"/> records
+                                                    </div>
+                                                </t>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    <tr class="total-row">
+                                        <td><strong>Total Disposal Value:</strong></td>
+                                        <td class="text-right">
+                                            <strong>
+                                                <t t-esc="'%.2f' % total_disposal_amount"/>
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+
+                    </body>
+                </html>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_asset_disposal" model="ir.actions.report">
+        <field name="name">Asset Disposal Report</field>
+        <field name="model">asset.disposal.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">dw_customer_credit.report_asset_disposal_template</field>
+        <field name="print_report_name">
+            'Asset Disposal Report - {start_date} to {end_date}'
+        </field>
+    </record>
+</odoo>

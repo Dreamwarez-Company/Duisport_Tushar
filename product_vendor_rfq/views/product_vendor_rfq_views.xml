@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- RFQ FORM VIEW -->
+    <record id="view_rfq_request_form" model="ir.ui.view">
+        <field name="name">rfq.request.form</field>
+        <field name="model">rfq.request</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_send_rfq"
+                            string="Send RFQ"
+                            type="object"
+                            class="oe_highlight"
+                            invisible="state != 'draft'"/>
+
+                    <button name="action_view_comparison"
+                            string="View Comparison"
+                            type="object"
+                            invisible="state == 'draft'"/>
+
+                    <field name="state"
+                           widget="statusbar"
+                           statusbar_visible="draft,sent,received,confirmed"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group>
+                            <field name="date"/>
+                            <field name="deadline"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+
+                        <!-- PRODUCTS -->
+                        <page string="Products">
+                            <field name="rfq_line_ids">
+                                <tree editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="quantity"/>
+                                    <field name="uom_id"/>
+                                    <field name="description"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <!-- VENDORS -->
+                        <page string="Vendors">
+                            <field name="vendor_line_ids">
+                                <tree editable="bottom">
+                                    <field name="vendor_id"/>
+                                    <field name="email"/>
+                                    <field name="phone"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <!-- QUOTES -->
+                        <page string="Quotes" invisible="state == 'draft'">
+                            <field name="vendor_quote_ids">
+                                <tree >
+                                    <!-- <field name="is_l1" invisible="1"/> -->
+                                    <field name="vendor_id"/>
+                                    <field name="total_amount"/>
+                                    <field name="state"/>
+                                    <button name="action_receive_quote"
+                                            string="Received"
+                                            type="object"
+                                            invisible="state != 'sent'"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                    </notebook>
+                </sheet>
+
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- RFQ TREE -->
+    <record id="view_rfq_request_tree" model="ir.ui.view">
+        <field name="name">rfq.request.tree</field>
+        <field name="model">rfq.request</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="date"/>
+                <field name="deadline"/> 
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- RFQ ACTION -->
+    <record id="action_rfq_request" model="ir.actions.act_window">
+        <field name="name">RFQ</field>
+        <field name="res_model">rfq.request</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

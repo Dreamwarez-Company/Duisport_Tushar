@@ -1,0 +1,43 @@
+<odoo>
+
+    <record id="module_category_eng_access" model="ir.module.category">
+        <field name="name">Team Access</field>
+        <field name="sequence">1</field>
+    </record>   
+
+    <!-- Engineering Team -->
+    <record id="group_engineering_team" model="res.groups">
+        <field name="name">Engineering Team</field>
+        <field name="category_id" ref="dw_engineering_product.module_category_eng_access"/>
+    </record>
+
+    <!-- Production Team -->
+    <record id="group_production_team" model="res.groups">
+        <field name="name">Production Team</field>
+        <field name="category_id" ref="dw_engineering_product.module_category_eng_access"/>
+    </record>
+
+    <!-- Management Team -->
+    <record id="group_management_team" model="res.groups">
+        <field name="name">Management Team</field>
+        <field name="category_id" ref="dw_engineering_product.module_category_eng_access"/>
+    </record>
+
+    <!--  ALLOW BOM access to Engineering and Production -->
+    <record id="rule_bom_engineering_production_access" model="ir.rule">
+        <field name="name">Allow BOM for Engineering and Production Only</field>
+        <field name="model_id" ref="mrp.model_mrp_bom"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('dw_engineering_product.group_engineering_team')),
+                                    (4, ref('dw_engineering_product.group_production_team'))]"/>
+    </record>
+
+    <!--  DENY BOM access for others (non-engineering, non-production) -->
+    <record id="rule_bom_restrict_others" model="ir.rule">
+        <field name="name">Restrict BOM for Non-Engineering/Production</field>
+        <field name="model_id" ref="mrp.model_mrp_bom"/>
+        <field name="domain_force">[(0, '=', 1)]</field>
+        <!-- Add this line: restrict rule only to 'base.group_user' (regular users) -->
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+</odoo>

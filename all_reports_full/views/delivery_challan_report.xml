@@ -1,0 +1,596 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+        <!-- Custom Paper Format for Fixed Height -->
+    <record id="paperformat_delivery_challan" model="report.paperformat">
+        <field name="name">Delivery Challan A4</field>
+        <field name="default" eval="False"/>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">15</field>
+        <field name="margin_bottom">5</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">96</field>
+    </record>
+
+
+    <!-- Report Action Definition -->
+    <record id="action_report_delivery_challan" model="ir.actions.report">
+        <field name="name">Delivery Challan</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">all_reports_full.report_delivery_challan_document</field>
+        <field name="report_file">all_reports_full.report_delivery_challan_document</field>
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Delivery_Challan_%s' % (object.name)</field>
+        <field name="paperformat_id" ref="all_reports_full.paperformat_delivery_challan"/>
+    </record>
+
+
+    <!-- Custom Header Template for Delivery Challan -->
+    <!-- <template id="delivery_challan_header">
+        <div class="header" style="margin-bottom: 0px;">
+            <img src="/all_reports_full/static/src/img/header1.png" 
+                 alt="Company Header" 
+                 style="width: 100%; height: auto; border: 1px solid #000; display: block;"/>
+        </div>
+    </template> -->
+
+    <template id="delivery_challan_header">
+    <div style="width:100%; border:1px solid #000; padding:10px; box-sizing:border-box;">
+        <table style="width:100%; border-collapse:collapse;">
+            <tr>
+                <!-- LEFT SIDE -->
+                <td style="width:65%; vertical-align:top;">
+                    <div style="font-size:20px; font-weight:bold;">
+                        Duisport Packing Logistics India Pvt. Ltd.
+                    </div>
+                    <div style="font-size:13px; margin-bottom:8px;">
+                        The Optimum Packaging For Every Shipment – The Optimum Service For Every Customer
+                    </div>
+
+                    <div style="font-size:13px; line-height:1.6;">
+                        Plot No. PAP-V-58, Chakan MIDC Phase II<br/>
+                        Wasuli, Khed, Pune 410501 Maharashtra, India.<br/>
+                        <strong>GSTIN :</strong> 27AAECD5705A1Z5<br/>
+                        <strong>CIN :</strong> U20299PN2013FTC146359
+                    </div>
+                </td>
+
+                <!-- RIGHT SIDE -->
+                <td style="width:35%; vertical-align:top; text-align:right;">
+                    <img src="/all_reports_full/static/src/img/logo.png"
+                         style="max-height:70px; margin-bottom:10px;"/>
+
+                    <div style="font-size:13px; line-height:1.6; text-align:left;">
+                        <strong>Contact Person :</strong><br/>
+                        <strong>Contact No :</strong><br/>
+                        <strong>Telephone :</strong><br/>
+                        <strong>Email :</strong><br/>
+                        <strong>Website :</strong> www.packinglogistics.de
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</template>
+
+
+    <!-- Main Report Template -->
+    <template id="report_delivery_challan_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.basic_layout">
+                    <!-- <t t-call="web.basic_layout"> -->
+    <!-- <t t-set="report_header" t-value="'all_reports_full.delivery_challan_header'"/>
+    <t t-set="data_report_margin_top" t-value="55"/> -->
+                    
+                    <div class="page" style="page-break-after: always;">
+                        <style>
+                            @page {
+                                size: A4 portrait;
+                                margin: 5mm;
+                            }
+                            
+                            body {
+                                font-family: "Times New Roman", serif;
+                                font-size: 16px;
+                            }
+                            
+                            .page {
+                                font-family: "Times New Roman", serif;
+                                font-size: 16px;
+                                width: 100%;
+                            }
+                            
+                            .delivery-challan-table {
+                                width: 100%;
+                                border-collapse: collapse;
+                                margin-top: 0px;
+                            }
+                            
+                            .delivery-challan-table th,
+                            .delivery-challan-table td {
+                                border: 1px solid #000;
+                                padding: 6px 8px;
+                                vertical-align: top;
+                                font-size: 16px;
+                            }
+                            
+                            .title-row {
+                                font-size: 18px;
+                                font-weight: bold;
+                                text-align: center;
+                                padding: 10px !important;
+                                background-color: #f5f5f5;
+                            }
+                            
+                            .label-bold {
+                                font-weight: bold;
+                            }
+                            
+                            .items-header {
+                                text-align: center;
+                                font-weight: bold;
+                                background-color: #e8e8e8;
+                                font-size: 16px;
+                                page-break-inside: avoid;
+                            }
+                            
+                            .item-row {
+                                page-break-inside: avoid;
+                            }
+                            
+                            .item-row td {
+                                padding: 2px 3px;
+                                font-size: 16px;
+                            }
+                            
+                            .text-right {
+                                text-align: right;
+                            }
+                            
+                            .text-center {
+                                text-align: center;
+                            }
+                            
+                            .text-left {
+                                text-align: left;
+                            }
+                            
+                            .small-text {
+                                font-size: 16px;
+                                line-height: 1.5;
+                            }
+                            
+                            .signature-area {
+                                padding-top: 20px !important;
+                                padding-bottom: 5px !important;
+                                page-break-inside: avoid;
+                            }
+                            
+                            .bank-details {
+                                line-height: 1.2;
+                                font-size: 14px;
+                            }
+                            
+                            .tax-details {
+                                line-height: 1.4;
+                                font-size: 14px;
+                            }
+                            
+                            .checkbox {
+                                display: inline-block;
+                                width: 14px;
+                                height: 14px;
+                                border: 1px solid #000;
+                                text-align: center;
+                                line-height: 14px;
+                                margin-right: 5px;
+                                font-size: 16px;
+                            }
+                            
+                            .footer-section {
+                                page-break-inside: avoid;
+                            }
+                            
+                            /* Ensure header repeats on each page */
+                            thead {
+                                display: table-header-group;
+                            }
+                            
+                            tfoot {
+                                display: table-footer-group;
+                            }
+                        </style>
+
+                        <!-- Header Image -->
+                        <div>
+                            <img src="/all_reports_full/static/src/img/header1.png" 
+                                 alt="Company Header" 
+                                 style="width: 100%; height: auto; border: 1px solid #000;"/>
+
+                                <table style="width: 100%;"><tr>
+<!-- LEFT SIDE -->
+<td width="65%" style="vertical-align:top; padding:8px; border-left:1px solid #000;">
+<div style="line-height:1.6;">
+<strong>Plot No. PAP-V-58, Chakan MIDC Phase II</strong><br/>
+Wasuli, Khed, Pune 410501 Maharashtra, India.<br/>
+<strong>GSTIN :</strong> 27AAECD5705A1Z5<br/>
+<strong>CIN :</strong> U20299PN2013FTC146359
+</div>
+</td>
+
+
+<!-- RIGHT SIDE -->
+<td width="35%" style="vertical-align:top; padding:8px;border-right:1px solid #000; text-align:right;">
+<div style="line-height:1.6;">
+<strong>Contact Person :</strong>
+<span t-esc="o.company_id.partner_id.name or ''"/><br/>
+
+
+<strong>Contact No :</strong>
+<span t-esc="o.company_id.partner_id.mobile or o.company_id.partner_id.phone or ''"/><br/>
+
+
+<strong>Telephone :</strong>
+<span t-esc="o.company_id.partner_id.phone or ''"/><br/>
+
+
+<strong>Email :</strong>
+<span t-esc="o.company_id.partner_id.email or ''"/><br/>
+
+
+<strong>Website :</strong>
+<span t-esc="o.company_id.website or ''"/>
+</div>
+</td>
+</tr>
+</table>
+                        </div>
+                            
+
+                        <table class="delivery-challan-table">
+                            <!-- TITLE ROW -->
+                            <tr>
+                                <td colspan="10" class="title-row">Delivery Challan</td>
+                            </tr>
+
+                            <!-- ROW 1: Customer Name & Challan Date -->
+                            <tr>
+                                <td colspan="6">
+                                    <span class="label-bold">Customer Name : </span>
+                                    <span t-if="o.partner_id" t-field="o.partner_id.name"/>
+                                </td>
+                                <td colspan="4">
+                                    <span class="label-bold">Challan Date : </span>
+                                    <span t-if="o.challan_date" t-field="o.challan_date" t-options='{"widget": "date", "format": "dd/MM/yyyy"}'/>
+                                </td>
+                            </tr>
+
+                            <!-- ROW 2: Company Address & E-Way No -->
+                            <tr>
+                                <td colspan="6">
+                                    <span class="label-bold">Company Address : </span>
+                                    <div t-if="o.partner_id" style="margin-top: 3px;">
+                                        <span t-if="o.partner_id.street" t-field="o.partner_id.street"/>
+                                        <span t-if="o.partner_id.street2"><br/><span t-field="o.partner_id.street2"/></span>
+                                        <br t-if="o.partner_id.street or o.partner_id.street2"/>
+                                        <span t-if="o.partner_id.city" t-field="o.partner_id.city"/><t t-if="o.partner_id.city and (o.partner_id.state_id or o.partner_id.zip)">, </t>
+                                        <span t-if="o.partner_id.state_id" t-field="o.partner_id.state_id.name"/>
+                                        <span t-if="o.partner_id.zip"> - <span t-field="o.partner_id.zip"/></span>
+                                        <br t-if="o.partner_id.country_id"/>
+                                        <span t-if="o.partner_id.country_id" t-field="o.partner_id.country_id.name"/>
+                                    </div>
+                                </td>
+                                <td colspan="4">
+                                    <span class="label-bold">E-Way No. : </span>
+                                    <span t-if="o.eway_bill_no" t-field="o.eway_bill_no"/>
+                                </td>
+                            </tr>
+
+                            <!-- ROW 3: Contact Person & Transport Name -->
+                            <tr>
+                                <td colspan="6">
+                                    <span class="label-bold">Contact Person : </span>
+                                    <span t-if="o.contact_person" t-field="o.contact_person"/>
+                                </td>
+                                <td colspan="4">
+                                    <span class="label-bold">Transport Name : </span>
+                                    <span t-if="o.transport_name" t-field="o.transport_name"/>
+                                </td>
+                            </tr>
+
+                            <!-- ROW 4: Contact Details & Transport Mode -->
+                            <tr>
+                                <td colspan="6">
+                                    <span class="label-bold">Contact Details : </span>
+                                    <t t-if="o.partner_id">
+                                        <span t-if="o.partner_id.phone" t-field="o.partner_id.phone"/>
+                                        <t t-if="o.partner_id.phone and o.partner_id.mobile"> / </t>
+                                        <span t-if="o.partner_id.mobile" t-field="o.partner_id.mobile"/>
+                                    </t>
+                                </td>
+                                <td colspan="4">
+                                    <span class="label-bold">Transport Mode : </span>
+                                    <t t-if="o.transport_mode">
+                                        <t t-if="o.transport_mode == 'road'">Road</t>
+                                        <t t-elif="o.transport_mode == 'air'">Air</t>
+                                        <t t-elif="o.transport_mode == 'sea'">Sea</t>
+                                        <t t-elif="o.transport_mode == 'rail'">Rail</t>
+                                    </t>
+                                </td>
+                            </tr>
+
+                            <!-- ROW 5: Email Address & Vehicle No -->
+                            <tr>
+                                <td colspan="6">
+                                    <span class="label-bold">Email Address : </span>
+                                    <span t-if="o.partner_id and o.partner_id.email" t-field="o.partner_id.email"/>
+                                </td>
+                                <td colspan="4">
+                                    <span class="label-bold">Vehicle No : </span>
+                                    <span t-if="o.vehicle_no" t-field="o.vehicle_no"/>
+                                </td>
+                            </tr>
+
+                            <!-- ROW 6: GSTIN & Challan Type -->
+                            <tr>
+                                <td colspan="6">
+                                    <span class="label-bold">GSTIN : </span>
+                                    <span t-if="o.partner_id and o.partner_id.vat" t-field="o.partner_id.vat"/>
+                                </td>
+                                <td colspan="4">
+                                    <span class="label-bold">Challan Type (Tick on FOC/Paid): </span>
+                                    <span class="checkbox"><t t-if="o.challan_type == 'foc'">✓</t></span> FOC
+                                    <span style="margin-left: 20px;">
+                                        <span class="checkbox"><t t-if="o.challan_type == 'paid'">✓</t></span> PAID
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <!-- ITEMS HEADER -->
+                            <tr class="items-header">
+                                <th style="width: 5%;">S. No.</th>
+                                <th colspan="2" style="width: 25%;">Item Description</th>
+                                <th style="width: 10%;">HSN Code</th>
+                                <th style="width: 8%;">Qty.</th>
+                                <th style="width: 8%;">UOM</th>
+                                <th style="width: 10%;">Unit Price</th>
+                                <th style="width: 10%;">Amount</th>
+                                <th style="width: 8%;">Discount</th>
+                                <th style="width: 16%;">Total Amount</th>
+                            </tr>
+
+                            <!-- ITEMS DATA ROWS - NO EMPTY ROWS -->
+                            <t t-set="line_number" t-value="0"/>
+                            <t t-set="total_quantity" t-value="0"/>
+                            
+                            <t t-foreach="o.invoice_line_ids.filtered(lambda l: l.display_type not in ('line_section', 'line_note'))" t-as="line">
+                                <t t-set="line_number" t-value="line_number + 1"/>
+                                <t t-set="total_quantity" t-value="total_quantity + line.quantity"/>
+                                <tr class="item-row">
+                                    <td class="text-center"><t t-esc="line_number"/></td>
+                                    <td colspan="2" class="text-left">
+                                        <span t-if="line.product_id" t-field="line.product_id.name"/>
+                                        <t t-if="not line.product_id and line.name">
+                                            <span t-field="line.name"/>
+                                        </t>
+                                    </td>
+                                    <td class="text-center">
+                                        <span t-if="line.product_id and line.product_id.l10n_in_hsn_code" 
+                                              t-field="line.product_id.l10n_in_hsn_code"/>
+                                    </td>
+                                    <td class="text-center">
+                                        <span t-field="line.quantity"/>
+                                    </td>
+                                    <td class="text-center">
+                                        <span t-if="line.product_uom_id" t-field="line.product_uom_id.name"/>
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-field="line.price_unit" 
+                                              t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td>
+                                    <td class="text-right">
+                                        <t t-set="line_amount" t-value="line.quantity * line.price_unit"/>
+                                        <span t-esc="'%.2f' % line_amount"/>
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-if="line.discount" t-field="line.discount"/>
+                                        <t t-if="line.discount">%</t>
+                                    </td>
+                                    <td class="text-right">
+                                        <span t-field="line.price_subtotal" 
+                                              t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td>
+                                </tr>
+                            </t>
+
+                                                        <!-- EMPTY ROWS (to make 7 rows total) -->
+                            <!-- <t t-set="empty_rows" t-value="7 - line_number"/>
+                            <t t-if="empty_rows > 0">
+                                <t t-foreach="range(empty_rows)" t-as="idx">
+                                    <t t-set="line_number" t-value="line_number + 1"/>
+                                    <tr class="item-row">
+                                        <td class="text-center"><t t-esc="line_number"/></td>
+                                        <td colspan="2"></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                </t>
+                            </t> -->
+
+                            <!-- TOTAL QUANTITY ROW -->
+                            <tr class="footer-section">
+                                <td colspan="4" class="text-right label-bold">Total Qty.</td>
+                                <td colspan="2" class="text-center label-bold">
+                                    <t t-esc="'%.2f' % total_quantity"/>
+                                </td>
+                                <td class="text-right label-bold">Nos.</td>
+                                <td colspan="3" class="text-right label-bold">
+                                    Sub Total Amount: 
+                                    <span t-field="o.amount_untaxed" 
+                                          t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                </td>
+                            </tr>
+
+                            <!-- BANK DETAILS & TAX SECTION -->
+                            <tr class="footer-section">
+                                <td colspan="5" class="bank-details" style="vertical-align: top;">
+                                    <div class="label-bold" style="margin-bottom: 5px;">Company Bank Details:</div>
+                                    <div><strong>Bank Name :</strong> Deutsche Bank</div>
+                                    <div><strong>Bank A/C :</strong> 6002406-00-0</div>
+                                    <div><strong>Bank IFSC Code :</strong> DEUT0537PUN</div>
+                                    <div><strong>Branch Location :</strong> Aundh</div>
+                                    <div>
+                                        <strong>Company PAN No. :</strong> 
+                                        <span t-if="o.company_id and o.company_id.vat" t-field="o.company_id.vat"/>
+                                    </div>
+                                </td>
+                                <td colspan="5" class="tax-details" style="vertical-align: top;">
+                                    <!-- Calculate taxes from invoice lines -->
+                                    <t t-set="sgst_amount" t-value="0"/>
+                                    <t t-set="cgst_amount" t-value="0"/>
+                                    <t t-set="igst_amount" t-value="0"/>
+                                    <t t-set="other_tax_amount" t-value="0"/>
+                                    
+                                    <t t-foreach="o.line_ids.filtered(lambda l: l.tax_line_id)" t-as="tax_line">
+                                        <t t-set="tax_name" t-value="tax_line.name or tax_line.tax_line_id.name or ''"/>
+                                        <t t-if="'SGST' in tax_name.upper() or 'S.G.S.T' in tax_name.upper()">
+                                            <t t-set="sgst_amount" t-value="sgst_amount + abs(tax_line.balance)"/>
+                                        </t>
+                                        <t t-elif="'CGST' in tax_name.upper() or 'C.G.S.T' in tax_name.upper()">
+                                            <t t-set="cgst_amount" t-value="cgst_amount + abs(tax_line.balance)"/>
+                                        </t>
+                                        <t t-elif="'IGST' in tax_name.upper() or 'I.G.S.T' in tax_name.upper()">
+                                            <t t-set="igst_amount" t-value="igst_amount + abs(tax_line.balance)"/>
+                                        </t>
+                                        <t t-else="">
+                                            <t t-set="other_tax_amount" t-value="other_tax_amount + abs(tax_line.balance)"/>
+                                        </t>
+                                    </t>
+                                    
+                                    <!-- Display taxes -->
+                                    <t t-if="sgst_amount > 0">
+                                        <div>
+                                            <strong>SGST@:</strong>
+                                            <span style="float: right;">
+                                                <t t-esc="'%.2f' % sgst_amount"/>
+                                            </span>
+                                        </div>
+                                    </t>
+                                    <t t-else="">
+                                        <div><strong>SGST@:</strong> <span style="float: right;">0.00</span></div>
+                                    </t>
+                                    
+                                    <t t-if="cgst_amount > 0">
+                                        <div>
+                                            <strong>CGST@:</strong>
+                                            <span style="float: right;">
+                                                <t t-esc="'%.2f' % cgst_amount"/>
+                                            </span>
+                                        </div>
+                                    </t>
+                                    <t t-else="">
+                                        <div><strong>CGST@:</strong> <span style="float: right;">0.00</span></div>
+                                    </t>
+                                    
+                                    <t t-if="igst_amount > 0">
+                                        <div>
+                                            <strong>IGST@:</strong>
+                                            <span style="float: right;">
+                                                <t t-esc="'%.2f' % igst_amount"/>
+                                            </span>
+                                        </div>
+                                    </t>
+                                    
+                                    <t t-if="other_tax_amount > 0">
+                                        <div>
+                                            <strong>Other Tax:</strong>
+                                            <span style="float: right;">
+                                                <t t-esc="'%.2f' % other_tax_amount"/>
+                                            </span>
+                                        </div>
+                                    </t>
+
+                                    
+                                    <div>
+                                        <strong>Freight Charges:</strong>
+                                        <span style="float: right;">
+                                            <span t-field="o.freight_charge_x"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                        </span>
+                                    </div>
+
+                                    <div>
+                                        <strong>Packing &amp; Development Charges:</strong>
+                                        <span style="float: right;">
+                                            <span t-field="o.packing_charge_x"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                        </span>
+                                    </div>
+                                    <t t-set="grand_total"
+                                        t-value="(o.amount_total or 0.0)
+                                                    + (o.freight_charge_x or 0.0)
+                                                    + (o.packing_charge_x or 0.0)"/>
+                                    <div style="margin-top: 8px; font-size: 14px;">
+                                        <strong>Grand Total Amount:</strong>
+                                        <span style="float: right;">
+                                            <span t-esc="grand_total"
+                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                        </span>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- AMOUNT IN WORDS & SIGNATURE -->
+                            <tr class="footer-section">
+                                <td colspan="5" style="vertical-align: top;">
+                                    <div class="label-bold" style="margin-bottom: 5px;">
+                                        Total Amount In Words:
+                                    </div>
+                                    <div>
+                                        <t t-set="amount_text"
+                                        t-value="o.currency_id.amount_to_text(grand_total)"/>
+                                        <span t-esc="amount_text"/>
+                                    </div>
+                                </td>
+
+                                
+                                <td colspan="5" class="text-center signature-area">
+                                    <div class="label-bold" style="font-size: 14px;">For Duisport Packing Logistics India Pvt. Ltd.</div>
+                                    <div style="margin-top: 50px;">
+                                        <div class="label-bold">Authorised Signatory</div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- TERMS & CONDITIONS -->
+                            <tr class="footer-section">
+                                <td colspan="10" class="small-text">
+                                    <div class="label-bold" style="margin-bottom: 5px;">Terms &amp; Conditions:</div>
+                                    <div>1. Acknowledgement of the Delivery Challan is must with sign and stamp.</div>
+                                    <div>2. This delivery challan is valid for the items listed herein and for the specific transaction mentioned only.</div>
+                                    <div>3. The recipient has the right to inspect the delivered items upon receipt and notify discrepancies immediately.</div>
+                                    <div>4. Prices mentioned on the delivery challan are the final prices and subsequent PO should be issued on same rates.</div>
+                                    <div>5. Delivery challans issued only to facilitate buyer for faster delivery and invoice will be issued within 3–4 working days.</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

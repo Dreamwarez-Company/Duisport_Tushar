@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_cashflow_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <html>
+                    <head>
+                        <meta charset="utf-8"/>
+                        <style>
+                            body { font-family: Arial, sans-serif; }
+                            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                            th { background-color: #f2f2f2; padding: 8px; text-align: left; }
+                            td { padding: 8px; border-bottom: 1px solid #ddd; }
+                            .text-right { text-align: right; }
+                            .header { text-align: center; margin-bottom: 20px; }
+                            .total-row { border-top: 2px solid #333; font-weight: bold; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <h2>Cash Flow Forecast</h2>
+                            <p>
+                                From: <strong><t t-esc="doc.start_date"/></strong>
+                                To: <strong><t t-esc="doc.end_date"/></strong>
+                            </p>
+                        </div>
+
+                        <table border="1">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th class="text-right">Inflow</th>
+                                    <th class="text-right">Outflow</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Get lines from JSON data -->
+                                <t t-set="lines" t-value="doc.get_cashflow_lines()"/>
+                                <t t-set="total_inflow" t-value="0"/>
+                                <t t-set="total_outflow" t-value="0"/>
+                                
+                                <t t-foreach="lines" t-as="l">
+                                    <t t-set="inflow" t-value="l.get('inflow', 0)"/>
+                                    <t t-set="outflow" t-value="l.get('outflow', 0)"/>
+                                    <t t-set="total_inflow" t-value="total_inflow + inflow"/>
+                                    <t t-set="total_outflow" t-value="total_outflow + outflow"/>
+                                    
+                                    <tr>
+                                        <td><t t-esc="l.get('date', '')"/></td>
+                                        <td><t t-esc="l.get('description', '')"/></td>
+                                        <td class="text-right"><t t-esc="'%.2f' % inflow"/></td>
+                                        <td class="text-right"><t t-esc="'%.2f' % outflow"/></td>
+                                    </tr>
+                                </t>
+                                
+                                <!-- Totals row -->
+                                <tr class="total-row">
+                                    <td colspan="2" style="text-align: right;">Total:</td>
+                                    <td class="text-right"><t t-esc="'%.2f' % total_inflow"/></td>
+                                    <td class="text-right"><t t-esc="'%.2f' % total_outflow"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Summary Section -->
+                        <div style="margin-top: 30px; width: 50%; margin-left: auto;">
+                            <table style="width: 100%;">
+                                <tr>
+                                    <td><strong>Total Inflow:</strong></td>
+                                    <td style="text-align: right;"><strong><t t-esc="'%.2f' % total_inflow"/></strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Total Outflow:</strong></td>
+                                    <td style="text-align: right;"><strong><t t-esc="'%.2f' % total_outflow"/></strong></td>
+                                </tr>
+                                <tr style="background-color: #e8f5e8;">
+                                    <td><strong>Net Cash Flow:</strong></td>
+                                    <td style="text-align: right;">
+                                        <strong>
+                                            <t t-set="net_cash" t-value="total_inflow - total_outflow"/>
+                                            <t t-esc="'%.2f' % net_cash"/>
+                                            <t t-if="net_cash >= 0"> (Positive)</t>
+                                            <t t-if="net_cash &lt; 0"> (Negative)</t>
+                                        </strong>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </body>
+                </html>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_cashflow" model="ir.actions.report">
+        <field name="name">Cash Flow Forecast</field>
+        <field name="model">dw.cashflow.forecast.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">dw_customer_credit.report_cashflow_template</field>
+        <field name="print_report_name">'Cash Flow Forecast'</field>
+    </record>
+</odoo>
+
+<!-- <?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="report_cashflow_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <h2 style="text-align:center;">Cash Flow Forecast</h2>
+                <p style="text-align:center;">
+                    From <strong><t t-esc="doc.start_date"/></strong>
+                    To <strong><t t-esc="doc.end_date"/></strong>
+                </p>
+
+                <table style="width:100%; border-collapse:collapse;" border="1">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Inflow</th>
+                            <th>Outflow</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="doc.line_ids" t-as="l">
+                            <tr>
+                                <td><t t-esc="l.date"/></td>
+                                <td><t t-esc="l.description"/></td>
+                                <td><t t-esc="'%.2f' % l.inflow"/></td>
+                                <td><t t-esc="'%.2f' % l.outflow"/></td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_cashflow" model="ir.actions.report">
+        <field name="name">Cash Flow Forecast</field>
+       
+        <field name="model">dw.cashflow.forecast.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">dw_customer_credit.report_cashflow_template</field>
+    </record>
+
+</odoo> -->

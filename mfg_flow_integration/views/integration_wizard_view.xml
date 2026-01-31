@@ -1,0 +1,43 @@
+<odoo>
+  <record id="view_vendor_compare_wizard_form" model="ir.ui.view">
+    <field name="name">vendor.compare.wizard.form</field>
+    <field name="model">vendor.compare.wizard</field>
+    <field name="arch" type="xml">
+      <form string="Vendor Compare">
+        <group>
+          <field name="product_id"/>
+          <field name="qty"/>
+        </group>
+        <notebook>
+          <page string="Vendors">
+            <field name="line_ids">
+              <tree editable="bottom">
+                <field name="vendor_id"/>
+                <field name="price"/>
+                <field name="min_qty"/>
+              </tree>
+            </field>
+          </page>
+        </notebook>
+        <footer>
+          <button string="Refresh" type="object" name="action_populate" class="btn-primary"/>
+          <button string="Select Best and Create RFQ" type="object" name="action_select_best" class="btn-success"/>
+          <button string="Close" class="btn-default" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_integration_test_wizard" model="ir.ui.view">
+    <field name="name">integration.test.wizard.form</field>
+    <field name="model">integration.test.wizard</field>
+    <field name="arch" type="xml">
+      <form string="Integration Test">
+        <footer>
+          <button string="Run Test" type="object" name="action_run_test" class="btn-primary"/>
+          <button string="Close" class="btn-default" special="cancel"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+</odoo>

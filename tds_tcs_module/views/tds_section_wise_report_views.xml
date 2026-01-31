@@ -1,0 +1,237 @@
+<!-- views/tds_section_wise_report_views.xml -->
+
+<odoo>
+    <!-- TDS Section-Wise Report Form View -->
+    <record id="view_tds_section_wise_report_form" model="ir.ui.view">
+        <field name="name">tds.section.wise.report.form</field>
+        <field name="model">tds.section.wise.report</field>
+        <field name="arch" type="xml">
+            <form string="Section-Wise TDS Report">
+                <header>
+                    <button name="action_generate_report" string="Generate Report" 
+                            type="object" class="oe_highlight" 
+                            invisible="state == 'confirmed'"
+                            confirm="This will regenerate the report. Continue?"/>
+                    <button name="action_print_report" string="Print Summary" 
+                            type="object" class="oe_highlight" 
+                            invisible="state == 'draft'"/>
+                    <button name="action_print_detailed_report" string="Print Detailed" 
+                            type="object" 
+                            invisible="state == 'draft'"/>
+                    <button name="action_reset_to_draft" string="Reset to Draft" 
+                            type="object" 
+                            invisible="state == 'draft'"
+                            confirm="Reset this report to draft?"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_print_report" type="object" 
+                                class="oe_stat_button" icon="fa-list"
+                                invisible="state == 'draft'">
+                            <field name="section_count" widget="statinfo" string="Sections"/>
+                        </button>
+                        <button name="action_print_detailed_report" type="object" 
+                                class="oe_stat_button" icon="fa-file-text-o"
+                                invisible="state == 'draft'">
+                            <field name="transaction_count" widget="statinfo" string="Transactions"/>
+                        </button>
+                    </div>
+                    
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="e.g. Section-Wise TDS - Q1 2024"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group string="Period">
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Filters">
+                            <field name="partner_id" 
+                                   domain="[('tds_section_id', '!=', False)]"
+                                   options="{'no_create': True}"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Section Summary" name="section_summary">
+                            <field name="section_line_ids" readonly="state == 'confirmed'">
+                                <tree decoration-primary="tds_amount &gt; 10000" create="false">
+                                    <field name="section_code"/>
+                                    <field name="section_name"/>
+                                    <field name="section_rate"/>
+                                    <field name="vendor_count"/>
+                                    <field name="invoice_count"/>
+                                    <field name="taxable_amount" sum="Total Taxable"/>
+                                    <field name="tds_amount" sum="Total TDS"/>
+                                    <field name="invoice_amount" sum="Total Invoice"/>
+                                    <button name="action_view_details" type="object" 
+                                            icon="fa-search-plus" 
+                                            title="View Details"/>
+                                </tree>
+                            </field>
+                        </page>
+                        
+                        <page string="Detailed Transactions" name="detailed_transactions">
+                            <field name="detail_line_ids" readonly="state == 'confirmed'">
+                                <tree decoration-muted="invoice_amount &lt; 0" create="false">
+                                    <field name="section_code"/>
+                                    <field name="invoice_date"/>
+                                    <field name="invoice_number"/>
+                                    <field name="partner_id"/>
+                                    <field name="pan_number"/>
+                                    <field name="tds_rate"/>
+                                    <field name="taxable_amount"/>
+                                    <field name="tds_amount"/>
+                                    <field name="invoice_amount"/>
+                                    <button name="action_view_invoice" type="object" 
+                                            icon="fa-external-link" 
+                                            title="View Invoice"/>
+                                </tree>
+                            </field>
+                        </page>
+                        
+                        <page string="Summary" name="summary">
+                            <group>
+                                <group string="Totals">
+                                    <field name="total_taxable_amount" 
+                                           widget="monetary" 
+                                           options="{'currency_field': 'currency_id'}"/>
+                                    <field name="total_tds_amount" 
+                                           widget="monetary" 
+                                           options="{'currency_field': 'currency_id'}"/>
+                                    <field name="total_invoice_amount" 
+                                           widget="monetary" 
+                                           options="{'currency_field': 'currency_id'}"/>
+                                </group>
+                                <group string="Statistics">
+                                    <field name="section_count"/>
+                                    <field name="transaction_count"/>
+                                    <field name="currency_id" invisible="1"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- TDS Section-Wise Report Tree View -->
+    <record id="view_tds_section_wise_report_tree" model="ir.ui.view">
+        <field name="name">tds.section.wise.report.tree</field>
+        <field name="model">tds.section.wise.report</field>
+        <field name="arch" type="xml">
+            <tree string="Section-Wise TDS Report" sample="1">
+                <field name="name"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="partner_id"/>
+                <field name="section_count"/>
+                <field name="transaction_count"/>
+                <field name="total_taxable_amount" sum="Total Taxable"/>
+                <field name="total_tds_amount" sum="Total TDS"/>
+                <field name="total_invoice_amount" sum="Total Invoice"/>
+                <field name="state" widget="badge" 
+                       decoration-info="state == 'draft'" 
+                       decoration-success="state == 'confirmed'"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- TDS Section-Wise Report Search View -->
+    <record id="view_tds_section_wise_report_search" model="ir.ui.view">
+        <field name="name">tds.section.wise.report.search</field>
+        <field name="model">tds.section.wise.report</field>
+        <field name="arch" type="xml">
+            <search string="Section-Wise TDS Report">
+                <field name="name" string="Report Name"/>
+                <field name="partner_id" string="Vendor"/>
+                 <field name="company_id"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                
+                <filter string="Draft" name="draft" domain="[('state','=','draft')]"/>
+                <filter string="Confirmed" name="confirmed" domain="[('state','=','confirmed')]"/>
+                
+                <separator/>
+                <filter string="Current Month" name="current_month" 
+                        domain="[('date_from','&gt;=', (context_today() - relativedelta(day=1)).strftime('%Y-%m-%d')),
+                                 ('date_to','&lt;=', (context_today() + relativedelta(day=31)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Current Quarter" name="current_quarter" 
+                        domain="[('date_from','&gt;=', (context_today() - relativedelta(day=1, month=((context_today().month-1)//3)*3+1)).strftime('%Y-%m-%d')),
+                                 ('date_to','&lt;=', (context_today() + relativedelta(day=31, month=((context_today().month-1)//3)*3+3)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Current Year" name="current_year" 
+                        domain="[('date_from','&gt;=', context_today().strftime('%Y-01-01')),
+                                 ('date_to','&lt;=', context_today().strftime('%Y-12-31'))]"/>
+                
+                <separator/>
+                <filter string="My Company" name="my_company" 
+                        domain="[('company_id','=',company_id)]"/>
+                
+                <group expand="0" string="Group By">
+                    <filter string="Status" name="group_state" context="{'group_by':'state'}"/>
+                    <filter string="Vendor" name="group_partner" context="{'group_by':'partner_id'}"/>
+                    <filter string="Company" name="group_company" context="{'group_by':'company_id'}" groups="base.group_multi_company"/>
+                    <filter string="Period (Month)" name="group_month" context="{'group_by':'date_from:month'}"/>
+                    <filter string="Period (Quarter)" name="group_quarter" context="{'group_by':'date_from:quarter'}"/>
+                    <filter string="Period (Year)" name="group_year" context="{'group_by':'date_from:year'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- TDS Section-Wise Detail Tree View (for popup) -->
+    <record id="view_tds_section_wise_detail_tree" model="ir.ui.view">
+        <field name="name">tds.section.wise.detail.tree</field>
+        <field name="model">tds.section.wise.detail</field>
+        <field name="arch" type="xml">
+            <tree string="Transaction Details" create="false" delete="false">
+                <field name="invoice_date"/>
+                <field name="invoice_number"/>
+                <field name="partner_id"/>
+                <field name="pan_number"/>
+                <field name="tds_rate"/>
+                <field name="taxable_amount" sum="Total Taxable"/>
+                <field name="tds_amount" sum="Total TDS"/>
+                <field name="invoice_amount" sum="Total Invoice"/>
+                <button name="action_view_invoice" type="object" 
+                        icon="fa-external-link" 
+                        title="View Invoice"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- TDS Section-Wise Report Action -->
+    <record id="action_tds_section_wise_report" model="ir.actions.act_window">
+        <field name="name">Section-Wise TDS Report</field>
+        <field name="res_model">tds.section.wise.report</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_current_year': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a Section-Wise TDS Report
+            </p>
+            <p>
+                Generate TDS reports grouped by TDS sections to analyze tax deductions by category.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_tds_section_wise_report"
+              name="Section-Wise TDS Report"
+              parent="account.menu_finance_reports"
+              action="action_tds_section_wise_report"
+              sequence="51"/>
+
+</odoo>

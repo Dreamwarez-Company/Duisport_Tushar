@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_dw_quality_check_team,dw_quality_check_team,model_dw_quality_check,dw_quality_check.group_quality_check,1,1,1,1
+access_dw_quality_check_inventory_user,dw_quality_check_inventory_user,model_dw_quality_check,stock.group_stock_user,1,1,1,1
+

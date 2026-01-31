@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Print Wizard Form View -->
+    <record id="view_vouchers_report_print_wizard_form" model="ir.ui.view">
+        <field name="name">vouchers.report.print.wizard.form</field>
+        <field name="model">vouchers.report.print.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Print Report" class="oe_modal">
+                <header>
+                    <button name="action_print" string="Print" type="object" class="btn-primary"/>
+                    <button name="action_close" string="Cancel" type="object" class="btn-secondary"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_print" type="object" class="oe_stat_button" icon="fa-print">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Print Now</span>
+                            </div>
+                        </button>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="report_name" readonly="1" class="oe_inline"/>
+                            <field name="print_format" widget="radio" options="{'horizontal': true}"/>
+                            <field name="paper_size" widget="radio" options="{'horizontal': true}"/>
+                            <field name="orientation" widget="radio" options="{'horizontal': true}"/>
+                        </group>
+                        <group>
+                            <label for="include_summary" string="Include Sections"/>
+                            <div>
+                                <field name="include_summary"/>
+                                <field name="include_details"/>
+                                <field name="include_filters"/>
+                            </div>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Preview">
+                            <div style="border: 1px solid #ddd; padding: 15px; background: white; max-height: 400px; overflow-y: auto;">
+                                <field name="preview_data" nolabel="1" widget="html"/>
+                            </div>
+                        </page>
+                        
+                        <page string="Print Settings">
+                            <group>
+                                <group>
+                                    <field name="paper_size"/>
+                                    <field name="orientation"/>
+                                </group>
+                                <group>
+                                    <field name="include_summary"/>
+                                    <field name="include_details"/>
+                                    <field name="include_filters"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Print Wizard Action -->
+    <record id="action_vouchers_report_print_wizard" model="ir.actions.act_window">
+        <field name="name">Print Report</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">vouchers.report.print.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" eval="False"/>
+        <field name="binding_view_types">form</field>
+    </record>
+</odoo>

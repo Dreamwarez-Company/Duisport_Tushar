@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Inherit Purchase Order Form View to add RFQ Request field -->
+    <record id="view_purchase_order_form_inherit_rfq" model="ir.ui.view">
+        <field name="name">purchase.order.form.inherit.rfq</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <!-- Add field in header after partner_ref -->
+            <xpath expr="//field[@name='partner_ref']" position="after">
+                <field name="rfq_request_id" readonly="1" 
+                      />
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Inherit Purchase Order Tree View to add RFQ Request field -->
+    <record id="view_purchase_order_tree_inherit_rfq" model="ir.ui.view">
+        <field name="name">purchase.order.tree.inherit.rfq</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='origin']" position="after">
+                <field name="rfq_request_id" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Inherit Purchase Order Search View to add RFQ Request filter -->
+    <record id="view_purchase_order_filter_inherit_rfq" model="ir.ui.view">
+        <field name="name">purchase.order.search.inherit.rfq</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="rfq_request_id"/>
+            </xpath>
+            <xpath expr="//filter[@name='draft']" position="after">
+                <separator/>
+                <filter string="RFQ Management" name="product_vendor_rfq" 
+                        domain="[('rfq_request_id', '!=', False)]"
+                        help="Purchase Orders from RFQ Management"/>
+            </xpath>
+            <xpath expr="//group[@expand='0']" position="inside">
+                <filter string="RFQ Request" name="group_rfq_request" 
+                        context="{'group_by': 'rfq_request_id'}"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

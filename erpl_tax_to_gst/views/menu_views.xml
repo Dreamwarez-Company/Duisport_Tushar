@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_tax_to_gst"
+              name="Convert Tax to GST"
+              parent="account.menu_finance"
+              action="action_tax_to_gst_wizard"
+              sequence="100"/>
+</odoo>
+

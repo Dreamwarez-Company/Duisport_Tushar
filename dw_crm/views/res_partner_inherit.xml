@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_partner_form_inherit_website_placeholder" model="ir.ui.view">
+        <field name="name">res.partner.form.inherit.website.placeholder</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Target the existing website field and change its placeholder -->
+            <xpath expr="//field[@name='website']" position="attributes">
+                <attribute name="placeholder">e.g. https://www.dreamwarez.com</attribute>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

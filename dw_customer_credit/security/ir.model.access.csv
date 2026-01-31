@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_res_partner_onboarding_user,res.partner.onboarding.user,model_res_partner_onboarding,base.group_user,1,1,1,0
+access_res_partner_onboarding_manager,res.partner.onboarding.manager,model_res_partner_onboarding,sales_team.group_sale_manager,1,1,1,1
+access_dw_cashflow_wizard,dw.cashflow.forecast.wizard.access,model_dw_cashflow_forecast_wizard,account.group_account_user,1,1,1,0
+access_neft_register_wizard,neft.register.wizard.access,model_neft_register_wizard,account.group_account_user,1,1,1,0
+access_asset_disposal_wizard,asset.disposal.wizard.access,model_asset_disposal_wizard,account.group_account_user,1,1,1,0
+access_inventory_costing_wizard,inventory.costing.wizard.access,model_inventory_costing_wizard,stock.group_stock_manager,1,1,1,0
+access_wip_valuation_wizard,wip.valuation.wizard,model_wip_valuation_wizard,account.group_account_user,1,1,1,0
+access_slow_moving_wizard,slow.moving.wizard.access,model_slow_moving_wizard,base.group_user,1,1,1,0

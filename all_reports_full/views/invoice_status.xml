@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Wizard Form View -->
+    <record id="view_invoice_status_wizard" model="ir.ui.view">
+        <field name="name">invoice.status.wizard.form</field>
+        <field name="model">invoice.status.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Invoice Status Report">
+                <group>
+                    <group>
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                        <field name="invoice_type"/>
+                    </group>
+                    <group>
+                        <field name="state"/>
+                        <field name="payment_state"/>
+                        <field name="partner_ids" widget="many2many_tags"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="print_report" string="Print" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Wizard Action -->
+    <record id="action_invoice_status_wizard" model="ir.actions.act_window">
+        <field name="name">Invoice Status Report</field>
+        <field name="res_model">invoice.status.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_invoice_status_report"
+              name="Invoice Status Report"
+              parent="account.menu_finance_reports"
+              action="action_invoice_status_wizard"
+              sequence="51"/>
+
+    <!-- Report Template -->
+    <template id="invoice_status_template">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <!-- Header -->
+                    <div class="text-center">
+                        <h2>Invoice Status Report</h2>
+                        <h4><t t-esc="company_name"/></h4>
+                        <p>
+                            <strong>Period:</strong> <t t-esc="date_from"/> to <t t-esc="date_to"/><br/>
+                            <strong>Type:</strong> <t t-esc="invoice_type_label"/>
+                        </p>
+                    </div>
+
+                    <!-- Summary Cards -->
+                    <div class="row mt-4 mb-4">
+                        <div class="col-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h6>Total Invoices</h6>
+                                    <h4><t t-esc="invoice_count"/></h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h6>Grand Total</h6>
+                                    <h4><t t-esc="'%.2f' % grand_total"/></h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h6>Total Due</h6>
+                                    <h4 class="text-danger"><t t-esc="'%.2f' % total_due"/></h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h6>Total Paid</h6>
+                                    <h4 class="text-success"><t t-esc="'%.2f' % total_paid"/></h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status Summary -->
+                    <div class="mt-4">
+                        <h4>Summary by Status</h4>
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Status</th>
+                                    <th class="text-end">Count</th>
+                                    <th class="text-end">Total Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Draft</td>
+                                    <td class="text-end"><t t-esc="draft_count"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % total_draft"/></td>
+                                </tr>
+                                <tr>
+                                    <td>Posted</td>
+                                    <td class="text-end"><t t-esc="posted_count"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % total_posted"/></td>
+                                </tr>
+                                <tr>
+                                    <td>Cancelled</td>
+                                    <td class="text-end"><t t-esc="cancelled_count"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % total_cancelled"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Payment Status Summary -->
+                    <div class="mt-4">
+                        <h4>Summary by Payment Status</h4>
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Payment Status</th>
+                                    <th class="text-end">Count</th>
+                                    <th class="text-end">Outstanding Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Not Paid</td>
+                                    <td class="text-end"><t t-esc="not_paid_count"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % total_not_paid"/></td>
+                                </tr>
+                                <tr>
+                                    <td>Partially Paid</td>
+                                    <td class="text-end"><t t-esc="partial_count"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % total_partial"/></td>
+                                </tr>
+                                <tr>
+                                    <td>Paid</td>
+                                    <td class="text-end"><t t-esc="paid_count"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % total_paid"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Customer Summary -->
+                    <div class="mt-5" t-if="customer_summary">
+                        <h4>Summary by Customer</h4>
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Customer</th>
+                                    <th class="text-end">Invoice Count</th>
+                                    <th class="text-end">Total Amount</th>
+                                    <th class="text-end">Amount Due</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="customer_summary" t-as="summary">
+                                    <td><t t-esc="summary['partner_name']"/></td>
+                                    <td class="text-end"><t t-esc="summary['invoice_count']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % summary['total_amount']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % summary['total_due']"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Detailed Invoice List -->
+                    <div class="mt-5" style="page-break-before: always;" t-if="invoices">
+                        <h4>Detailed Invoice List</h4>
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Invoice Number</th>
+                                    <th>Customer</th>
+                                    <th>Status</th>
+                                    <th>Payment Status</th>
+                                    <th class="text-end">Total Amount</th>
+                                    <th class="text-end">Amount Due</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="invoices" t-as="invoice">
+                                    <td><t t-esc="invoice.invoice_date"/></td>
+                                    <td><t t-esc="invoice.name"/></td>
+                                    <td><t t-esc="invoice.partner_id.name"/></td>
+                                    <td>
+                                        <t t-if="invoice.state == 'draft'">
+                                            <span class="badge bg-secondary">Draft</span>
+                                        </t>
+                                        <t t-elif="invoice.state == 'posted'">
+                                            <span class="badge bg-success">Posted</span>
+                                        </t>
+                                        <t t-elif="invoice.state == 'cancel'">
+                                            <span class="badge bg-danger">Cancelled</span>
+                                        </t>
+                                    </td>
+                                    <td>
+                                        <t t-if="invoice.payment_state == 'paid'">
+                                            <span class="badge bg-success">Paid</span>
+                                        </t>
+                                        <t t-elif="invoice.payment_state == 'not_paid'">
+                                            <span class="badge bg-warning">Not Paid</span>
+                                        </t>
+                                        <t t-elif="invoice.payment_state == 'partial'">
+                                            <span class="badge bg-info">Partial</span>
+                                        </t>
+                                        <t t-elif="invoice.payment_state == 'in_payment'">
+                                            <span class="badge bg-primary">In Payment</span>
+                                        </t>
+                                    </td>
+                                    <td class="text-end"><t t-esc="'%.2f' % invoice.amount_total"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % invoice.amount_residual"/></td>
+                                </tr>
+                            </tbody>
+                            <tfoot class="table-active">
+                                <tr>
+                                    <td colspan="5" class="text-end"><strong>Total:</strong></td>
+                                    <td class="text-end"><strong><t t-esc="'%.2f' % grand_total"/></strong></td>
+                                    <td class="text-end"><strong><t t-esc="'%.2f' % total_due"/></strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <!-- No Data Message -->
+                    <div class="mt-5 text-center" t-if="invoice_count == 0">
+                        <div class="alert alert-info">
+                            <h5>No invoices found</h5>
+                            <p>Please adjust your filters and try again.</p>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Action -->
+    <record id="action_invoice_status_report" model="ir.actions.report">
+        <field name="name">Invoice Status Report</field>
+        <field name="model">invoice.status.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">all_reports_full.invoice_status_template</field>
+        <field name="report_file">all_reports_full.invoice_status_template</field>
+        <field name="binding_model_id" ref="model_invoice_status_wizard"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

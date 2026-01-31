@@ -1,0 +1,34 @@
+<odoo>
+  <report
+      id="report_delivery_challan"
+      string="Delivery Challan"
+      model="stock.picking"
+      report_type="qweb-pdf"
+      name="mfg_flow_integration.report_delivery_challan_view"
+      file="mfg_flow_integration.report_delivery_challan_view"
+  />
+
+  <template id="report_delivery_challan_view">
+    <t t-call="web.html_container">
+      <t t-foreach="docs" t-as="o">
+        <div class="page">
+          <h2>Delivery Challan - <t t-esc="o.name"/></h2>
+          <p>Customer: <t t-esc="o.partner_id.name"/></p>
+          <table class="table table-sm">
+            <thead>
+              <tr><th>Product</th><th>Qty</th></tr>
+            </thead>
+            <tbody>
+              <t t-foreach="o.move_ids_without_package" t-as="line">
+                <tr>
+                  <td><t t-esc="line.product_id.display_name"/></td>
+                  <td><t t-esc="line.product_uom_qty"/></td>
+                </tr>
+              </t>
+            </tbody>
+          </table>
+        </div>
+      </t>
+    </t>
+  </template>
+</odoo>

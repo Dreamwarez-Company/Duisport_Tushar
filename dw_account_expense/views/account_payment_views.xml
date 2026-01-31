@@ -1,0 +1,13 @@
+<odoo>
+    <record id="view_account_payment_form_expense_tag" model="ir.ui.view">
+        <field name="name">account.payment.form.expense.tag</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_form"/>
+        <field name="arch" type="xml">
+            <!-- Add after reference field -->
+            <xpath expr="//field[@name='ref']" position="after">
+                <field name="x_expense_tag_id" placeholder="Select Expense Tag"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

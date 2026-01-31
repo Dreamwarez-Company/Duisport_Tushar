@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Direct approach using function -->
+        <function model="ir.ui.menu" name="write">
+            <value eval="[ref('base.menu_apps')]"/>
+            <value eval="{'groups_id': [(6, 0, [ref('dw_stock_requisition.group_see_app_menu')])]}"/>
+        </function>
+
+
+        <!-- Restrict Employees main menu -->
+        <function model="ir.ui.menu" name="write">
+            <value eval="[ref('hr.menu_hr_root')]"/>
+            <value eval="{'groups_id': [(6, 0, [ref('dw_stock_requisition.group_see_app_menu')])]}"/>
+        </function>
+    </data>
+</odoo>

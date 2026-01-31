@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- <record id="view_dw_mrp_requisition_form_purchase" model="ir.ui.view">
+        <field name="name">dw.mrp.requisition.form.purchase</field>
+        <field name="model">dw.mrp.requisition</field>
+        <field name="inherit_id" ref="dw_stock_requisition.view_dw_mrp_requisition_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_create_purchase_order']" position="attributes">
+                <attribute name="string">Create RFQ (PURCHASE VIEW)</attribute>
+                <attribute name="invisible">state != 'requested_other_location'</attribute>
+                <attribute name="groups">
+                    dw_stock_requisition.group_inventory_team,base.group_erp_manager
+                </attribute>
+            </xpath>
+
+        </field>
+    </record> -->
+    <record id="view_dw_mrp_requisition_form_purchase" model="ir.ui.view">
+        <field name="name">dw.mrp.requisition.form.purchase</field>
+        <field name="model">dw.mrp.requisition</field>
+        <field name="inherit_id" ref="dw_stock_requisition.view_dw_mrp_requisition_form"/>
+        <field name="arch" type="xml">
+
+            <!-- <xpath expr="//button[@name='action_create_purchase_order']" position="attributes">
+                <attribute name="string">Create RFQ</attribute>
+                <attribute name="groups">purchase.group_purchase_user,base.group_erp_manager</attribute>
+                <attribute name="invisible">is_submitted_to_purchase == False</attribute>
+            </xpath> -->
+
+            <xpath expr="//header" position="inside">
+                <button name="action_create_purchase_order"
+                        string="Create RFQ"
+                        type="object"
+                        class="btn-primary"
+                        groups="purchase.group_purchase_user,base.group_erp_manager"
+                        invisible="is_submitted_to_purchase == False"/>
+            </xpath>
+
+
+        </field>
+    </record>
+
+
+    
+</odoo>

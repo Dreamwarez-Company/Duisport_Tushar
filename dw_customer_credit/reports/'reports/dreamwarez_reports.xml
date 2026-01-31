@@ -1,0 +1,14 @@
+<odoo>
+    <!-- Report Action (this is what your HR gave you) -->
+    <record id="action_report_delivery_challan" model="ir.actions.report">
+        <field name="name">Delivery Challan</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">all_reports_full.report_delivery_challan_document</field>
+        <field name="report_file">all_reports_full.report_delivery_challan_document</field>
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Delivery_Challan_%s' % (object.name)</field>
+        <field name="paperformat_id" ref="all_reports_full.paperformat_delivery_challan"/>
+    </record>
+</odoo>

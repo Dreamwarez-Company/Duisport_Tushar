@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="action_journal_voucher" model="ir.actions.act_window">
+        <field name="name">Journal Vouchers</field>
+        <field name="res_model">account.move</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('is_journal_voucher','=',True)]</field>
+        <field name="context">
+            {
+                'default_is_journal_voucher': True,
+                'default_move_type': 'entry',
+                'search_default_journal_voucher': 1
+            }
+        </field>
+    </record>
+
+    <menuitem id="menu_journal_voucher"
+              name="Journal Vouchers"
+              parent="account.menu_finance_entries"
+              action="action_journal_voucher"
+              sequence="10"/>
+
+
+</odoo>

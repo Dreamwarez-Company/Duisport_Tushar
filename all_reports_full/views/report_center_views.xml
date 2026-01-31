@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_report_center_tree" model="ir.ui.view">
+        <field name="name">report.center.tree</field>
+        <field name="model">report.center</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="report_type"/>
+            </tree>
+        </field>
+    </record>
+
+<record id="view_report_export_wizard_form" model="ir.ui.view">
+    <field name="name">report.export.wizard.form</field>
+    <field name="model">report.export.wizard</field>
+    <field name="arch" type="xml">
+        <form string="Export Report">
+            <group>
+                <field name="report_code"/>
+                <field name="report_format"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+            </group>
+            
+                <button string="Export" type="object" name="action_export" class="btn-primary"/>
+                <button string="Cancel" class="btn-secondary" special="cancel"/>
+            
+        </form>
+    </field>
+</record>
+
+    <record id="action_report_center" model="ir.actions.act_window">
+        <field name="name">Report Center</field>
+        <field name="res_model">report.center</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_report_center_action" name="Report Center" parent="menu_reports_root" action="action_report_center" sequence="7"/>
+
+    <record id="action_report_export_wizard" model="ir.actions.act_window">
+        <field name="name">Export Report</field>
+        <field name="res_model">report.export.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_export_report" name="Export Reports" parent="menu_reports_root" action="action_report_export_wizard" sequence="8"/>
+
+</odoo>

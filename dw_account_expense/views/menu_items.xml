@@ -1,0 +1,50 @@
+<odoo>
+    <!-- Parent Menu: Accounting (Invoicing) -->
+    <!-- inside Accounting -> Configuration -->
+    <menuitem
+        id="menu_dw_account_expense_root"
+        name="Expense Management"
+        parent="account.menu_finance_configuration"
+        sequence="100"
+    />
+
+    <!-- Expense Tags Menu -->
+    <record id="action_expense_tag" model="ir.actions.act_window">
+        <field name="name">Expense Tags</field>
+        <field name="res_model">expense.tag</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create and manage your expense tags here.
+            </p>
+        </field>
+    </record>
+
+    <menuitem
+        id="menu_expense_tag"
+        name="Expense Tags"
+        parent="menu_dw_account_expense_root"
+        action="action_expense_tag"
+        sequence="1"
+    />
+
+    <!-- Expense Records Menu -->
+    <record id="action_expense_record" model="ir.actions.act_window">
+        <field name="name">Expense Records</field>
+        <field name="res_model">expense.record</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Track and manage all expense records here.
+            </p>
+        </field>
+    </record>
+
+    <menuitem
+        id="menu_expense_record"
+        name="Expense Records"
+        parent="menu_dw_account_expense_root"
+        action="action_expense_record"
+        sequence="2"
+    />
+</odoo>

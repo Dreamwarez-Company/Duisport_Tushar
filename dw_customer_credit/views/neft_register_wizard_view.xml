@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_neft_register_wizard_form" model="ir.ui.view">
+        <field name="name">neft.register.wizard.form</field>
+        <field name="model">neft.register.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Fund Transfer / NEFT Register">
+                <header>
+                    <button name="action_generate_neft_data" type="object" string="Generate" class="btn-primary"/>
+                    <button name="action_print_neft_register" type="object" string="Print PDF" class="btn-secondary" invisible="not has_data"/>
+                    <button string="Cancel" special="cancel" class="btn-link"/>
+                </header>
+                
+                <sheet>
+                    <!-- Add has_data as an invisible field -->
+                    <field name="has_data" invisible="1"/>
+                    
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_generate_neft_data" type="object" string="Generate" class="oe_stat_button" icon="fa-refresh"/>
+                    </div>
+                    
+                    <div class="oe_title">
+                        <h1>Fund Transfer / NEFT Register</h1>
+                        <div class="text-muted">
+                            Report of outgoing payments and transfers (Vendor Payments)
+                        </div>
+                    </div>
+                    
+                    <group>
+                        <group string="Date Range">
+                            <field name="date_from" widget="date" string="From Date" required="1"/>
+                            <field name="date_to" widget="date" string="To Date" required="1"/>
+                        </group>
+                        
+                        <group string="Journal Filter">
+                            <field name="journal_id" string="Bank Journal" placeholder="All Bank/Cash Journals"/>
+                            <div class="oe_edit_only" style="margin-top: 8px;">
+                                <span class="text-muted">
+                                    <small>Leave empty to include all bank and cash journals</small>
+                                </span>
+                            </div>
+                        </group>
+                    </group>
+                    
+                    <separator string="Transaction Types to Include"/>
+                    
+                    <div class="row mt16">
+                        <div class="col-12 col-md-4">
+                            <field name="include_vendor_payments" string="Vendor Payments"/>
+                            <div class="text-muted" style="font-size: 11px; margin-top: 5px;">
+                                Money paid to vendors/suppliers
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <field name="include_transfers" string="Internal Transfers"/>
+                            <div class="text-muted" style="font-size: 11px; margin-top: 5px;">
+                                Money transferred between accounts
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <field name="include_customer_payments" string="Customer Payments"/>
+                            <div class="text-muted" style="font-size: 11px; margin-top: 5px;">
+                                Money received from customers
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- NEFT Transactions Table -->
+                    <div class="oe_title" invisible="not has_data">
+                        <h3>NEFT Transactions</h3>
+                    </div>
+                    
+                    <div invisible="not has_data">
+                        <field name="neft_data_html" nolabel="1" widget="html"/>
+                    </div>
+                    
+                    <!-- Summary Section -->
+                    <div class="oe_title" invisible="not has_data">
+                        <h3>Summary</h3>
+                    </div>
+                    
+                    <group invisible="not has_data">
+                        <group>
+                            <field name="vendor_count" string="Vendor Payments"/>
+                            <field name="transfer_count" string="Internal Transfers"/>
+                            <field name="customer_count" string="Customer Payments"/>
+                            <field name="total_amount" widget="monetary" string="Net Cash Flow"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <record id="action_neft_register_wizard" model="ir.actions.act_window">
+        <field name="name">Fund Transfer / NEFT Register</field>
+        <field name="res_model">neft.register.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_neft_register_wizard_form"/>
+        <field name="target">new</field>
+    </record>
+</odoo>

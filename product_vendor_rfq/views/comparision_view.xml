@@ -1,0 +1,141 @@
+<odoo>
+<template id="rfq_vertical_comparison_template" name="RFQ Vertical Comparison Styled">
+    <t t-call="web.html_container">
+        <t t-call="web.basic_layout">
+            <style>
+                .comparison-header {
+                    font-size: 22px;
+                    font-weight: 600;
+                    color: #1a1a1a;
+                    margin-bottom: 16px;
+                    border-bottom: 2px solid #ccc;
+                    padding-bottom: 6px;
+                }
+                .product-section {
+                    background: #f9fafc;
+                    border-radius: 12px;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                    padding: 20px;
+                    margin-bottom: 30px;
+                }
+                .product-title {
+                    color: #0b5ed7;
+                    font-size: 18px;
+                    font-weight: 600;
+                    margin-bottom: 12px;
+                }
+                .vendor-card {
+                    border: 1px solid #dee2e6;
+                    border-radius: 10px;
+                    background: #fff;
+                    padding: 15px;
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                    transition: 0.3s;
+                }
+                .vendor-card:hover {
+                    transform: translateY(-3px);
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+                }
+                .vendor-header {
+                    font-weight: 600;
+                    font-size: 16px;
+                    color: #333;
+                    margin-bottom: 10px;
+                }
+                .quote-detail {
+                    font-size: 14px;
+                    color: #555;
+                    line-height: 1.5;
+                }
+                .status-badge {
+                    font-size: 12px;
+                    text-transform: capitalize;
+                    padding: 3px 8px;
+                    border-radius: 6px;
+                    background-color: #e9ecef;
+                    color: #333;
+                }
+                .btn {
+                    font-size: 13px;
+                    margin-top: 4px;
+                    padding: 4px 10px;
+                    border-radius: 6px;
+                }
+                .checkbox-group label {
+                    margin-right: 8px;
+                    font-size: 13px;
+                }
+            </style>
+
+            <div class="container mt16 mb16">
+                <h2 class="comparison-header">Vendor Comparison: <t t-esc="rfq.name"/></h2>
+
+                <t t-foreach="products" t-as="product">
+                    <div class="product-section">
+                        <div class="product-title"><t t-esc="product.display_name"/></div>
+                        <div class="row g-3">
+                            <t t-foreach="vendors" t-as="vendor">
+                                <t t-set="quote" t-value="quotes.filtered(lambda q: q.vendor_id == vendor and q.product_id == product)[:1]"/>
+                                <t t-if="quote">
+                                    <div class="col-lg-4 col-md-6">
+                                        <div class="vendor-card">
+                                            <div class="vendor-header"><t t-esc="vendor.name"/></div>
+                                            <div class="quote-detail">
+                                                Quantity: <t t-esc="quote.quantity"/><br/>
+                                                Unit Price: ₹<t t-esc="quote.unit_price"/><br/>
+                                                Total Price: ₹<t t-esc="quote.total_price"/><br/>
+                                                Delivery Time: <t t-esc="quote.delivery_time"/> days<br/>
+                                                Status: <span class="status-badge"><t t-esc="quote.state"/></span>
+                                            </div>
+
+                                            <div class="mt2 d-flex flex-wrap gap-2">
+                                                <button type="button"
+                                                    class="btn btn-success btn-sm"
+                                                    t-att-data-id="quote.id"
+                                                    onclick="callServerAction(this, 'action_confirm')">
+                                                    ✅ Confirm
+                                                </button>
+                                                <button type="button"
+                                                    class="btn btn-danger btn-sm"
+                                                    t-att-data-id="quote.id"
+                                                    onclick="callServerAction(this, 'action_reject')">
+                                                    ❌ Reject
+                                                </button>
+                                            </div>
+
+                                            <div class="checkbox-group mt2">
+                                                <label><input type="checkbox" t-att-checked="quote.is_l1"/> L1</label>
+                                                <label><input type="checkbox" t-att-checked="quote.is_l2"/> L2</label>
+                                                <label><input type="checkbox" t-att-checked="quote.is_l3"/> L3</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </t>
+                            </t>
+                        </div>
+                    </div>
+                </t>
+            </div>
+
+            <script>
+                async function callServerAction(el, method) {
+                    const id = parseInt(el.dataset.id);
+                    await fetch('/web/dataset/call_kw/rfq.vendor.quote/' + method, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            model: 'rfq.vendor.quote',
+                            method: method,
+                            args: [[id]],
+                            kwargs: {},
+                        }),
+                    });
+                    location.reload();
+                }
+            </script>
+        </t>
+    </t>
+</template>
+
+
+</odoo>
