@@ -1,0 +1,119 @@
+<odoo>
+    <!-- Wizard View -->
+    <record id="view_outstanding_credit_notes_wizard" model="ir.ui.view">
+        <field name="name">outstanding.credit.notes.wizard.form</field>
+        <field name="model">outstanding.credit.notes.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Outstanding Credit Notes">
+                <group>
+                    <group>
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                    </group>
+                    <group>
+                        <field name="partner_ids" widget="many2many_tags"/>
+                        <field name="partner_type"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_print_outstanding_credit_notes" type="object" string="Print PDF" class="btn-primary"/>
+                    <button special="cancel" string="Cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Wizard Action -->
+    <record id="action_outstanding_credit_notes_wizard" model="ir.actions.act_window">
+        <field name="name">Outstanding Credit Notes</field>
+        <field name="res_model">outstanding.credit.notes.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Report QWeb Template -->
+    <template id="outstanding_credit_notes_template">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h2 class="text-center">Outstanding Credit Notes</h2>
+
+                    <div class="row mt-2 mb-3">
+                        <div class="col-12">
+                            <strong>As of:</strong> <t t-esc="date_to"/>
+                            <t t-if="date_from">
+                                |  <strong>From:</strong> <t t-esc="date_from"/>
+                            </t>
+                             |  <strong>Type:</strong> <t t-esc="partner_type"/>
+                        </div>
+                    </div>
+
+                    <t t-if="not grouped">
+                        <p class="text-center text-muted">No outstanding credit notes found for the selected criteria.</p>
+                    </t>
+
+                    <t t-foreach="grouped" t-as="grp">
+                        <div style="page-break-inside: avoid;" class="mb-4">
+                            <h4><t t-esc="grp['partner'].name or 'Unknown Partner'"/></h4>
+
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Credit Note</th>
+                                        <th>Date</th>
+                                        <th>Journal</th>
+                                        <th>Origin / Reference</th>
+                                        <th class="text-end">Total</th>
+                                        <th class="text-end">Outstanding</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="grp['lines']" t-as="l">
+                                        <tr>
+                                            <td><t t-esc="l['move_name']"/></td>
+                                            <td><t t-esc="l['date']"/></td>
+                                            <td><t t-esc="l['journal']"/></td>
+                                            <td><t t-esc="l['origin']"/></td>
+                                            <td class="text-end"><t t-esc="'%.2f' % l['amount_total']"/></td>
+                                            <td class="text-end"><t t-esc="'%.2f' % l['amount_residual']"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                                <tfoot class="table-light">
+                                    <tr>
+                                        <td colspan="5"><strong>Total Outstanding for <t t-esc="grp['partner'].name"/></strong></td>
+                                        <td class="text-end"><strong><t t-esc="'%.2f' % grp['total_residual']"/></strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        <t t-if="not grp == grouped[-1]">
+                            <p style="page-break-after: always;"/>
+                        </t>
+                    </t>
+
+                    <div class="mt-3">
+                        <h5 class="text-end">Grand Total Outstanding: <strong><t t-esc="'%.2f' % grand_total"/></strong></h5>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Action -->
+    <record id="outstanding_credit_notes_pdf_action" model="ir.actions.report">
+        <field name="name">Outstanding Credit Notes</field>
+        <field name="model">outstanding.credit.notes.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">all_reports_full.outstanding_credit_notes_template</field>
+        <field name="report_file">all_reports_full.outstanding_credit_notes_template</field>
+        <field name="print_report_name">Outstanding Credit Notes</field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_outstanding_credit_notes"
+              name="Outstanding Credit Notes"
+              parent="all_reports_full.menu_reports_root"
+              action="action_outstanding_credit_notes_wizard"
+              sequence="22"/>
+</odoo>

@@ -1,0 +1,430 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- General Ledger PDF -->
+        <record id="report_general_ledger_pdf" model="ir.actions.report">
+            <field name="name">General Ledger</field>
+            <field name="model">report.export.wizard</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">all_reports_full.general_ledger_template</field>
+            <field name="report_file">all_reports_full.general_ledger_template</field>
+            <field name="binding_model_id" ref="model_report_export_wizard"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <template id="general_ledger_template">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="web.external_layout">
+                        <div class="page">
+                            <h2>General Ledger Report</h2>
+                            <p>From: <span t-esc="o.start_date or 'N/A'"/> To: <span t-esc="o.end_date or 'N/A'"/></p>
+
+                            <table class="table table-bordered table-sm">
+                                <thead style="background-color: #f0f0f0;">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Journal</th>
+                                        <th>Account</th>
+                                        <th>Partner</th>
+                                        <th>Label</th>
+                                        <th class="text-right">Debit</th>
+                                        <th class="text-right">Credit</th>
+                                        <th class="text-right">Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-set="balance" t-value="0"/>
+                                    <t t-set="current_account" t-value="False"/>
+                                    <t t-foreach="o._get_general_ledger_data()" t-as="line">
+                                        <t t-if="current_account != line.account_id.id">
+                                            <t t-set="balance" t-value="0"/>
+                                            <t t-set="current_account" t-value="line.account_id.id"/>
+                                        </t>
+                                        <t t-set="balance" t-value="balance + line.debit - line.credit"/>
+                                        <tr>
+                                            <td><span t-field="line.date"/></td>
+                                            <td><span t-field="line.move_id.journal_id.name"/></td>
+                                            <td><span t-field="line.account_id.code"/> - <span t-field="line.account_id.name"/></td>
+                                            <td><span t-field="line.partner_id.name"/></td>
+                                            <td><span t-field="line.name"/></td>
+                                            <td class="text-right"><span t-field="line.debit"/></td>
+                                            <td class="text-right"><span t-field="line.credit"/></td>
+                                            <td class="text-right"><span t-esc="'%.2f' % balance"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+
+        <!-- Trial Balance PDF -->
+        <record id="report_trial_balance_pdf" model="ir.actions.report">
+            <field name="name">Trial Balance</field>
+            <field name="model">report.export.wizard</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">all_reports_full.trial_balance_template</field>
+            <field name="report_file">all_reports_full.trial_balance_template</field>
+            <field name="binding_model_id" ref="model_report_export_wizard"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <template id="trial_balance_template">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="web.external_layout">
+                        <div class="page">
+                            <h2>Trial Balance</h2>
+                            <p>From: <span t-esc="o.start_date or 'N/A'"/> To: <span t-esc="o.end_date or 'N/A'"/></p>
+                            
+                            <table class="table table-bordered table-sm">
+                                <thead style="background-color: #f0f0f0;">
+                                    <tr>
+                                        <th>Account Code</th>
+                                        <th>Account Name</th>
+                                        <th class="text-right">Opening Balance</th>
+                                        <th class="text-right">Debit</th>
+                                        <th class="text-right">Credit</th>
+                                        <th class="text-right">Closing Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="o._get_trial_balance_data()" t-as="acc_data">
+                                        <tr>
+                                            <td><span t-esc="acc_data['account'].code"/></td>
+                                            <td><span t-esc="acc_data['account'].name"/></td>
+                                            <td class="text-right"><span t-esc="'%.2f' % acc_data['opening']"/></td>
+                                            <td class="text-right"><span t-esc="'%.2f' % acc_data['debit']"/></td>
+                                            <td class="text-right"><span t-esc="'%.2f' % acc_data['credit']"/></td>
+                                            <td class="text-right"><span t-esc="'%.2f' % acc_data['closing']"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+
+        <!-- Chart of Accounts PDF -->
+        <record id="report_chart_of_accounts_pdf" model="ir.actions.report">
+            <field name="name">Chart of Accounts</field>
+            <field name="model">report.export.wizard</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">all_reports_full.chart_of_accounts_template</field>
+            <field name="report_file">all_reports_full.chart_of_accounts_template</field>
+            <field name="binding_model_id" ref="model_report_export_wizard"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <template id="chart_of_accounts_template">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="web.external_layout">
+                        <div class="page">
+                            <h2>Chart of Accounts</h2>
+                            <table class="table table-bordered table-sm">
+                                <thead style="background-color: #f0f0f0;">
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Name</th>
+                                        <th>Type</th>
+                                        <th>Reconcile</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="o.env['account.account'].search([], order='code')" t-as="acc">
+                                        <tr>
+                                            <td><span t-field="acc.code"/></td>
+                                            <td><span t-field="acc.name"/></td>
+                                            <td><span t-esc="acc.account_type or ''"/></td>
+                                            <td><span t-esc="'Yes' if acc.reconcile else 'No'"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+
+        <!-- Customer Aging PDF -->
+        <record id="report_customer_aging_pdf" model="ir.actions.report">
+            <field name="name">Customer Aging</field>
+            <field name="model">report.export.wizard</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">all_reports_full.customer_aging_template</field>
+            <field name="report_file">all_reports_full.customer_aging_template</field>
+            <field name="binding_model_id" ref="model_report_export_wizard"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <template id="customer_aging_template">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="web.external_layout">
+                        <div class="page">
+                            <h2>Customer Aging Report</h2>
+                            <p>As of: <span t-esc="o.end_date or 'N/A'"/></p>
+                            
+                            <table class="table table-bordered table-sm">
+                                <thead style="background-color:#ddd;">
+                                    <tr>
+                                        <th>Customer</th>
+                                        <th class="text-right">Total Due</th>
+                                        <th class="text-right">0-30 Days</th>
+                                        <th class="text-right">31-60 Days</th>
+                                        <th class="text-right">61-90 Days</th>
+                                        <th class="text-right">90+ Days</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="o._get_aging_data('customer')" t-as="partner_data">
+                                        <tr>
+                                            <td><span t-esc="partner_data['partner'].name"/></td>
+                                            <td class="text-right"><span t-esc="'%.2f' % partner_data['total']"/></td>
+                                            <td class="text-right"><span t-esc="'%.2f' % partner_data['buckets'][0]"/></td>
+                                            <td class="text-right"><span t-esc="'%.2f' % partner_data['buckets'][1]"/></td>
+                                            <td class="text-right"><span t-esc="'%.2f' % partner_data['buckets'][2]"/></td>
+                                            <td class="text-right"><span t-esc="'%.2f' % partner_data['buckets'][3]"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+
+        <!-- Vendor Aging PDF -->
+        <record id="report_vendor_aging_pdf" model="ir.actions.report">
+            <field name="name">Vendor Aging</field>
+            <field name="model">report.export.wizard</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">all_reports_full.vendor_aging_template</field>
+            <field name="report_file">all_reports_full.vendor_aging_template</field>
+            <field name="binding_model_id" ref="model_report_export_wizard"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <template id="vendor_aging_template">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="web.external_layout">
+                        <div class="page">
+                            <h2>Vendor Aging Report</h2>
+                            <p>As of: <span t-esc="o.end_date or 'N/A'"/></p>
+                            
+                            <table class="table table-bordered table-sm">
+                                <thead style="background-color:#ddd;">
+                                    <tr>
+                                        <th>Vendor</th>
+                                        <th class="text-right">Total Due</th>
+                                        <th class="text-right">0-30 Days</th>
+                                        <th class="text-right">31-60 Days</th>
+                                        <th class="text-right">61-90 Days</th>
+                                        <th class="text-right">90+ Days</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="o._get_aging_data('vendor')" t-as="partner_data">
+                                        <tr>
+                                            <td><span t-esc="partner_data['partner'].name"/></td>
+                                            <td class="text-right"><span t-esc="'%.2f' % partner_data['total']"/></td>
+                                            <td class="text-right"><span t-esc="'%.2f' % partner_data['buckets'][0]"/></td>
+                                            <td class="text-right"><span t-esc="'%.2f' % partner_data['buckets'][1]"/></td>
+                                            <td class="text-right"><span t-esc="'%.2f' % partner_data['buckets'][2]"/></td>
+                                            <td class="text-right"><span t-esc="'%.2f' % partner_data['buckets'][3]"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+
+        <!-- Inventory Valuation PDF -->
+        <record id="report_inventory_valuation_pdf" model="ir.actions.report">
+            <field name="name">Inventory Valuation</field>
+            <field name="model">report.export.wizard</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">all_reports_full.inventory_valuation_template</field>
+            <field name="report_file">all_reports_full.inventory_valuation_template</field>
+            <field name="binding_model_id" ref="model_report_export_wizard"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <template id="inventory_valuation_template">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="web.external_layout">
+                        <div class="page">
+                            <h2>Inventory Valuation Report</h2>
+                            <p>As of: <span t-esc="o.end_date or 'N/A'"/></p>
+                            
+                            <table class="table table-bordered table-sm">
+                                <thead style="background-color: #f0f0f0;">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>SKU</th>
+                                        <th class="text-right">Quantity on Hand</th>
+                                        <th class="text-right">Unit Cost</th>
+                                        <th class="text-right">Total Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-set="total_value" t-value="0"/>
+                                    <t t-foreach="o.env['product.product'].search([('type', '=', 'product')])" t-as="product">
+                                        <t t-set="quants" t-value="o.env['stock.quant'].search([('product_id','=',product.id),('location_id.usage','=','internal')])"/>
+                                        <t t-set="qty" t-value="sum(quants.mapped('quantity'))"/>
+                                        <t t-set="unit_cost" t-value="product.standard_price or 0.0"/>
+                                        <t t-set="value" t-value="qty * unit_cost"/>
+                                        <t t-set="total_value" t-value="total_value + value"/>
+                                        <tr t-if="qty != 0">
+                                            <td><span t-field="product.name"/></td>
+                                            <td><span t-field="product.default_code"/></td>
+                                            <td class="text-right"><span t-esc="'%.2f' % qty"/></td>
+                                            <td class="text-right"><span t-esc="'%.2f' % unit_cost"/></td>
+                                            <td class="text-right"><span t-esc="'%.2f' % value"/></td>
+                                        </tr>
+                                    </t>
+                                    <tr style="font-weight: bold; background-color: #f0f0f0;">
+                                        <td colspan="4" class="text-right">Total Inventory Value:</td>
+                                        <td class="text-right"><span t-esc="'%.2f' % total_value"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+
+        <!-- Stock Register PDF -->
+        <record id="report_stock_register_pdf" model="ir.actions.report">
+            <field name="name">Stock Register</field>
+            <field name="model">report.export.wizard</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">all_reports_full.stock_register_template</field>
+            <field name="report_file">all_reports_full.stock_register_template</field>
+            <field name="binding_model_id" ref="model_report_export_wizard"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <template id="stock_register_template">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="web.external_layout">
+                        <div class="page">
+                            <h2>Stock Register Report</h2>
+                            <p>From: <span t-esc="o.start_date or 'N/A'"/> To: <span t-esc="o.end_date or 'N/A'"/></p>
+                            
+                            <table class="table table-bordered table-sm">
+                                <thead style="background-color: #f0f0f0;">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Reference</th>
+                                        <th>Product</th>
+                                        <th>SKU</th>
+                                        <th class="text-right">Quantity</th>
+                                        <th>UOM</th>
+                                        <th>Source Location</th>
+                                        <th>Destination Location</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="o.env['stock.move'].search([('date','&gt;=',o.start_date or '1900-01-01'),('date','&lt;=',o.end_date or '2099-12-31'),('state','=','done')], order='date', limit=500)" t-as="move">
+                                        <tr>
+                                            <td><span t-field="move.date"/></td>
+                                            <td><span t-esc="move.reference or move.picking_id.name or ''"/></td>
+                                            <td><span t-field="move.product_id.name"/></td>
+                                            <td><span t-field="move.product_id.default_code"/></td>
+                                            <td class="text-right"><span t-field="move.product_uom_qty"/></td>
+                                            <td><span t-field="move.product_uom.name"/></td>
+                                            <td><span t-esc="move.location_id.complete_name"/></td>
+                                            <td><span t-esc="move.location_dest_id.complete_name"/></td>
+                                            <td><span t-field="move.state"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+
+        <!-- GR/IR Report PDF -->
+        <record id="report_gr_ir_pdf" model="ir.actions.report">
+            <field name="name">GR/IR Report</field>
+            <field name="model">report.export.wizard</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">all_reports_full.gr_ir_template</field>
+            <field name="report_file">all_reports_full.gr_ir_template</field>
+            <field name="binding_model_id" ref="model_report_export_wizard"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <template id="gr_ir_template">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="web.external_layout">
+                        <div class="page">
+                            <h2>Goods Receipt / Invoice Receipt (GR/IR) Report</h2>
+                            <p>From: <span t-esc="o.start_date or 'N/A'"/> To: <span t-esc="o.end_date or 'N/A'"/></p>
+                            
+                            <table class="table table-bordered table-sm">
+                                <thead style="background-color: #f0f0f0;">
+                                    <tr>
+                                        <th>Purchase Order</th>
+                                        <th>Vendor</th>
+                                        <th>Product</th>
+                                        <th class="text-right">Ordered Qty</th>
+                                        <th class="text-right">Received Qty</th>
+                                        <th class="text-right">Invoiced Qty</th>
+                                        <th class="text-right">Difference</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="o.env['purchase.order'].search([('date_order','&gt;=',o.start_date or '1900-01-01'),('date_order','&lt;=',o.end_date or '2099-12-31'),('state','in',['purchase','done'])])" t-as="po">
+                                        <t t-foreach="po.order_line" t-as="line">
+                                            <t t-set="difference" t-value="line.qty_received - line.qty_invoiced"/>
+                                            <tr t-if="difference != 0">
+                                                <td><span t-field="po.name"/></td>
+                                                <td><span t-field="po.partner_id.name"/></td>
+                                                <td><span t-field="line.product_id.name"/></td>
+                                                <td class="text-right"><span t-field="line.product_qty"/></td>
+                                                <td class="text-right"><span t-field="line.qty_received"/></td>
+                                                <td class="text-right"><span t-field="line.qty_invoiced"/></td>
+                                                <td class="text-right" t-attf-style="color: #{difference &gt; 0 and 'red' or 'green'};">
+                                                    <span t-esc="'%.2f' % difference"/>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </t>
+                                </tbody>
+                            </table>
+                            <p style="margin-top: 20px;">
+                                <small>
+                                    <strong>Note:</strong> Positive difference indicates goods received but not yet invoiced. 
+                                    Negative difference indicates invoiced quantities exceeding received quantities.
+                                </small>
+                            </p>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+
+    </data>
+</odoo>

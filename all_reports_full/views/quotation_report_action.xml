@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="action_quotation_report" model="ir.actions.report">
+        <field name="name">Quotation Report</field>
+        <field name="model">sale.order</field>
+        <field name="report_type">qweb-pdf</field>
+
+        <!-- QWeb template -->
+        <field name="report_name">all_reports_full.quotation_report_document</field>
+        <field name="report_file">all_reports_full.quotation_report_document</field>
+
+        <!-- Bind to Print button -->
+        <field name="binding_model_id" ref="sale.model_sale_order"/>
+        <field name="binding_type">report</field>
+
+        <!-- Optional but recommended -->
+        <field name="print_report_name">'Quotation - %s' % (object.name)</field>
+    </record>
+
+
+    <record id="view_sale_order_form_terms_conditions" model="ir.ui.view">
+        <field name="name">sale.order.form.quotation.terms</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//notebook" position="inside">
+                <page string="Terms &amp; Conditions">
+                    <group>
+                        <field name="quotation_terms"
+                               widget="html"
+                               placeholder="Type Terms &amp; Conditions here..."
+                               readonly="state in ('sale','done')"/>
+                    </group>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+    
+
+</odoo>

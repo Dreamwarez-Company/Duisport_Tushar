@@ -1,0 +1,9 @@
+<svg width="128" height="128" xmlns="http://www.w3.org/2000/svg">
+  <rect width="128" height="128" fill="#875A7B" rx="20"/>
+  <text x="64" y="50" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="white" text-anchor="middle">TAX</text>
+  <path d="M 20 60 L 108 60" stroke="white" stroke-width="3"/>
+  <text x="64" y="85" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="white" text-anchor="middle">GST</text>
+  <path d="M 30 70 L 50 60 L 30 50" fill="white" opacity="0.9"/>
+  <path d="M 98 70 L 78 60 L 98 50" fill="white" opacity="0.9"/>
+</svg>
+

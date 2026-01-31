@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_account_move_jv,account.move.jv,account.model_account_move,base.group_user,1,1,1,1
+access_vouchers_report,vouchers.report,model_vouchers_report,account.group_account_manager,1,1,1,1
+access_vouchers_report_user,vouchers.report,model_vouchers_report,account.group_account_user,1,0,0,0
+access_vouchers_report_line,vouchers.report.line,model_vouchers_report_line,account.group_account_manager,1,1,1,1
+access_vouchers_report_print_wizard,vouchers.report.print.wizard,model_vouchers_report_print_wizard,account.group_account_user,1,1,1,1

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="stage_analysis_done" model="crm.stage">
+        <field name="name">Analysis Done</field>
+        <field name="sequence">50</field>
+        <field name="fold">False</field>
+    </record>
+</odoo>

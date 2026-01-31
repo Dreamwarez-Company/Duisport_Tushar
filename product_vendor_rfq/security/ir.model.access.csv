@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_rfq_request_user,rfq.request.user,model_rfq_request,product_vendor_rfq.group_rfq_department,1,1,1,1
+access_rfq_vendor_line_user,rfq.vendor.line.user,model_rfq_vendor_line,product_vendor_rfq.group_rfq_department,1,1,1,1
+access_rfq_vendor_quote_user,rfq.vendor.quote.user,model_rfq_vendor_quote,product_vendor_rfq.group_rfq_department,1,1,1,1
+access_rfq_request_portal,rfq.request.portal,model_rfq_request,product_vendor_rfq.group_rfq_department,1,0,0,0
+access_rfq_vendor_quote_portal,rfq.vendor.quote.portal,model_rfq_vendor_quote,product_vendor_rfq.group_rfq_department,1,1,0,0
+access_rfq_request_store,rfq.request.store,model_rfq_request,product_vendor_rfq.group_rfq_department,1,1,1,1
+access_rfq_vendor_line_store,rfq.vendor.line.store,model_rfq_vendor_line,product_vendor_rfq.group_rfq_department,1,1,1,1
+access_rfq_vendor_quote_store,rfq.vendor.quote.store,model_rfq_vendor_quote,product_vendor_rfq.group_rfq_department,1,1,1,1

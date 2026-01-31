@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Form view for Quality Check -->
+    <record id="view_dw_quality_check_form" model="ir.ui.view">
+        <field name="name">dw.quality.check.form</field>
+        <field name="model">dw.quality.check</field>
+        <field name="arch" type="xml">
+            <form string="Quality Check">
+                <header>
+                    <button name="action_qc_done"
+                            string="QC Done"
+                            type="object"
+                            class="btn-primary"
+                            invisible="qc_status == 'done'"/>
+                    <field name="qc_status" widget="statusbar" statusbar_visible="received,done"/>
+                </header>
+
+                <sheet>
+                    <group>
+                        <field name="picking_id"/>
+                        <field name="mrp_id"/>
+                        <field name="product_id"/>
+                        <field name="quantity"/>
+                        <field name="passed"/>
+                        <field name="remarks"/>
+                        <field name="date"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree/List view -->
+    <record id="view_dw_quality_check_tree" model="ir.ui.view">
+        <field name="name">dw.quality.check.tree</field>
+        <field name="model">dw.quality.check</field>
+        <field name="arch" type="xml">
+            <tree string="Quality Checks">
+                <field name="picking_id"/>
+                <field name="mrp_id"/>
+                <field name="product_id"/>
+                <!-- <field name="lot_id"/> -->
+                <field name="quantity"/>
+                <field name="passed"/>
+                <field name="date"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Search view -->
+    <!-- <record id="view_dw_quality_check_search" model="ir.ui.view">
+        <field name="name">dw.quality.check.search</field>
+        <field name="model">dw.quality.check</field>
+        <field name="arch" type="xml">
+            <search string="Search Quality Checks">
+                <field name="picking_id"/>
+                <field name="product_id"/>
+                <field name="passed"/>
+                <field name="date"/>
+            </search>
+        </field>
+    </record> -->
+
+    <!-- Action -->
+    <record id="action_dw_quality_check" model="ir.actions.act_window">
+        <field name="name">Quality Checks</field>
+        <field name="res_model">dw.quality.check</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="menu_dw_quality_check_root" name="Quality Control" sequence="10" groups="dw_quality_check.group_quality_check"/>
+    <menuitem id="menu_dw_quality_check" name="Quality Checks"
+              parent="menu_dw_quality_check_root"
+              action="action_dw_quality_check" groups="dw_quality_check.group_quality_check"/>
+</odoo>

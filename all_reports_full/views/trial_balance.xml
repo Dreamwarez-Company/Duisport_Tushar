@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Trial Balance Report Form View -->
+    <record id="view_trial_balance_report_form" model="ir.ui.view">
+        <field name="name">trial.balance.report.form</field>
+        <field name="model">trial.balance.report</field>
+        <field name="arch" type="xml">
+            <form string="Trial Balance Report">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="start_date"/>
+                        </group>
+                        <group>
+                            <field name="end_date"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Report Data">
+                            <field name="line_ids">
+                                <tree>
+                                    <field name="account_code"/>
+                                    <field name="account_name"/>
+                                    <field name="opening_balance" sum="Total Opening"/>
+                                    <field name="debit" sum="Total Debit"/>
+                                    <field name="credit" sum="Total Credit"/>
+                                    <field name="closing_balance" sum="Total Closing"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                
+                <footer>
+                    <button string="View Report" type="object" name="action_view_report" class="btn-primary"/>
+                    <button string="Download Excel" type="object" name="action_download_xlsx" class="btn-success"/>
+                    <button string="Download PDF" type="object" name="action_download_pdf" class="btn-info"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Trial Balance Report Action -->
+    <record id="action_trial_balance_report" model="ir.actions.act_window">
+        <field name="name">Trial Balance</field>
+        <field name="res_model">trial.balance.report</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_trial_balance_report" 
+              name="Trial Balance" 
+              parent="account.menu_finance_reports" 
+              action="action_trial_balance_report" 
+              sequence="20"/>
+
+    <!-- PDF Report Definition -->
+    <record id="report_trial_balance_pdf" model="ir.actions.report">
+        <field name="name">Trial Balance PDF</field>
+        <field name="model">trial.balance.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">all_reports_full.trial_balance_pdf_template</field>
+        <field name="report_file">all_reports_full.trial_balance_pdf_template</field>
+        <field name="binding_model_id" ref="model_trial_balance_report"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- PDF Template -->
+    <template id="trial_balance_pdf_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Trial Balance Report</h2>
+                        <p>
+                            <strong>Period:</strong> 
+                            <span t-esc="o.start_date"/> to <span t-esc="o.end_date"/>
+                        </p>
+                        
+                        <table class="table table-bordered table-sm mt-4">
+                            <thead style="background-color: #f0f0f0;">
+                                <tr>
+                                    <th>Account Code</th>
+                                    <th>Account Name</th>
+                                    <th class="text-right">Opening Balance</th>
+                                    <th class="text-right">Debit</th>
+                                    <th class="text-right">Credit</th>
+                                    <th class="text-right">Closing Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="total_opening" t-value="0"/>
+                                <t t-set="total_debit" t-value="0"/>
+                                <t t-set="total_credit" t-value="0"/>
+                                <t t-set="total_closing" t-value="0"/>
+                                
+                                <t t-foreach="o.get_report_data()" t-as="acc_data">
+                                    <t t-set="total_opening" t-value="total_opening + acc_data['opening']"/>
+                                    <t t-set="total_debit" t-value="total_debit + acc_data['debit']"/>
+                                    <t t-set="total_credit" t-value="total_credit + acc_data['credit']"/>
+                                    <t t-set="total_closing" t-value="total_closing + acc_data['closing']"/>
+                                    
+                                    <tr>
+                                        <td><span t-esc="acc_data['account'].code"/></td>
+                                        <td><span t-esc="acc_data['account'].name"/></td>
+                                        <td class="text-right"><span t-esc="'%.2f' % acc_data['opening']"/></td>
+                                        <td class="text-right"><span t-esc="'%.2f' % acc_data['debit']"/></td>
+                                        <td class="text-right"><span t-esc="'%.2f' % acc_data['credit']"/></td>
+                                        <td class="text-right"><span t-esc="'%.2f' % acc_data['closing']"/></td>
+                                    </tr>
+                                </t>
+                                
+                                <tr style="font-weight: bold; background-color: #e9ecef;">
+                                    <td colspan="2">Total</td>
+                                    <td class="text-right"><span t-esc="'%.2f' % total_opening"/></td>
+                                    <td class="text-right"><span t-esc="'%.2f' % total_debit"/></td>
+                                    <td class="text-right"><span t-esc="'%.2f' % total_credit"/></td>
+                                    <td class="text-right"><span t-esc="'%.2f' % total_closing"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

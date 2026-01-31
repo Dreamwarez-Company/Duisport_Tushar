@@ -1,0 +1,580 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <template id="report_vendor_debit_note">
+        <t t-call="web.html_container">
+
+            <style>
+                @page {
+                    size: A4;
+                    margin: 2mm;
+                }
+                .cell {
+                    border: 0.6px solid #777;
+                    padding: 6px;
+                    vertical-align: top;
+                    font-size: 16px;
+                }
+
+                .item-cell {
+                    border-left: 0.6px solid #777;
+                    border-right: 0.6px solid #777;
+                    border-top: 0;
+                    border-bottom: 0;
+                    padding: 6px;
+                }
+
+
+                body {
+                        font-size: 16px;
+                    }
+
+
+                .center {
+                    text-align: center;
+                }
+            </style>
+
+            <t t-foreach="docs" t-as="o">
+
+                <div style="position: relative; width:100%; height:287mm;">
+
+                    <!-- HEADING -->
+                    <div style="text-align:center;font-weight:bold;font-size:16px;margin-bottom:6mm;">
+                        Debit Note
+                    </div>
+
+                    <!-- PAGE BORDER -->
+                    <div style="
+                        position:absolute;
+                        top:6mm; left:0; right:0; bottom:0;
+                        border:0.7px solid #4c4b4b;
+                        padding:6mm;
+                        box-sizing:border-box;">
+
+                        <!-- MASTER TABLE -->
+                        <table style="width:100%; border-collapse:collapse;">
+
+                            <tr>
+
+                                <!-- ================= LEFT SIDE (55%) ================= -->
+                                <td class="cell" style="width:55%; vertical-align:top; padding:0;">
+
+                                    <table style="width:100%; border-collapse:collapse;">
+
+                                        <!-- INVOICE TO -->
+                                        <tr>
+                                            <td class="cell" style="border-left:none; border-right:none; border-top:none;">
+                                                <table style="width:100%; border-collapse:collapse;">
+                                                    <tr>
+                                                        <!-- <td style="width:18%;">
+                                                            <img t-if="o.company_id.logo"
+                                                                t-att-src="image_data_uri(o.company_id.logo)"
+                                                                style="width:180px; height:auto;"/>
+                                                        </td> -->
+                                                        <td style="width:82%;">
+                                                            
+                                                            <strong t-esc="o.company_id.name"/><br/>
+                                                            <span t-esc="o.company_id.street"/><br/>
+                                                            <span t-esc="o.company_id.city"/> -
+                                                            <span t-esc="o.company_id.zip"/><br/>
+                                                            GSTIN/UIN :
+                                                            <span t-esc="o.company_id.vat"/><br/>
+                                                            State Name :
+                                                            <span t-esc="o.company_id.state_id.name"/>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+
+                                        <!-- CONSIGNEE (SHIP TO) -->
+                                        <tr>
+                                            <td class="cell" style="border-left:none; border-right:none;">
+                                                Consignee (Ship to)<br/>
+
+                                                <strong t-esc="o.ship_to_name"/><br/>
+
+                                                <t t-if="o.ship_to_street">
+                                                    <span t-esc="o.ship_to_street"/><br/>
+                                                </t>
+
+                                                <t t-if="o.ship_to_street2">
+                                                    <span t-esc="o.ship_to_street2"/><br/>
+                                                </t>
+
+                                                <t t-if="o.ship_to_city or o.ship_to_zip">
+                                                    <span t-esc="o.ship_to_city"/> - <span t-esc="o.ship_to_zip"/><br/>
+                                                </t>
+
+                                                <t t-if="o.ship_to_state_id">
+                                                    State Name: <span t-esc="o.ship_to_state_id.name"/><br/>
+                                                </t>
+
+                                                <t t-if="o.ship_to_gstin">
+                                                    GSTIN/UIN: <span t-esc="o.ship_to_gstin"/>
+                                                </t>
+
+                                            </td>
+                                        </tr>
+
+
+                                        <!-- SUPPLIER -->
+                                        <tr>
+                                            <td class="cell" style="border-left:none; border-right:none; border-bottom:none;">
+                                                Buyer (Bill to)<br/>
+                                                <strong t-esc="o.partner_id.name"/><br/>
+                                                <span t-esc="o.partner_id.street"/><br/>
+                                                GSTIN/UIN :
+                                                <span t-esc="o.partner_id.vat"/><br/>
+                                                State Name :
+                                                <span t-esc="o.partner_id.state_id.name"/>
+                                            </td>
+                                        </tr>
+
+                                    </table>
+
+                                </td>
+
+
+                                <!-- ================= RIGHT SIDE (45%) ================= -->
+                                <td class="cell" style="width:45%; vertical-align:top; padding:0;">
+
+                                    <!-- HEADER GRID -->
+                                    <table style="width:100%; border-collapse:collapse;">
+                                        <tr>
+                                            <td class="cell">
+                                                Debit Note No.<br/>
+                                                <strong t-esc="o.name"/>
+                                            </td>
+                                            <td class="cell">
+                                                Dated<br/>
+                                                <strong t-esc="o.invoice_date.strftime('%d-%b-%Y') if o.invoice_date else ''"/>
+                                                <!-- <strong t-esc="o.invoice_date.strftime('%d-%b-%Y')"/> -->
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td class="cell">
+                                                Original Invoice No. &amp; Date.<br/>
+                                                <strong><t t-esc="o.reversed_entry_id.name"/></strong>
+                                                <span> <span><b><t t-esc="o.invoice_date or ''"/></b></span> </span>
+
+                                            </td>
+
+                                            <td class="cell">
+                                                Other References<br/>
+                                                <t t-set="term" t-value="o.invoice_payment_term_id"/>
+                                                <strong t-if="term" t-esc="term.name"/>
+                                                <t t-else="">-</t>                                           
+                                            </td>
+                                            
+                                        </tr>
+
+                                        <tr>
+                                            <td colspan="2" style="
+                                                border-bottom:0.6px solid #777;
+                                                padding:0;
+                                                height:0;
+                                            "></td>
+                                        </tr>
+
+                                    </table>
+
+                                    <!-- TERMS OF DELIVERY -->
+                                    <!-- <div class="cell" style="border-top:0.6px solid #777;">
+                                        Terms of Delivery<br/>
+                                        <strong t-if="o.terms_of_delivery" t-esc="o.terms_of_delivery"/>
+                                    </div> -->
+
+
+                                </td>
+
+                            </tr>
+
+                        </table>
+
+                        <!-- CALCULATE TAX AMOUNTS -->
+
+                        <!-- GST CALCULATION (PURCHASE ORDER - CORRECT WAY) -->
+                        <t t-set="cgst_amount" t-value="0.0"/>
+                        <t t-set="sgst_amount" t-value="0.0"/>
+                        <t t-set="igst_amount" t-value="0.0"/>
+
+                        <!-- <t t-foreach="o.order_line" t-as="line"> -->
+                        <t t-foreach="o.invoice_line_ids" t-as="line">
+                            <!-- GST CALCULATION -->
+                            <t t-set="cgst_amount" t-value="0.0"/>
+                            <t t-set="sgst_amount" t-value="0.0"/>
+                            <t t-set="igst_amount" t-value="0.0"/>
+
+                            <t t-foreach="o.invoice_line_ids" t-as="line">
+                                <t t-set="taxes"
+                                t-value="line.tax_ids.compute_all(
+                                            line.price_unit,
+                                            o.currency_id,
+                                            line.quantity,                  
+                                            product=line.product_id,
+                                            partner=o.partner_id
+                                        )"/>
+
+                                <t t-foreach="taxes['taxes']" t-as="tax">
+                                    <t t-set="tax_name" t-value="(tax.get('name') or '').upper()"/>
+
+                                    <t t-if="'CGST' in tax_name">
+                                        <t t-set="cgst_amount" t-value="cgst_amount + tax.get('amount', 0.0)"/>
+                                    </t>
+                                    <t t-if="'SGST' in tax_name">
+                                        <t t-set="sgst_amount" t-value="sgst_amount + tax.get('amount', 0.0)"/>
+                                    </t>
+                                    <t t-if="'IGST' in tax_name">
+                                        <t t-set="igst_amount" t-value="igst_amount + tax.get('amount', 0.0)"/>
+                                    </t>
+                                </t>
+                            </t>
+                        </t>
+
+
+
+
+
+                        <!-- ================= ITEMS TABLE ================= -->
+                        <table style="width:100%; border-collapse:collapse; margin-top:0;">
+
+                            <!-- HEADER -->
+                            <tr>
+                                <th class="cell center" style="width:5%;">Sl<br/>No.</th>
+                                <th class="cell" style="width:45%;">Description of Goods</th>
+                                <th class="cell center" style="width:12%;">Quantity</th>
+                                <th class="cell center" style="width:10%;">Rate</th>
+                                <th class="cell center" style="width:6%;">per</th>
+                                <th class="cell center" style="width:12%;">Disc.%</th>
+                                <th class="cell center" style="width:10%;">Amount</th>
+                            </tr>
+
+                            <!-- ROWS -->
+                            <t t-set="slno" t-value="1"/>
+                            <!-- <t t-foreach="o.order_line" t-as="line"> -->
+                            <t t-foreach="o.invoice_line_ids" t-as="line">
+                                <tr>
+                                    <!-- SL NO -->
+                                    <td class="cell center">
+                                        <t t-esc="slno"/>
+                                        <t t-set="slno" t-value="slno + 1"/>
+                                    </td>
+
+                                    <!-- DESCRIPTION -->
+                                    <td class="cell">
+                                        <strong t-esc="line.name"/>
+                                    </td>
+
+                                    <!-- QTY -->
+                                    <td class="cell" style="text-align:right;">
+                                        <strong t-esc="line.quantity"/>
+                                        <t t-if="line.product_uom_id">
+                                            <t t-esc="line.product_uom_id.name or 'Nos.'"/>
+                                        </t>
+                                        <t t-else="">Nos.</t>
+                                    </td>
+
+                                    <!-- RATE -->
+                                    <td class="cell" style="text-align:right;">
+                                        <t t-esc="line.price_unit"/>
+                                    </td>
+
+                                    <!-- PER -->
+                                    <td class="cell center">
+                                        <t t-esc="line.product_uom_id.name or ''"/>
+                                    </td>
+
+                                    <!-- Disc% -->
+                                    <td class="cell center">
+                                        <t t-esc="line.discount"/>
+                                    </td>
+                                    
+                                    <!-- AMOUNT -->
+                                    <td class="cell" style="text-align:right;">
+                                        <t t-esc="line.price_subtotal"/>
+                                    </td>
+                                </tr>
+                            </t>
+
+                            <tr>
+                                <td class="cell" style="height:180px;"></td>
+                                <td class="cell"></td>
+                                <td class="cell"></td>
+                                <td class="cell"></td>
+                                <td class="cell"></td>
+                                <td class="cell"></td>
+                                <td class="cell"></td>
+                            </tr>
+
+                            <tr>
+                                <td class="cell"></td>
+                                <td class="cell" style="text-align:right;"><strong>CGST Input</strong></td>
+                                <td class="cell"></td>
+                                <td class="cell"></td>
+                                <td class="cell"></td>
+                                <td class="cell"></td>
+                                <td class="cell" style="text-align:right;">
+                                    <t t-esc="'%.2f' % cgst_amount"/>
+                                </td>
+                            </tr>
+
+
+                            <tr>
+                                <td class="cell"></td>
+                                <td class="cell" style="text-align:right;"><strong>SGST Input</strong></td>
+                                <td class="cell"></td>
+                                <td class="cell"></td>
+                                <td class="cell"></td>
+                                <td class="cell"></td>
+                                <td class="cell" style="text-align:right;">
+                                    <t t-esc="'%.2f' % sgst_amount"/>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="cell"></td>
+                                <td class="cell" style="text-align:right;"><strong>IGST Input</strong></td>
+                                <td class="cell"></td>
+                                <td class="cell"></td>
+                                <td class="cell"></td>
+                                <td class="cell"></td>
+                                <td class="cell" style="text-align:right;">
+                                    <t t-esc="'%.2f' % igst_amount"/>
+                                </td>
+                            </tr>
+
+                        
+                            <tr>
+                                <td class="cell"></td>
+
+                                <td class="cell" style="text-align:right;">
+                                    <strong>Round Off</strong>
+                                </td>
+
+                                <td class="cell"></td>
+                                <td class="cell"></td>
+                                <td class="cell"></td>
+                                <td class="cell"></td>
+
+                                <td class="cell" style="text-align:right;">
+                                    <strong>
+                                        <t t-esc="'%.2f' % (cgst_amount + sgst_amount + igst_amount)"/>
+                                    </strong>
+                                </td>
+                            </tr>
+
+
+
+
+
+                            <!-- TOTAL ROW -->
+                            <tr>
+                                <td class="cell"></td>
+                                <td class="cell" style="text-align:right;"><strong>Total</strong></td>
+                                <td class="cell" style="text-align:right;">
+                                    <strong>
+                                        <!-- <t t-esc="sum(o.order_line.mapped('product_qty'))"/> Nos. -->
+                                        <t t-esc="sum(o.invoice_line_ids.mapped('quantity'))"/> Nos.
+
+                                    </strong>
+                                </td>
+                                <td class="cell"></td>
+                                <td class="cell"></td>
+                                <td class="cell"></td>
+                                <td class="cell" style="text-align:right;">
+                                    <strong>
+                                        $ <t t-esc="(o.amount_untaxed + cgst_amount + sgst_amount + igst_amount)"/>
+                                    </strong>
+                                </td>
+                            </tr>
+
+
+                        </table>
+
+
+                        <!-- AMOUNT IN WORDS + E.&O.E + SIGNATURE (OUTER BORDER MATCHES SIGNATURE BOTTOM) -->
+                        <table style="width:100%; border-collapse:collapse; margin-top:0;">
+
+                            <!-- ROW 1 -->
+                            <tr>
+                                <td style="
+                                    width:60%;
+                                    vertical-align:top;
+                                    border-top:0.6px solid #777;
+                                    border-left:0.6px solid #777;
+                                    border-right:none;
+                                    border-bottom:none;
+                                    padding:2px 6px;">
+                                    <strong>Amount Chargeable (in words)</strong>
+                                </td>
+
+                                <td style="
+                                    width:40%;
+                                    text-align:right;
+                                    vertical-align:top;
+                                    border-top:0.6px solid #777;
+                                    border-right:0.6px solid #777;
+                                    border-left:none;
+                                    border-bottom:none;
+                                    padding:2px 6px;">
+                                    <em>E. &amp; O.E</em>
+                                </td>
+                            </tr>
+
+                            <!-- ROW 2 (NO BOTTOM BORDER HERE) -->
+                            <tr>
+                                <td style="
+                                    vertical-align:top;
+                                    border-left:0.6px solid #777;
+                                    border-right:none;
+                                    border-top:none;
+                                    border-bottom:none;
+                                    padding:2px 6px;
+                                ">
+                                    <strong>
+                                        <t t-esc="o.currency_id.amount_to_text(o.amount_total)"/>
+                                    </strong>
+                                </td>
+
+                                <td style="
+                                    border-right:0.6px solid #777;
+                                    border-left:none;
+                                    border-top:none;
+                                    border-bottom:none;
+                                    padding:2px 6px;
+                                "></td>
+                            </tr>
+
+                            <!-- NEW ROW: Company's PAN (left) and Bank Details (right) -->
+                            <tr>
+                                
+                                <td style="
+                                    vertical-align:top;
+                                    border-left:0.6px solid #777;
+                                    border-right:none;
+                                    border-top:none;
+                                    border-bottom:none;
+                                    padding:6px;
+                                    font-size:16px;
+                                ">
+                                    <strong>Company's PAN</strong> : <span t-esc="o.company_pan or 'AAECD5705A'"/>
+                                </td>
+
+                                <td style="
+                                    vertical-align:top;
+                                    border-right:0.6px solid #777;
+                                    border-left:none;
+                                    border-top:none;
+                                    border-bottom:none;
+                                    padding:6px;
+                                    font-size:16px;
+                                ">
+                                    <strong>Bank's Detail</strong><br/>
+                                    <t t-if="o.company_id.bank_ids">
+                                        <t t-set="bank" t-value="o.company_id.bank_ids[0]"/>
+                                        Bank Name : <span t-esc="bank.bank_id.name or 'Deutsche Bank'"/><br/>
+                                        A/c No. : <span t-esc="bank.acc_number or '600240600-0-0'"/><br/>
+                                        Branch &amp; IFS Code : <span t-esc="bank.bank_id.street or 'Aundh Branch, Pune'"/> &amp; <span t-esc="bank.bank_id.bic or 'DEUT0537PUN'"/>
+                                    </t>
+                                    <t t-else="">
+                                        <!-- Fallback if no bank configured -->
+                                        Bank Name : Deutsche Bank<br/>
+                                        A/c No. : 600240600-0-0<br/>
+                                        Branch &amp; IFS Code : Aundh Branch, Pune &amp; DEUT0537PUN
+                                    </t>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="border-left:0.6px solid #777; height:20px;"></td>
+                                <td style="border-right:0.6px solid #777; height:20px;"></td>
+                            </tr>
+                            
+
+                            <!-- ROW 3 : SIGNATURE (PROVIDES FINAL BOTTOM BORDER) -->
+                            <tr>
+                                <td style="
+                                    border-left:0.6px solid #777;
+                                    border-top:none;
+                                    border-right:none;
+                                    border-bottom:none;
+                                "></td>
+                                <td class="cell" style="text-align:right; vertical-align:bottom; height:10px;">
+                                    <strong>for Duisport Packing Logistics India Pvt. Ltd.</strong><br/><br/><br/>
+                                    Authorised Signatory
+                                </td>
+                            </tr>
+                            <!-- OUTER BOTTOM BORDER (FULL WIDTH) -->
+                            <tr>
+                                <td colspan="2" style="
+                                    border-left:0.6px solid #777;
+                                    border-right:0.6px solid #777;
+                                    border-bottom:0.6px solid #777;
+                                    padding:0;
+                                    height:0;
+                                "></td>
+                            </tr>
+
+
+                        </table>
+
+                        <!-- COMPUTER GENERATED NOTE (CENTERED) -->
+                        <tr>
+                            <td colspan="2" style="
+                                border-left:0.6px solid #777;
+                                border-right:0.6px solid #777;
+                                border-top:none;
+                                border-bottom:0.6px solid #777;
+                                padding:8px;">
+                                
+                                <div style="
+                                    width:100%;
+                                    text-align:center;
+                                    font-size:13px;
+                                    color:#555;
+                                ">
+                                    This is a Computer Generated Document
+                                </div>
+                            </td>
+                        </tr>
+                    </div>
+                 
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_vendor_debit_note" model="ir.actions.report">
+        <field name="name">Print Debit Note</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">all_reports_full.report_vendor_debit_note</field>
+        <field name="report_file">all_reports_full.report_vendor_debit_note</field>
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Debit Note - %s' % (object.name or '')</field>
+    </record>
+
+</odoo>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

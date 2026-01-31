@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="voucher_type_receipt" model="voucher.type">
+            <field name="name">Receipt</field>
+            <field name="code">receipt</field>
+            <field name="active">True</field>
+        </record>
+        <record id="voucher_type_payment" model="voucher.type">
+            <field name="name">Payment</field>
+            <field name="code">payment</field>
+            <field name="active">True</field>
+        </record>
+        <record id="voucher_type_contra" model="voucher.type">
+            <field name="name">Contra</field>
+            <field name="code">contra</field>
+            <field name="active">True</field>
+        </record>
+        <record id="voucher_type_journal" model="voucher.type">
+            <field name="name">Journal</field>
+            <field name="code">journal</field>
+            <field name="active">True</field>
+        </record>
+    </data>
+</odoo>

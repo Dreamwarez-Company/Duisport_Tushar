@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- General Ledger Report Form View -->
+    <record id="view_general_ledger_report_form" model="ir.ui.view">
+        <field name="name">general.ledger.report.form</field>
+        <field name="model">general.ledger.report</field>
+        <field name="arch" type="xml">
+            <form string="General Ledger Report">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="start_date"/>
+                        </group>
+                        <group>
+                            <field name="end_date"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Report Data">
+                            <field name="line_ids">
+                                <tree>
+                                    <field name="date"/>
+                                    <field name="journal"/>
+                                    <field name="account_code"/>
+                                    <field name="account_name"/>
+                                    <field name="partner"/>
+                                    <field name="label"/>
+                                    <field name="debit" sum="Total Debit"/>
+                                    <field name="credit" sum="Total Credit"/>
+                                    <field name="balance"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                
+                <footer>
+                    <button string="View Report" type="object" name="action_view_report" class="btn-primary"/>
+                    <button string="Download Excel" type="object" name="action_download_xlsx" class="btn-success"/>
+                    <button string="Download PDF" type="object" name="action_download_pdf" class="btn-info"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- General Ledger Report Action -->
+    <record id="action_general_ledger_report" model="ir.actions.act_window">
+        <field name="name">General Ledger</field>
+        <field name="res_model">general.ledger.report</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_general_ledger_report" 
+              name="General Ledger" 
+              parent="account.menu_finance_reports" 
+              action="action_general_ledger_report" 
+              sequence="10"/>
+
+    <!-- PDF Report Definition -->
+    <record id="report_general_ledger_pdf" model="ir.actions.report">
+        <field name="name">General Ledger PDF</field>
+        <field name="model">general.ledger.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">all_reports_full.general_ledger_pdf_template</field>
+        <field name="report_file">all_reports_full.general_ledger_pdf_template</field>
+        <field name="binding_model_id" ref="model_general_ledger_report"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- PDF Template -->
+    <template id="general_ledger_pdf_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>General Ledger Report</h2>
+                        <p>
+                            <strong>Period:</strong> 
+                            <span t-esc="o.start_date"/> to <span t-esc="o.end_date"/>
+                        </p>
+
+                        <table class="table table-bordered table-sm mt-4">
+                            <thead style="background-color: #f0f0f0;">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Journal</th>
+                                    <th>Account</th>
+                                    <th>Partner</th>
+                                    <th>Label</th>
+                                    <th class="text-right">Debit</th>
+                                    <th class="text-right">Credit</th>
+                                    <th class="text-right">Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="balance" t-value="0"/>
+                                <t t-set="current_account" t-value="False"/>
+                                <t t-foreach="o.get_report_data()" t-as="line">
+                                    <t t-if="current_account != line.account_id.id">
+                                        <t t-set="balance" t-value="0"/>
+                                        <t t-set="current_account" t-value="line.account_id.id"/>
+                                    </t>
+                                    <t t-set="balance" t-value="balance + line.debit - line.credit"/>
+                                    <tr>
+                                        <td><span t-field="line.date"/></td>
+                                        <td><span t-field="line.move_id.journal_id.name"/></td>
+                                        <td>
+                                            <span t-field="line.account_id.code"/> - 
+                                            <span t-field="line.account_id.name"/>
+                                        </td>
+                                        <td><span t-field="line.partner_id.name"/></td>
+                                        <td><span t-field="line.name"/></td>
+                                        <td class="text-right"><span t-esc="'%.2f' % line.debit"/></td>
+                                        <td class="text-right"><span t-esc="'%.2f' % line.credit"/></td>
+                                        <td class="text-right"><span t-esc="'%.2f' % balance"/></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

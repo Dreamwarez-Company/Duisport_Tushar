@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Stock Register Report Form View -->
+    <record id="view_stock_register_report_form" model="ir.ui.view">
+        <field name="name">stock.register.report.form</field>
+        <field name="model">stock.register.report</field>
+        <field name="arch" type="xml">
+            <form string="Stock Register Report">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Stock Register Report</h1>
+                    </div>
+                    
+                    <group>
+                        <group string="Date Filters">
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                        <group string="Product Filters">
+                            <field name="product_ids" widget="many2many_tags" 
+                                   options="{'no_create': True}"
+                                   placeholder="All Products"/>
+                            <field name="category_ids" widget="many2many_tags" 
+                                   options="{'no_create': True}"
+                                   placeholder="All Categories"/>
+                        </group>
+                    </group>
+                    
+                    <field name="report_generated" invisible="1"/>
+                    
+                    <notebook invisible="report_generated == False">
+                        <page string="Report Data">
+                            <field name="line_ids">
+                                <tree decoration-info="status == 'done'" 
+                                      decoration-muted="status == 'cancel'"
+                                      create="false" edit="false" delete="false">
+                                    <field name="date"/>
+                                    <field name="reference"/>
+                                    <field name="product_name"/>
+                                    <field name="sku"/>
+                                    <field name="category"/>
+                                    <field name="quantity" sum="Total Quantity"/>
+                                    <field name="uom"/>
+                                    <field name="source_location"/>
+                                    <field name="dest_location"/>
+                                    <field name="status"/>
+                                </tree>
+                            </field>
+                            
+                            <!-- <div class="mt-3">
+                                <p class="text-muted">
+                                    <i class="fa fa-info-circle"/> Total Records: <field name="line_ids" readonly="1" 
+                                    widget="statinfo" string="Records" invisible="1"/>
+                                    <strong><t t-esc="len(line_ids)"/></strong>
+                                </p>
+                            </div> -->
+                        </page>
+                    </notebook>
+                </sheet>
+                
+                <footer>
+                    <!-- Generate Report Button - Primary action -->
+                    <button string="Generate Report" 
+                            type="object" 
+                            name="action_generate_report" 
+                            class="btn-primary"
+                            invisible="report_generated == True"/>
+                    
+                    <!-- Download Buttons - Only visible after report is generated -->
+                    <!-- <button string="Download Excel" 
+                            type="object" 
+                            name="action_download_xlsx" 
+                            class="btn-success"
+                            icon="fa-file-excel-o"
+                            attrs="{'invisible': [('report_generated', '=', False)]}"/> -->
+                    
+                    <button string="Download PDF" 
+                            type="object" 
+                            name="action_download_pdf" 
+                            class="btn-info"
+                            icon="fa-file-pdf-o"
+                            invisible="report_generated == False"/>
+                    
+                    <!-- Regenerate Button -->
+                    <!-- <button string="Regenerate Report" 
+                            type="object" 
+                            name="action_generate_report" 
+                            class="btn-warning"
+                            attrs="{'invisible': [('report_generated', '=', False)]}"/> -->
+                    
+                    <button string="Close" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Stock Register Report Action -->
+    <record id="action_stock_register_report" model="ir.actions.act_window">
+        <field name="name">Stock Register Report</field>
+        <field name="res_model">stock.register.report</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{}</field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_stock_register_report" 
+              name="Stock Register" 
+              parent="stock.menu_warehouse_report" 
+              action="action_stock_register_report" 
+              sequence="20"/>
+
+    <!-- PDF Report Definition -->
+    <record id="report_stock_register_pdf" model="ir.actions.report">
+        <field name="name">Stock Register PDF</field>
+        <field name="model">stock.register.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">all_reports_full.stock_register_pdf_template</field>
+        <field name="report_file">all_reports_full.stock_register_pdf_template</field>
+        <field name="binding_model_id" ref="model_stock_register_report"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+
+    <!-- PDF Template -->
+    <template id="stock_register_pdf_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="text-center">
+                            <h2>Stock Register Report</h2>
+                        </div>
+                        
+                        <div class="row mt-3 mb-3">
+                            <div class="col-6">
+                                <strong>Period:</strong> 
+                                <span t-esc="o.start_date"/> to <span t-esc="o.end_date"/>
+                            </div>
+                            <div class="col-6 text-right">
+                                <strong>Generated:</strong> 
+                                <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"/>
+                            </div>
+                        </div>
+                        
+                        <!-- Filters Applied -->
+                        <div class="row mb-3" t-if="o.product_ids or o.category_ids">
+                            <div class="col-12">
+                                <strong>Filters Applied:</strong>
+                                <ul style="margin-top: 5px;">
+                                    <li t-if="o.product_ids">
+                                        Products: <t t-esc="', '.join(o.product_ids.mapped('name'))"/>
+                                    </li>
+                                    <li t-if="o.category_ids">
+                                        Categories: <t t-esc="', '.join(o.category_ids.mapped('name'))"/>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <table class="table table-bordered table-sm mt-4">
+                            <thead style="background-color: #875a7b; color: white;">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Reference</th>
+                                    <th>Product</th>
+                                    <th>SKU</th>
+                                    <th>Category</th>
+                                    <th class="text-right">Quantity</th>
+                                    <th>UOM</th>
+                                    <th>Source</th>
+                                    <th>Destination</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="total_qty" t-value="0"/>
+                                <t t-foreach="o.get_report_data()" t-as="move">
+                                    <tr>
+                                        <td><span t-field="move.date"/></td>
+                                        <td><span t-esc="move.reference or move.picking_id.name or ''"/></td>
+                                        <td><span t-field="move.product_id.name"/></td>
+                                        <td><span t-field="move.product_id.default_code"/></td>
+                                        <td><span t-field="move.product_id.categ_id.name"/></td>
+                                        <td class="text-right">
+                                            <span t-field="move.product_uom_qty"/>
+                                            <t t-set="total_qty" t-value="total_qty + move.product_uom_qty"/>
+                                        </td>
+                                        <td><span t-field="move.product_uom.name"/></td>
+                                        <td><span t-esc="move.location_id.complete_name"/></td>
+                                        <td><span t-esc="move.location_dest_id.complete_name"/></td>
+                                        <td><span t-field="move.state"/></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            <tfoot style="background-color: #f0f0f0; font-weight: bold;">
+                                <tr>
+                                    <td colspan="5" class="text-right">Total:</td>
+                                    <td class="text-right"><t t-esc="'%.2f' % total_qty"/></td>
+                                    <td colspan="4"></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

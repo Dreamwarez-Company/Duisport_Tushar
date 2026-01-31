@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Admin: sees all leads -->
+    <record id="rule_dw_crm_admin" model="ir.rule">
+        <field name="name">Admin: all crm leads</field>
+        <field name="model_id" ref="crm.model_crm_lead"/>
+        <field name="groups" eval="[(4, ref('dw_crm.group_crm_admin'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field> 
+    </record>
+
+    <!-- Sales Team sees limited stages -->
+    <record id="rule_crm_stage_sales_team" model="ir.rule">
+        <field name="name">Sales Team: Limited CRM Stages</field>
+        <field name="model_id" ref="crm.model_crm_stage"/>
+        <field name="groups" eval="[(4, ref('dw_crm.group_crm_sales_team'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field> 
+        <!-- <field name="domain_force">[('name','in',['New','Analysis Done','Quotation Sent','Won'])]</field> -->
+    </record>
+
+
+</odoo>

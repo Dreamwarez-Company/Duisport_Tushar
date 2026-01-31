@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- GR/IR Report Form View -->
+    <record id="view_gr_ir_report_form" model="ir.ui.view">
+        <field name="name">gr.ir.report.form</field>
+        <field name="model">gr.ir.report</field>
+        <field name="arch" type="xml">
+            <form string="GR/IR Report">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="start_date"/>
+                        </group>
+                        <group>
+                            <field name="end_date"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Report Data">
+                            <field name="line_ids">
+                                <tree decoration-danger="difference &gt; 0" decoration-success="difference &lt; 0">
+                                    <field name="po_number"/>
+                                    <field name="vendor"/>
+                                    <field name="product_name"/>
+                                    <field name="ordered_qty"/>
+                                    <field name="received_qty"/>
+                                    <field name="invoiced_qty"/>
+                                    <field name="difference"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                
+                <footer>
+                    <button string="View Report" type="object" name="action_view_report" class="btn-primary"/>
+                    <button string="Download PDF" type="object" name="action_download_pdf" class="btn-info"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- GR/IR Report Action -->
+    <record id="action_gr_ir_report" model="ir.actions.act_window">
+        <field name="name">GR/IR Report</field>
+        <field name="res_model">gr.ir.report</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_gr_ir_report" 
+              name="GR/IR Report" 
+              parent="account.menu_finance_reports" 
+              action="action_gr_ir_report" 
+              sequence="10"/>
+
+    <!-- PDF Report Definition -->
+    <record id="report_gr_ir_pdf" model="ir.actions.report">
+        <field name="name">GR/IR Report PDF</field>
+        <field name="model">gr.ir.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">all_reports_full.gr_ir_pdf_template</field>
+        <field name="report_file">all_reports_full.gr_ir_pdf_template</field>
+        <field name="binding_model_id" ref="model_gr_ir_report"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- PDF Template -->
+    <template id="gr_ir_pdf_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Goods Receipt / Invoice Receipt (GR/IR) Report</h2>
+                        <p>
+                            <strong>Period:</strong> 
+                            <span t-esc="o.start_date"/> to <span t-esc="o.end_date"/>
+                        </p>
+                        
+                        <table class="table table-bordered table-sm mt-4">
+                            <thead style="background-color: #f0f0f0;">
+                                <tr>
+                                    <th>Purchase Order</th>
+                                    <th>Vendor</th>
+                                    <th>Product</th>
+                                    <th class="text-right">Ordered Qty</th>
+                                    <th class="text-right">Received Qty</th>
+                                    <th class="text-right">Invoiced Qty</th>
+                                    <th class="text-right">Difference</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="o.get_report_data()" t-as="po">
+                                    <t t-foreach="po.order_line" t-as="line">
+                                        <t t-set="difference" t-value="line.qty_received - line.qty_invoiced"/>
+                                        <tr t-if="difference != 0">
+                                            <td><span t-field="po.name"/></td>
+                                            <td><span t-field="po.partner_id.name"/></td>
+                                            <td><span t-field="line.product_id.name"/></td>
+                                            <td class="text-right"><span t-field="line.product_qty"/></td>
+                                            <td class="text-right"><span t-field="line.qty_received"/></td>
+                                            <td class="text-right"><span t-field="line.qty_invoiced"/></td>
+                                            <td class="text-right" t-attf-style="color: #{difference > 0 and 'red' or 'green'};">
+                                                <span t-esc="'%.2f' % difference"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </t>  
+                            </tbody>
+                        </table>
+                        
+                        <p style="margin-top: 20px;">
+                            <small>
+                                <strong>Note:</strong> 
+                                <span style="color: red;">Positive difference</span> indicates goods received but not yet invoiced. 
+                                <span style="color: green;">Negative difference</span> indicates invoiced quantities exceeding received quantities.
+                            </small>
+                        </p>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

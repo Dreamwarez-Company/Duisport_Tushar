@@ -1,0 +1,15 @@
+<odoo>
+    <data>
+        <!-- Report Action -->
+        <record id="action_report_wip_valuation" model="ir.actions.report">
+            <field name="name">WIP Valuation Report</field>
+            <field name="model">wip.valuation.wizard</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">dw_customer_credit.report_wip_valuation_template</field>
+            <field name="report_file">dw_customer_credit.report_wip_valuation_template</field>
+            <field name="print_report_name">'WIP Valuation Report - %s to %s' % (object.start_date, object.end_date)</field>
+            <field name="binding_model_id" ref="model_wip_valuation_wizard"/>
+            <field name="binding_type">report</field>
+        </record>
+    </data>
+</odoo>

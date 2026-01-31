@@ -1,0 +1,46 @@
+<odoo>
+  <data>
+
+    <record id="stage_new" model="crm.stage">
+        <field name="name">New</field>
+        <field name="sequence">1</field>
+        <field name="fold">False</field>
+        <field name="team_id" eval="False"/>
+        <!-- <field name="allowed_group_ids" eval="[(6,0,[ref('dw_crm.group_crm_sales_team'), ref('dw_crm.group_crm_admin')])]"/> -->
+    </record>
+
+    <record id="stage_send_for_analysis" model="crm.stage">
+        <field name="name">Send for Analysis</field>
+        <field name="sequence">2</field>
+        <field name="fold">False</field>
+        <field name="team_id" eval="False"/>
+        <!-- <field name="allowed_group_ids" eval="[(6,0,[ref('dw_crm.group_crm_engineering_team'), ref('dw_crm.group_crm_admin')])]"/> -->
+    </record>
+
+    <record id="stage_analysis_done" model="crm.stage">
+        <field name="name">Analysis Done</field>
+        <field name="sequence">3</field>
+        <field name="fold">False</field>
+        <field name="team_id" eval="False"/>
+        <!-- <field name="allowed_group_ids" eval="[(6,0,[ref('dw_crm.group_crm_sales_team'), ref('dw_crm.group_crm_admin')])]"/> -->
+    </record>
+
+    <record id="stage_quotation_sent" model="crm.stage">
+        <field name="name">Quotation Sent</field>
+        <field name="sequence">4</field>
+        <field name="fold">False</field>
+        <field name="team_id" eval="False"/>
+        <!-- <field name="allowed_group_ids" eval="[(6,0,[ref('dw_crm.group_crm_sales_team'), ref('dw_crm.group_crm_admin')])]"/> -->
+    </record>
+
+    <record id="stage_won" model="crm.stage">
+        <field name="name">Won</field>
+        <field name="sequence">5</field>
+        <field name="fold">True</field>
+        <field name="is_won">True</field>
+        <field name="team_id" eval="False"/>
+        <!-- <field name="allowed_group_ids" eval="[(6,0,[ref('dw_crm.group_crm_sales_team'), ref('dw_crm.group_crm_admin')])]"/> -->
+    </record>
+
+  </data>
+</odoo>

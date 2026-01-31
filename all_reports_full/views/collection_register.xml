@@ -1,0 +1,112 @@
+<odoo>
+
+    <!-- WIZARD FORM VIEW -->
+    <record id="view_collection_register_wizard" model="ir.ui.view">
+        <field name="name">collection.register.wizard.form</field>
+        <field name="model">collection.register.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Collection Register">
+                <group>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                    <field name="partner_ids" widget="many2many_tags"/>
+                </group>
+
+                <notebook>
+                    <page string="Payment Records">
+                        <field name="payment_ids" nolabel="1">
+                            <tree create="false" edit="false" delete="false">
+                                <field name="date"/>
+                                <field name="partner_id"/>
+                                <field name="amount"/>
+                                <field name="journal_id"/>
+                                <field name="ref"/>
+                                <field name="state"/>
+                            </tree>
+                        </field>
+                    </page>
+                </notebook>
+
+                <footer>
+                    <button name="action_view_payments"
+                            type="object"
+                            string="View Records"
+                            class="btn-secondary"/>
+                    <button name="action_print_collection_register"
+                            type="object"
+                            string="Print Report"
+                            class="btn-primary"/>
+                    <button special="cancel" string="Cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- WIZARD ACTION -->
+    <record id="action_collection_register_report_wizard" model="ir.actions.act_window">
+        <field name="name">Collection Register</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">collection.register.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- TEMPLATE -->
+    <template id="collection_register_template">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h2>Collection Register</h2>
+ 
+                    <p>
+                        <strong>From:</strong>
+                        <t t-esc="date_from"/>  
+                        <strong>To:</strong>
+                        <t t-esc="date_to"/>
+                    </p>
+
+                    <table class="table table-sm o_main_table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Customer</th>
+                                <th>Amount</th>
+                                <th>Journal</th>
+                                <th>Reference</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="payments" t-as="p">
+                                <tr>
+                                    <td><t t-esc="p.date"/></td>
+                                    <td><t t-esc="p.partner_id.name"/></td>
+                                    <td><t t-esc="p.amount"/></td>
+                                    <td><t t-esc="p.journal_id.name"/></td>
+                                    <td><t t-esc="p.ref"/></td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- REPORT ACTION -->
+    <record id="collection_register_pdf_report_action" model="ir.actions.report">
+        <field name="name">Collection Register</field>
+        <field name="model">collection.register.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">all_reports_full.collection_register_template</field>
+        <field name="report_file">all_reports_full.collection_register_template</field>
+        <field name="print_report_name">Collection Register</field>
+    </record>
+
+    <!-- MENU ITEM -->
+    <menuitem id="menu_collection_register_report"
+              name="Collection Register"
+              parent="account.account_reports_management_menu"
+              action="action_collection_register_report_wizard"
+              sequence="20"/>
+
+</odoo>

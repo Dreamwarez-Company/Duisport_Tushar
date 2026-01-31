@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_inventory_costing_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <html>
+                    <head>
+                        <meta charset="utf-8"/>
+                        <style>
+                            body { font-family: Arial, sans-serif; font-size: 12px; margin: 0; padding: 20px; }
+                            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+                            .company-header { font-size: 20px; font-weight: bold; }
+                            .report-title { font-size: 16px; margin: 10px 0; }
+                            .report-info { font-size: 12px; margin: 5px 0; }
+                            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                            th { background-color: #f2f2f2; padding: 8px; text-align: left; border: 1px solid #ddd; font-weight: bold; }
+                            td { padding: 8px; border: 1px solid #ddd; }
+                            .text-right { text-align: right; }
+                            .text-center { text-align: center; }
+                            .footer { margin-top: 30px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 10px; color: #666; }
+                            .summary-box { background-color: #f9f9f9; padding: 15px; border: 1px solid #ddd; margin: 20px 0; }
+                            .summary-title { font-weight: bold; margin-bottom: 10px; }
+                        </style>
+                    </head>
+                    <body>
+                        <!-- Header -->
+                        <div class="header">
+                            <div class="company-header">
+                                <t t-esc="company.name"/>
+                            </div>
+                            <div class="report-title">INVENTORY &amp; COSTING REPORT</div>
+                            <div class="report-info">
+                                <p>Report Type: <strong><t t-esc="report_type.upper()"/> REPORT</strong></p>
+                                <t t-if="start_date">
+                                    <p>Period: <t t-esc="start_date"/> to <t t-esc="end_date"/></p>
+                                </t>
+                                <p>Generated on: <t t-esc="current_date"/></p>
+                            </div>
+                        </div>
+
+                        <!-- Summary Report -->
+                        <t t-if="report_type == 'summary'">
+                            <div class="summary-box">
+                                <div class="summary-title">Inventory Summary</div>
+                                <p>Total Products: <strong><t t-esc="len(report_data.get('summary_data', []))"/></strong></p>
+                                <p>Total Inventory Value: <strong><t t-esc="'%.2f' % report_data.get('total_value', 0)"/></strong></p>
+                            </div>
+                            
+                            <t t-set="summary_items" t-value="report_data.get('summary_data', [])"/>
+                            
+                            <t t-if="summary_items and len(summary_items) > 0">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>No.</th>
+                                            <th>Product Name</th>
+                                            <th>Category</th>
+                                            <th>UOM</th>
+                                            <th class="text-right">Quantity</th>
+                                            <th class="text-right">Unit Cost</th>
+                                            <th class="text-right">Total Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="summary_items" t-as="item">
+                                            <t t-set="index" t-value="item_index + 1"/>
+                                            <tr>
+                                                <td class="text-center"><t t-esc="index"/></td>
+                                                <td><t t-esc="item.get('product_name', '')"/></td>
+                                                <td><t t-esc="item.get('category', '')"/></td>
+                                                <td><t t-esc="item.get('uom', '')"/></td>
+                                                <td class="text-right"><t t-esc="item.get('quantity', 0)"/></td>
+                                                <td class="text-right"><t t-esc="'%.2f' % item.get('unit_cost', 0)"/></td>
+                                                <td class="text-right"><t t-esc="'%.2f' % item.get('total_value', 0)"/></td>
+                                            </tr>
+                                        </t>
+                                        <tr style="font-weight: bold; background-color: #f0f0f0;">
+                                            <td colspan="6" class="text-right">TOTAL INVENTORY VALUE:</td>
+                                            <td class="text-right">
+                                                <t t-esc="'%.2f' % report_data.get('total_value', 0)"/>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </t>
+                            <t t-else="">
+                                <div class="text-center" style="padding: 40px; color: #666;">
+                                    <h3>No Inventory Data Found</h3>
+                                    <p>No products with inventory were found matching your criteria.</p>
+                                </div>
+                            </t>
+                        </t>
+
+                        <!-- Detailed Report -->
+                        <t t-if="report_type == 'detailed'">
+                            <div class="summary-box">
+                                <div class="summary-title">Transaction Summary</div>
+                                <p>Total Transactions: <strong><t t-esc="len(report_data.get('transactions', []))"/></strong></p>
+                                <p>Total Transaction Value: <strong><t t-esc="'%.2f' % report_data.get('total_cost', 0)"/></strong></p>
+                            </div>
+                            
+                            <t t-set="transactions" t-value="report_data.get('transactions', [])"/>
+                            
+                            <t t-if="transactions and len(transactions) > 0">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>No.</th>
+                                            <th>Date</th>
+                                            <th>Product Name</th>
+                                            <th>Reference</th>
+                                            <th>Type</th>
+                                            <th class="text-right">Quantity</th>
+                                            <th class="text-right">Unit Cost</th>
+                                            <th class="text-right">Total Cost</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="transactions" t-as="txn">
+                                            <t t-set="index" t-value="txn_index + 1"/>
+                                            <tr>
+                                                <td class="text-center"><t t-esc="index"/></td>
+                                                <td><t t-esc="txn.get('date', '')"/></td>
+                                                <td><t t-esc="txn.get('product_name', '')"/></td>
+                                                <td><t t-esc="txn.get('reference', '')"/></td>
+                                                <td><t t-esc="txn.get('move_type', '')"/></td>
+                                                <td class="text-right"><t t-esc="txn.get('quantity', 0)"/></td>
+                                                <td class="text-right"><t t-esc="'%.2f' % txn.get('unit_cost', 0)"/></td>
+                                                <td class="text-right"><t t-esc="'%.2f' % txn.get('total_cost', 0)"/></td>
+                                            </tr>
+                                        </t>
+                                        <tr style="font-weight: bold; background-color: #f0f0f0;">
+                                            <td colspan="7" class="text-right">TOTAL TRANSACTION VALUE:</td>
+                                            <td class="text-right">
+                                                <t t-esc="'%.2f' % report_data.get('total_cost', 0)"/>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </t>
+                            <t t-else="">
+                                <div class="text-center" style="padding: 40px; color: #666;">
+                                    <h3>No Transactions Found</h3>
+                                    <p>No inventory transactions were found in the selected period.</p>
+                                </div>
+                            </t>
+                        </t>
+
+                        <!-- Footer -->
+                        <div class="footer">
+                            <p>Generated by <t t-esc="company.name"/> | Page 1</p>
+                        </div>
+                    </body>
+                </html>
+            </t>
+        </t>
+    </template>
+
+    <!-- Report Action - Make sure this is properly defined -->
+    <!-- <record id="action_report_inventory_costing" model="ir.actions.report">
+        <field name="name">Inventory &amp; Costing Report</field>
+        <field name="model">inventory.costing.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">dw_customer_credit.report_inventory_costing_template</field>
+        <field name="print_report_name">'Inventory &amp; Costing Report'</field>
+        <field name="binding_model_id" eval="False"/>
+        <field name="binding_type">report</field>
+    </record> -->
+
+    <record id="action_report_inventory_costing" model="ir.actions.report">
+        <field name="name">Inventory &amp; Costing Report</field>
+        <field name="model">inventory.costing.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">dw_customer_credit.report_inventory_costing_template</field>
+        <field name="binding_model_id" eval="False"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

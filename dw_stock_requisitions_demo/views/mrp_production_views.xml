@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Extend MRP Production Form View to Add Requisition Button -->
+    <record id="view_mrp_production_form_inherit_dw_requisition" model="ir.ui.view">
+        <field name="name">mrp.production.form.inherit.dw.requisition</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/button[@name='action_open_label_type']" position="after">
+                
+                <button name="action_create_requisition" string="Requisition" type="object" class="btn-primary" 
+                    groups="dw_stock_requisitions_demo.group_manufacturing_team,dw_stock_requisitions_demo.group_inventory_team,dw_stock_requisitions_demo.group_manufacturing_requisition_admin"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

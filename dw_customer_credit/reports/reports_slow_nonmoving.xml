@@ -1,0 +1,658 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <template id="report_slow_nonmoving_template">
+            <t t-call="web.external_layout">
+                <t t-set="o" t-value="docs[0]" />
+                <t t-set="today" t-value="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y')" />
+
+                <main class="page">
+                    <!-- Header -->
+                    <div class="text-center mb-5 mt-4">
+                        <h2>Slow / Non-Moving Inventory Aging Report</h2>
+                        <h4>Lot-Level Tracking Analysis</h4>
+                    </div>
+
+                    <!-- Report Header Info -->
+                    <div class="row mb-4">
+                        <div class="col-4">
+                            <strong>Report Date:</strong> <span t-esc="today"/><br/>
+                            <strong>Location:</strong> 
+                            <t t-if="location_info">
+                                <span t-esc="location_info"/>
+                            </t>
+                            <t t-else="">
+                                All Locations
+                            </t><br/>
+                            <strong>Category:</strong> <span t-esc="product_category"/>
+                        </div>
+                        <div class="col-4">
+                            <strong>Slow Moving ≥</strong> <span t-esc="slow_days"/> days<br/>
+                            <strong>Non-Moving ≥</strong> <span t-esc="non_moving_days"/> days<br/>
+                            <strong>Total Products:</strong> <span t-esc="len(lines)"/>
+                        </div>
+                        <div class="col-4 text-end">
+                            <strong>Action Plan Thresholds:</strong><br/>
+                            15 Days: <span t-esc="thresholds['15']"/> | 
+                            30 Days: <span t-esc="thresholds['30']"/> | 
+                            60 Days: <span t-esc="thresholds['60']"/><br/>
+                            120 Days: <span t-esc="thresholds['120']"/> | 
+                            180 Days: <span t-esc="thresholds['180']"/>
+                        </div>
+                    </div>
+
+                    <!-- Summary Statistics -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body py-2">
+                                    <div class="row text-center">
+                                        <div class="col">
+                                            <h5 class="mb-0"><span t-esc="'{0:,.2f}'.format(total_summary['total_qty'])"/></h5>
+                                            <small class="text-muted">Total Quantity</small>
+                                        </div>
+                                        <div class="col">
+                                            <h5 class="mb-0"><span t-esc="'{0:,.2f}'.format(total_summary['total_value'])"/></h5>
+                                            <small class="text-muted">Total Value</small>
+                                        </div>
+                                        <div class="col">
+                                            <h5 class="mb-0"><span t-esc="total_summary['total_lots']"/></h5>
+                                            <small class="text-muted">Total Lots/Serials</small>
+                                        </div>
+                                        <div class="col">
+                                            <h5 class="mb-0 text-warning"><span t-esc="total_summary['slow_moving_count']"/></h5>
+                                            <small class="text-muted">Slow Moving Products</small>
+                                        </div>
+                                        <div class="col">
+                                            <h5 class="mb-0 text-danger"><span t-esc="total_summary['non_moving_count']"/></h5>
+                                            <small class="text-muted">Non-Moving Products</small>
+                                        </div>
+                                        <div class="col">
+                                            <h5 class="mb-0 text-success"><span t-esc="total_summary['active_count']"/></h5>
+                                            <small class="text-muted">Active Products</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Age Bucket Summary -->
+                    <t t-if="show_age_buckets and all_age_buckets and lines">
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5>Inventory Age Distribution</h5>
+                                <table class="table table-bordered table-sm">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Age Bucket</th>
+                                            <th class="text-end">Quantity</th>
+                                            <th class="text-end">Value</th>
+                                            <th class="text-end">% of Total Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="['0-15 Days', '16-30 Days', '31-60 Days', '61-120 Days', '121-180 Days', '180+ Days']" t-as="bucket_name">
+                                            <t t-set="bucket" t-value="all_age_buckets.get(bucket_name, {'qty': 0, 'value': 0})"/>
+                                            <tr>
+                                                <td><strong><span t-esc="bucket_name"/></strong></td>
+                                                <td class="text-end"><span t-esc="'{0:,.2f}'.format(bucket['qty'])"/></td>
+                                                <td class="text-end"><span t-esc="'{0:,.2f}'.format(bucket['value'])"/></td>
+                                                <td class="text-end">
+                                                    <t t-set="percent" t-value="(bucket['value'] / total_summary['total_value'] * 100) if total_summary['total_value'] > 0 else 0"/>
+                                                    <span t-esc="'{0:,.1f}'.format(percent)"/>%
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Main Product List -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5>Product Aging Details</h5>
+                            <table class="table table-bordered table-sm table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Code</th>
+                                        <th>Category</th>
+                                        <th class="text-end">Total Qty</th>
+                                        <th class="text-end">Total Value</th>
+                                        <th class="text-center">Oldest Lot</th>
+                                        <th class="text-end">Days</th>
+                                        <th class="text-center">Newest Lot</th>
+                                        <th class="text-end">Days</th>
+                                        <th class="text-center">Lots</th>
+                                        <th class="text-center">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="lines" t-as="line">
+                                        <!-- Product row -->
+                                        <tr class="product-group">
+                                            <td><span t-esc="line['product']"/></td>
+                                            <td><span t-esc="line['code']"/></td>
+                                            <td><span t-esc="line['category']"/></td>
+                                            <td class="text-end"><span t-esc="'{0:,.2f}'.format(line['total_qty'])"/></td>
+                                            <td class="text-end"><span t-esc="'{0:,.2f}'.format(line['total_value'])"/></td>
+                                            <td class="text-center">
+                                                <t t-if="line.get('oldest_date')">
+                                                    <div><small>
+                                                        <t t-if="hasattr(line['oldest_date'], 'strftime')">
+                                                            <span t-esc="line['oldest_date'].strftime('%d/%m/%Y')"/>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <span t-esc="line['oldest_date']"/>
+                                                        </t>
+                                                    </small></div>
+                                                    <t t-if="line.get('oldest_lot')">
+                                                        <div><small class="text-muted">Lot: <span t-esc="line['oldest_lot']"/></small></div>
+                                                    </t>
+                                                    <t t-if="line.get('oldest_reference')">
+                                                        <div><small class="text-muted">Ref: <span t-esc="line['oldest_reference']"/></small></div>
+                                                    </t>
+                                                </t>
+                                                <t t-else="">Never</t>
+                                            </td>
+                                            <td class="text-end font-weight-bold">
+                                                <span t-esc="line['oldest_days']"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-if="line.get('newest_date')">
+                                                    <div><small>
+                                                        <t t-if="hasattr(line['newest_date'], 'strftime')">
+                                                            <span t-esc="line['newest_date'].strftime('%d/%m/%Y')"/>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <span t-esc="line['newest_date']"/>
+                                                        </t>
+                                                    </small></div>
+                                                    <t t-if="line.get('newest_lot')">
+                                                        <div><small class="text-muted">Lot: <span t-esc="line['newest_lot']"/></small></div>
+                                                    </t>
+                                                    <t t-if="line.get('newest_reference')">
+                                                        <div><small class="text-muted">Ref: <span t-esc="line['newest_reference']"/></small></div>
+                                                    </t>
+                                                </t>
+                                                <t t-else="">Never</t>
+                                            </td>
+                                            <td class="text-end">
+                                                <span t-esc="line.get('newest_days', 0)"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <span t-esc="line['lot_count']"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <span t-attf-class="badge px-3 py-2 {{ 
+                                                    'badge-danger' if line['classification'] == 'Non-Moving' 
+                                                    else 'badge-warning text-dark' if line['classification'] == 'Slow Moving'
+                                                    else 'badge-success'
+                                                }}">
+                                                    <t t-esc="line['classification']"/>
+                                                </span>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Updated Lot/Serial Numbers row with Remaining & Used Qty -->
+                                        <tr class="bg-light product-group">
+                                            <td colspan="11" class="p-2">
+                                                <small class="text-muted">Lot/Serial Numbers:</small>
+                                                <div class="d-flex flex-wrap gap-2 mt-1">
+                                                    <t t-foreach="line.get('lot_info', [])" t-as="lot">
+                                                        <span class="badge bg-info text-dark">
+                                                            <t t-esc="lot['lot_name']"/>
+                                                            <small> (Rem: <t t-esc="'{0:,.2f}'.format(lot['remaining_qty'])"/> | 
+                                                                    Used: <t t-esc="'{0:,.2f}'.format(lot['used_qty'])"/>)</small>
+                                                        </span>
+                                                    </t>
+                                                    <t t-if="line.get('all_lots_count', 0) > 10">
+                                                        <span class="badge bg-secondary">
+                                                            Total Lots: <span t-esc="line.get('all_lots_count', 0)"/>
+                                                        </span>
+                                                    </t>
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Updated Age Buckets with Remaining & Used Qty -->
+                                        <t t-if="show_age_buckets">
+                                            <tr class="bg-light product-group">
+                                                <td colspan="11" class="p-2">
+                                                    <small class="text-muted">Lot Age Distribution:</small>
+                                                    <div class="d-flex flex-wrap gap-2 mt-1">
+                                                        <t t-foreach="['0-15 Days', '16-30 Days', '31-60 Days', '61-120 Days', '121-180 Days', '180+ Days']" t-as="bucket_name">
+                                                            <t t-set="bucket" t-value="line.get('age_buckets', {}).get(bucket_name, {'qty': 0, 'value': 0, 'lots': []})"/>
+                                                            <t t-if="bucket and bucket.get('qty', 0) > 0">
+                                                                <div class="border rounded p-2">
+                                                                    <strong><span t-esc="bucket_name"/></strong><br/>
+                                                                    <small>
+                                                                        Remaining: <span t-esc="'{0:,.2f}'.format(bucket.get('qty', 0))"/> | 
+                                                                        Value: <span t-esc="'{0:,.2f}'.format(bucket.get('value', 0))"/>
+                                                                    </small>
+                                                                    <t t-if="bucket and bucket.get('lots') and len(bucket.get('lots', [])) > 0">
+                                                                        <div class="mt-1">
+                                                                            <small class="text-muted">Sample Lots:</small><br/>
+                                                                            <t t-foreach="bucket.get('lots', [])[:3]" t-as="lot">
+                                                                                <small>
+                                                                                    • <span t-esc="lot['name']"/>: 
+                                                                                    Rem: <span t-esc="'{0:,.2f}'.format(lot['remaining_qty'])"/> | 
+                                                                                    Used: <span t-esc="'{0:,.2f}'.format(lot['used_qty'])"/>
+                                                                                    (<span t-esc="lot['days']"/> days)
+                                                                                </small><br/>
+                                                                            </t>
+                                                                            <t t-if="len(bucket.get('lots', [])) > 3">
+                                                                                <small>... and <span t-esc="len(bucket.get('lots', [])) - 3"/> more lots</small>
+                                                                            </t>
+                                                                        </div>
+                                                                    </t>
+                                                                </div>
+                                                            </t>
+                                                        </t>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </t>
+                                    <tr t-if="not lines">
+                                        <td colspan="11" class="text-center text-muted py-5">
+                                            No inventory items found with current criteria.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Action Plan Section -->
+                    <div class="row mt-5">
+                        <div class="col-12">
+                            <h5>Action Plan Recommendations</h5>
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <h6 class="text-success">0-15 Days</h6>
+                                            <small>Normal inventory - No action required</small>
+                                        </div>
+                                        <div class="col-4">
+                                            <h6 class="text-warning">16-30 Days</h6>
+                                            <small>Monitor for slow movement</small>
+                                        </div>
+                                        <div class="col-4">
+                                            <h6 class="text-warning">31-60 Days</h6>
+                                            <small>Review for promotions/discounts</small>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col-4">
+                                            <h6 class="text-danger">61-120 Days</h6>
+                                            <small>Consider clearance sales</small>
+                                        </div>
+                                        <div class="col-4">
+                                            <h6 class="text-danger">121-180 Days</h6>
+                                            <small>Urgent disposal needed</small>
+                                        </div>
+                                        <div class="col-4">
+                                            <h6 class="text-danger">180+ Days</h6>
+                                            <small>Write-off consideration</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer Totals -->
+                    <div class="row mt-4 report-footer">
+                        <div class="col-12">
+                            <div class="text-center">
+                                <strong>Report Summary:</strong><br/>
+                                Total Products: <span t-esc="len(lines)"/> | 
+                                Total Quantity: <span t-esc="'{0:,.2f}'.format(total_summary['total_qty'])"/> | 
+                                Total Value: <span t-esc="'{0:,.2f}'.format(total_summary['total_value'])"/> | 
+                                Total Lots: <span t-esc="total_summary['total_lots']"/>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </t>
+        </template>
+
+        <record id="action_report_slow_nonmoving" model="ir.actions.report">
+            <field name="name">Slow / Non-Moving Inventory Aging Report</field>
+            <field name="model">slow.moving.wizard</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">dw_customer_credit.report_slow_nonmoving_template</field>
+            <field name="report_file">dw_customer_credit.report_slow_nonmoving_template</field>
+            <field name="binding_model_id" ref="model_slow_moving_wizard"/>
+            <field name="binding_type">report</field>
+        </record>
+
+    </data>
+</odoo>
+
+
+<!-- <odoo>
+    <data noupdate="0">
+
+        <template id="report_slow_nonmoving_template">
+            <t t-call="web.external_layout">
+                <t t-set="o" t-value="docs[0]" />
+                <t t-set="today" t-value="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y')" />
+
+                <main class="page">
+                    
+                    <div class="text-center mb-5 mt-4">
+                        <h2>Slow / Non-Moving Inventory Aging Report</h2>
+                        <h4>Lot-Level Tracking Analysis</h4>
+                    </div>
+
+                    
+                    <div class="row mb-4">
+                        <div class="col-4">
+                            <strong>Report Date:</strong> <span t-esc="today"/><br/>
+                            <strong>Location:</strong> 
+                            <t t-if="location_info">
+                                <span t-esc="location_info"/>
+                            </t>
+                            <t t-else="">
+                                All Locations
+                            </t><br/>
+                            <strong>Category:</strong> <span t-esc="product_category"/>
+                        </div>
+                        <div class="col-4">
+                            <strong>Slow Moving ≥</strong> <span t-esc="slow_days"/> days<br/>
+                            <strong>Non-Moving ≥</strong> <span t-esc="non_moving_days"/> days<br/>
+                            <strong>Total Products:</strong> <span t-esc="len(lines)"/>
+                        </div>
+                        <div class="col-4 text-end">
+                            <strong>Action Plan Thresholds:</strong><br/>
+                            15 Days: <span t-esc="thresholds['15']"/> | 
+                            30 Days: <span t-esc="thresholds['30']"/> | 
+                            60 Days: <span t-esc="thresholds['60']"/><br/>
+                            120 Days: <span t-esc="thresholds['120']"/> | 
+                            180 Days: <span t-esc="thresholds['180']"/>
+                        </div>
+                    </div>
+
+                    
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body py-2">
+                                    <div class="row text-center">
+                                        <div class="col">
+                                            <h5 class="mb-0"><span t-esc="'{0:,.2f}'.format(total_summary['total_qty'])"/></h5>
+                                            <small class="text-muted">Total Quantity</small>
+                                        </div>
+                                        <div class="col">
+                                            <h5 class="mb-0"><span t-esc="'{0:,.2f}'.format(total_summary['total_value'])"/></h5>
+                                            <small class="text-muted">Total Value</small>
+                                        </div>
+                                        <div class="col">
+                                            <h5 class="mb-0"><span t-esc="total_summary['total_lots']"/></h5>
+                                            <small class="text-muted">Total Lots/Serials</small>
+                                        </div>
+                                        <div class="col">
+                                            <h5 class="mb-0 text-warning"><span t-esc="total_summary['slow_moving_count']"/></h5>
+                                            <small class="text-muted">Slow Moving Products</small>
+                                        </div>
+                                        <div class="col">
+                                            <h5 class="mb-0 text-danger"><span t-esc="total_summary['non_moving_count']"/></h5>
+                                            <small class="text-muted">Non-Moving Products</small>
+                                        </div>
+                                        <div class="col">
+                                            <h5 class="mb-0 text-success"><span t-esc="total_summary['active_count']"/></h5>
+                                            <small class="text-muted">Active Products</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <t t-if="show_age_buckets and all_age_buckets">
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5>Inventory Age Distribution</h5>
+                                <table class="table table-bordered table-sm">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Age Bucket</th>
+                                            <th class="text-end">Quantity</th>
+                                            <th class="text-end">Value</th>
+                                            <th class="text-end">% of Total Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="['0-15 Days', '16-30 Days', '31-60 Days', '61-120 Days', '121-180 Days', '180+ Days']" t-as="bucket_name">
+                                            <t t-set="bucket" t-value="all_age_buckets.get(bucket_name, {'qty': 0, 'value': 0})"/>
+                                            <tr>
+                                                <td><strong><span t-esc="bucket_name"/></strong></td>
+                                                <td class="text-end"><span t-esc="'{0:,.2f}'.format(bucket['qty'])"/></td>
+                                                <td class="text-end"><span t-esc="'{0:,.2f}'.format(bucket['value'])"/></td>
+                                                <td class="text-end">
+                                                    <t t-set="percent" t-value="(bucket['value'] / total_summary['total_value'] * 100) if total_summary['total_value'] > 0 else 0"/>
+                                                    <span t-esc="'{0:,.1f}'.format(percent)"/>%
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </t>
+
+                    
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5>Product Aging Details</h5>
+                            <table class="table table-bordered table-sm table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Code</th>
+                                        <th>Category</th>
+                                        <th class="text-end">Total Qty</th>
+                                        <th class="text-end">Total Value</th>
+                                        <th class="text-center">Oldest Lot</th>
+                                        <th class="text-end">Days</th>
+                                        <th class="text-center">Newest Lot</th>
+                                        <th class="text-end">Days</th>
+                                        <th class="text-center">Lots</th>
+                                        <th class="text-center">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="lines" t-as="line">
+                                        
+                                        <tr class="product-group">
+                                            <td><span t-esc="line['product']"/></td>
+                                            <td><span t-esc="line['code']"/></td>
+                                            <td><span t-esc="line['category']"/></td>
+                                            <td class="text-end"><span t-esc="'{0:,.2f}'.format(line['total_qty'])"/></td>
+                                            <td class="text-end"><span t-esc="'{0:,.2f}'.format(line['total_value'])"/></td>
+                                            <td class="text-center">
+                                                <t t-if="line['oldest_date']">
+                                                    <div><small><span t-esc="line['oldest_date'].strftime('%d/%m/%Y')"/></small></div>
+                                                    <t t-if="line['oldest_lot']">
+                                                        <div><small class="text-muted">Lot: <span t-esc="line['oldest_lot']"/></small></div>
+                                                    </t>
+                                                    <t t-if="line['oldest_reference']">
+                                                        <div><small class="text-muted">Ref: <span t-esc="line['oldest_reference']"/></small></div>
+                                                    </t>
+                                                </t>
+                                                <t t-else="">Never</t>
+                                            </td>
+                                            <td class="text-end font-weight-bold">
+                                                <span t-esc="line['oldest_days']"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <t t-if="line['newest_date']">
+                                                    <div><small><span t-esc="line['newest_date'].strftime('%d/%m/%Y')"/></small></div>
+                                                    <t t-if="line['newest_lot']">
+                                                        <div><small class="text-muted">Lot: <span t-esc="line['newest_lot']"/></small></div>
+                                                    </t>
+                                                    <t t-if="line['newest_reference']">
+                                                        <div><small class="text-muted">Ref: <span t-esc="line['newest_reference']"/></small></div>
+                                                    </t>
+                                                </t>
+                                                <t t-else="">Never</t>
+                                            </td>
+                                            <td class="text-end">
+                                                <span t-esc="line['newest_days']"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <span t-esc="line['lot_count']"/>
+                                            </td>
+                                            <td class="text-center">
+                                                <span t-attf-class="badge px-3 py-2 {{ 
+                                                    'badge-danger' if line['classification'] == 'Non-Moving' 
+                                                    else 'badge-warning text-dark' if line['classification'] == 'Slow Moving'
+                                                    else 'badge-success'
+                                                }}">
+                                                    <t t-esc="line['classification']"/>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        
+                                       
+                                        <tr class="bg-light product-group">
+                                            <td colspan="11" class="p-2">
+                                                <small class="text-muted">Lot/Serial Numbers:</small>
+                                                <div class="d-flex flex-wrap gap-2 mt-1">
+                                                    <t t-foreach="line['lot_names']" t-as="lot_name">
+                                                        <span class="badge bg-info text-dark">
+                                                            <span t-esc="lot_name"/>
+                                                        </span>
+                                                    </t>
+                                                    <t t-if="line['all_lots_count'] > 5">
+                                                        <span class="badge bg-secondary">
+                                                            Total Lots: <span t-esc="line['all_lots_count']"/>
+                                                        </span>
+                                                    </t>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        
+                                        
+                                        <t t-if="show_age_buckets">
+                                            <tr class="bg-light product-group">
+                                                <td colspan="11" class="p-2">
+                                                    <small class="text-muted">Lot Age Distribution:</small>
+                                                    <div class="d-flex flex-wrap gap-2 mt-1">
+                                                        <t t-foreach="['0-15 Days', '16-30 Days', '31-60 Days', '61-120 Days', '121-180 Days', '180+ Days']" t-as="bucket_name">
+                                                            <t t-set="bucket" t-value="line['age_buckets'].get(bucket_name, {'qty': 0, 'value': 0, 'lots': []})"/>
+                                                            <t t-if="bucket['qty'] > 0">
+                                                                <div class="border rounded p-2">
+                                                                    <strong><span t-esc="bucket_name"/></strong><br/>
+                                                                    <small>
+                                                                        Qty: <span t-esc="'{0:,.2f}'.format(bucket['qty'])"/> | 
+                                                                        Value: <span t-esc="'{0:,.2f}'.format(bucket['value'])"/>
+                                                                    </small>
+                                                                    <t t-if="bucket.get('lots') and len(bucket['lots']) > 0">
+                                                                        <div class="mt-1">
+                                                                            <small class="text-muted">Sample Lots:</small><br/>
+                                                                            <t t-foreach="bucket['lots'][:2]" t-as="lot">
+                                                                                <small>
+                                                                                    • <span t-esc="lot['name']"/>: 
+                                                                                    <span t-esc="'{0:,.2f}'.format(lot['qty'])"/> units
+                                                                                    (<span t-esc="lot['days']"/> days)
+                                                                                </small><br/>
+                                                                            </t>
+                                                                            <t t-if="len(bucket['lots']) > 2">
+                                                                                <small>... and <span t-esc="len(bucket['lots']) - 2"/> more lots</small>
+                                                                            </t>
+                                                                        </div>
+                                                                    </t>
+                                                                </div>
+                                                            </t>
+                                                        </t>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </t>
+                                    <tr t-if="not lines">
+                                        <td colspan="11" class="text-center text-muted py-5">
+                                            No inventory items found with current criteria.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    
+                    <div class="row mt-5">
+                        <div class="col-12">
+                            <h5>Action Plan Recommendations</h5>
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <h6 class="text-success">0-15 Days</h6>
+                                            <small>Normal inventory - No action required</small>
+                                        </div>
+                                        <div class="col-4">
+                                            <h6 class="text-warning">16-30 Days</h6>
+                                            <small>Monitor for slow movement</small>
+                                        </div>
+                                        <div class="col-4">
+                                            <h6 class="text-warning">31-60 Days</h6>
+                                            <small>Review for promotions/discounts</small>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col-4">
+                                            <h6 class="text-danger">61-120 Days</h6>
+                                            <small>Consider clearance sales</small>
+                                        </div>
+                                        <div class="col-4">
+                                            <h6 class="text-danger">121-180 Days</h6>
+                                            <small>Urgent disposal needed</small>
+                                        </div>
+                                        <div class="col-4">
+                                            <h6 class="text-danger">180+ Days</h6>
+                                            <small>Write-off consideration</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div class="row mt-4 report-footer">
+                        <div class="col-12">
+                            <div class="text-center">
+                                <strong>Report Summary:</strong><br/>
+                                Total Products: <span t-esc="len(lines)"/> | 
+                                Total Quantity: <span t-esc="'{0:,.2f}'.format(total_summary['total_qty'])"/> | 
+                                Total Value: <span t-esc="'{0:,.2f}'.format(total_summary['total_value'])"/> | 
+                                Total Lots: <span t-esc="total_summary['total_lots']"/>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </t>
+        </template>
+
+        <record id="action_report_slow_nonmoving" model="ir.actions.report">
+            <field name="name">Slow / Non-Moving Inventory Aging Report</field>
+            <field name="model">slow.moving.wizard</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">dw_customer_credit.report_slow_nonmoving_template</field>
+            <field name="report_file">dw_customer_credit.report_slow_nonmoving_template</field>
+            <field name="binding_model_id" ref="model_slow_moving_wizard"/>
+            <field name="binding_type">report</field>
+        </record>
+
+    </data>
+</odoo> -->

@@ -1,0 +1,628 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <record id="view_depreciation_sheet_wizard_form" model="ir.ui.view">
+        <field name="name">depreciation.sheet.wizard.form</field>
+        <field name="model">depreciation.sheet.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Depreciation Sheet Report">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Depreciation Sheet Report</h1>
+                        <h3>Generate depreciation report for a specific period</h3>
+                    </div>
+                    
+                    <group>
+                        <group string="Period">
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                        
+                        <group string="Filters">
+                            <field name="state" widget="radio" options="{'horizontal': true}"/>
+                            <field name="category_id"/>
+                            <field name="partner_id"/>
+                        </group>
+                    </group>
+                    
+                    <footer>
+                        <button name="action_print_depreciation_sheet" string="Generate PDF Report" type="object" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    
+    <record id="action_depreciation_sheet_wizard" model="ir.actions.act_window">
+        <field name="name">Depreciation Sheet Report</field>
+        <field name="res_model">depreciation.sheet.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_depreciation_sheet_wizard_form"/>
+        <field name="target">new</field>
+    </record>
+
+   
+    <menuitem id="menu_accounting_print_reports" 
+              name="Print Reports" 
+              parent="account.menu_finance"
+              sequence="55"/>
+
+
+    <record id="view_cashflow_forecast_wizard_form" model="ir.ui.view">
+        <field name="name">dw.cashflow.forecast.wizard.form</field>
+        <field name="model">dw.cashflow.forecast.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Cash Flow Forecast">
+                <header>
+                    <button name="action_generate_cashflow" type="object" string="Generate" class="btn-primary"/>
+                    <button name="action_print_cashflow" type="object" string="Print" class="btn-secondary" invisible="not has_data"/>
+                    <button string="Cancel" special="cancel" class="btn-link"/>
+                </header>
+                
+                <sheet>
+                   
+                    <field name="has_data" invisible="1"/>
+                    
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_generate_cashflow" type="object" string="Generate" class="oe_stat_button" icon="fa-refresh"/>
+                    </div>
+                    
+                    <div class="oe_title">
+                        <h1>Cash Flow Forecast</h1>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                    </group>
+                    
+                    
+                    <div class="oe_title" invisible="not has_data">
+                        <h3>Cash Flow Lines</h3>
+                    </div>
+                    
+                    <div invisible="not has_data">
+                        <field name="cashflow_lines_html" nolabel="1" widget="html"/>
+                    </div>
+                    
+                    
+                    <div class="oe_title" invisible="not has_data">
+                        <h3>Summary</h3>
+                    </div>
+                    
+                    <group invisible="not has_data">
+                        <group>
+                            <field name="total_inflow" widget="monetary" string="Total Inflow"/>
+                            <field name="total_outflow" widget="monetary" string="Total Outflow"/>
+                            <field name="net_cash_flow" widget="monetary" string="Net Cash Flow"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    
+    <record id="action_cashflow_forecast_wizard" model="ir.actions.act_window">
+        <field name="name">Cash Flow Forecast</field>
+        <field name="res_model">dw.cashflow.forecast.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    
+
+    <menuitem id="menu_report_cashflow_forecast" 
+            name="Cash Flow Forecast" 
+            parent="menu_accounting_print_reports" 
+            action="action_cashflow_forecast_wizard" 
+            sequence="35"/>
+
+    
+    <menuitem id="menu_report_neft_register"
+              name="Fund Transfer / NEFT Register"
+              parent="menu_accounting_print_reports"
+              action="action_neft_register_wizard"
+              sequence="36"/>
+
+    <record id="view_fixed_asset_register_wizard_form" model="ir.ui.view">
+        <field name="name">fixed.asset.register.wizard.form</field>
+        <field name="model">fixed.asset.register.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Fixed Asset Register Report">
+                <!-- <header>
+                    <button name="action_generate_assets" type="object" string="Generate" class="btn-primary"/>
+                    <button name="action_print_fixed_asset_register" string="Generate PDF Report" type="object" class="btn-secondary" invisible="not has_data"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </header> -->
+                
+                <sheet>
+                    <!-- Add has_data as an invisible field -->
+                    <field name="has_data" invisible="1"/>
+                    
+                    <div class="oe_title">
+                        <h1>Fixed Asset Register Report</h1>
+                        <h3>Generate a comprehensive report of your fixed assets</h3>
+                    </div>
+                    
+                    <group>
+                        <group string="Basic Filters">
+                            <field name="date_as_of"/>
+                            
+                            <field name="state" widget="radio" options="{'horizontal': true}"/>
+                        </group>
+                        
+                        <group string="Asset Details">
+                            <field name="category_id"/>
+                            <field name="partner_id"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Date Range">
+                        <group>
+                            <field name="acquisition_date_from"/>
+                            <field name="acquisition_date_to"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Value Range">
+                        <group>
+                            <field name="min_value"/>
+                            <field name="max_value"/>
+                        </group>
+                    </group>
+                    
+                    <!-- Asset Lines Preview -->
+                    <div class="oe_title" invisible="not has_data">
+                        <h3>Asset Preview</h3>
+                    </div>
+                    
+                    <div invisible="not has_data">
+                        <field name="asset_lines_html" nolabel="1" widget="html"/>
+                    </div>
+                    
+                    <!-- Summary Section -->
+                    <div class="oe_title" invisible="not has_data">
+                        <h3>Summary</h3>
+                    </div>
+                    
+                    <group invisible="not has_data">
+                        <group>
+                            <field name="total_assets" string="Total Assets"/>
+                            <field name="total_original_value" widget="monetary" string="Total Original Value"/>
+                            <field name="total_depreciation" widget="monetary" string="Total Depreciation"/>
+                            <field name="total_net_value" widget="monetary" string="Total Net Book Value"/>
+                        </group>
+                    </group>
+                    
+                    <!-- Footer buttons -->
+                    <footer>
+                        <button name="action_generate_assets" type="object" string="Generate" class="btn-primary"/>
+                        <button name="action_print_fixed_asset_register" string="Generate PDF Report" type="object" class="btn-secondary" invisible="not has_data"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    
+    <record id="action_fixed_asset_register_wizard" model="ir.actions.act_window">
+        <field name="name">Fixed Asset Register Report</field>
+        <field name="res_model">fixed.asset.register.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_fixed_asset_register_wizard_form"/>
+        <field name="target">new</field>
+    </record>
+
+    
+    <menuitem id="menu_report_fixed_asset_register"
+              name="Fixed Asset Register"
+              parent="menu_accounting_print_reports"
+              action="action_fixed_asset_register_wizard"
+              sequence="37"/>
+
+    
+    <menuitem id="menu_report_depreciation_sheet"
+              name="Depreciation Sheet"
+              parent="menu_accounting_print_reports"
+              action="action_depreciation_sheet_wizard"
+              sequence="38"/>
+    
+    <record id="view_cwip_report_wizard_form" model="ir.ui.view">
+        <field name="name">cwip.report.wizard.form</field>
+        <field name="model">cwip.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="CWIP Report">
+                <header>
+                    <button name="action_generate_cwip_data" type="object" string="Generate" class="btn-primary"/>
+                    <button name="action_print_cwip_report" type="object" string="Generate PDF Report" class="btn-secondary" invisible="not has_data"/>
+                    <button string="Cancel" class="btn-link" special="cancel"/>
+                </header>
+                
+                <sheet>
+                    <!-- Add has_data as an invisible field -->
+                    <field name="has_data" invisible="1"/>
+                    
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_generate_cwip_data" type="object" string="Generate" class="oe_stat_button" icon="fa-refresh"/>
+                    </div>
+                    
+                    <div class="oe_title">
+                        <h1>Capital Work in Progress (CWIP) Report</h1>
+                        <h3>Generate report for capital work in progress</h3>
+                    </div>
+                    
+                    <group>
+                        <group string="Basic Filters">
+                            <field name="date_as_of"/>
+                            <field name="status" widget="radio" options="{'horizontal': true}"/>
+                        </group>
+                        
+                        <group string="Asset Details">
+                            <field name="category_id"/>
+                            <field name="partner_id"/>
+                        </group>
+                    </group>
+                    
+                    <!-- Additional filters (if they exist in your model) -->
+                    <!-- <group string="Additional Filters">
+                        <field name="project_ref"/>
+                        <field name="location"/>
+                    </group> -->
+                    
+                    <!-- CWIP Assets Table -->
+                    <div class="oe_title" invisible="not has_data">
+                        <h3>CWIP Assets</h3>
+                    </div>
+                    
+                    <div invisible="not has_data">
+                        <field name="cwip_data_html" nolabel="1" widget="html"/>
+                    </div>
+                    
+                    <!-- Summary Section -->
+                    <div class="oe_title" invisible="not has_data">
+                        <h3>Summary</h3>
+                    </div>
+                    
+                    <group invisible="not has_data">
+                        <group>
+                            <field name="total_assets" string="Total Assets"/>
+                            <field name="draft_count" string="Draft Assets"/>
+                            <field name="open_count" string="Running Assets"/>
+                            <field name="total_cwip_value" widget="monetary" string="Total CWIP Value"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_cwip_report_wizard" model="ir.actions.act_window">
+        <field name="name">CWIP Report</field>
+        <field name="res_model">cwip.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_cwip_report_wizard_form"/>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_report_cwip_report"
+            name="CWIP Report"
+            parent="menu_accounting_print_reports"
+            action="action_cwip_report_wizard"
+            sequence="39"/>
+   
+    <!-- Replace the existing Asset Disposal Report wizard view with this: -->
+    <record id="view_asset_disposal_wizard_form" model="ir.ui.view">
+        <field name="name">asset.disposal.wizard.form</field>
+        <field name="model">asset.disposal.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Asset Disposal Report">
+                <header>
+                    <button name="action_generate_disposal_data" type="object" string="Generate" class="btn-primary"/>
+                    <button name="action_print_asset_disposal" type="object" string="Generate PDF Report" class="btn-secondary" invisible="not has_data"/>
+                    <button string="Cancel" class="btn-link" special="cancel"/>
+                </header>
+                
+                <sheet>
+                    <!-- Add has_data as an invisible field -->
+                    <field name="has_data" invisible="1"/>
+                    
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_generate_disposal_data" type="object" string="Generate" class="oe_stat_button" icon="fa-refresh"/>
+                    </div>
+                    
+                    <div class="oe_title">
+                        <h1>Asset Disposal Report</h1>
+                        <h3>Generate report for disposed/sold assets</h3>
+                    </div>
+                    
+                    <group>
+                        <group string="Date Range">
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                        
+                        <group string="Filters">
+                            <field name="journal_id"/>
+                            <field name="asset_category_id"/>
+                        </group>
+                    </group>
+                    
+                    <!-- Disposal Records Table -->
+                    <div class="oe_title" invisible="not has_data">
+                        <h3>Disposal Records</h3>
+                    </div>
+                    
+                    <div invisible="not has_data">
+                        <field name="disposal_data_html" nolabel="1" widget="html"/>
+                    </div>
+                    
+                    <!-- Summary Section -->
+                    <div class="oe_title" invisible="not has_data">
+                        <h3>Summary</h3>
+                    </div>
+                    
+                    <group invisible="not has_data">
+                        <group>
+                            <field name="total_records" string="Total Records"/>
+                            <field name="total_disposal_amount" widget="monetary" string="Total Disposal Amount"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_asset_disposal_wizard" model="ir.actions.act_window">
+        <field name="name">Asset Disposal Report</field>
+        <field name="res_model">asset.disposal.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_asset_disposal_wizard_form"/>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_report_asset_disposal"
+              name="Asset Disposal Report"
+              parent="menu_accounting_print_reports"
+              action="action_asset_disposal_wizard"
+              sequence="41"/>
+
+    <!-- <record id="view_inventory_costing_wizard_form" model="ir.ui.view">
+        <field name="name">inventory.costing.wizard.form</field>
+        <field name="model">inventory.costing.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Inventory &amp; Costing Report">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Inventory &amp; Costing Report</h1>
+                        <h3>Generate inventory valuation and costing reports</h3>
+                    </div>
+                    
+                    <group>
+                        <group string="Date Range">
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                        
+                        <group string="Report Type">
+                            <field name="report_type" widget="radio" options="{'horizontal': true}"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Product Filters">
+                        <field name="product_id"/>
+                        <field name="product_category_id"/>
+                    </group>
+                    
+                    <footer>
+                        <button name="action_print_inventory_costing" string="Generate PDF Report" type="object" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record> -->
+
+    <record id="view_inventory_costing_wizard_form" model="ir.ui.view">
+        <field name="name">inventory.costing.wizard.form</field>
+        <field name="model">inventory.costing.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Inventory &amp; Costing Report">
+                <header>
+                    <button name="action_generate_inventory_data" type="object" string="Generate" class="btn-primary"/>
+                    <button name="action_print_inventory_costing" type="object" string="Print" class="btn-secondary" invisible="not has_data"/>
+                    <button string="Cancel" class="btn-link" special="cancel"/>
+                </header>
+                
+                <sheet>
+                    <!-- Add has_data as an invisible field -->
+                    <field name="has_data" invisible="1"/>
+                    
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_generate_inventory_data" type="object" string="Generate" class="oe_stat_button" icon="fa-refresh"/>
+                    </div>
+                    
+                    <div class="oe_title">
+                        <h1>Inventory &amp; Costing Report</h1>
+                        <h3>Generate inventory valuation and costing reports</h3>
+                    </div>
+                    
+                    <group>
+                        <group string="Date Range">
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                        
+                        <group string="Report Type">
+                            <field name="report_type" widget="radio" options="{'horizontal': true}"/>
+                        </group>
+                    </group>
+                    
+                    <group string="Product Filters">
+                        <field name="product_id"/>
+                        <field name="product_category_id"/>
+                    </group>
+                    
+                    <!-- Report Preview Section -->
+                    <div class="oe_title" invisible="not has_data">
+                        <h3>Report Preview</h3>
+                    </div>
+                    
+                    <div invisible="not has_data">
+                        <field name="report_data_html" nolabel="1" widget="html"/>
+                    </div>
+                    
+                    <!-- Summary Section -->
+                    <div class="oe_title" invisible="not has_data">
+                        <h3>Summary</h3>
+                    </div>
+                    
+                    <group invisible="not has_data">
+                        <group>
+                            <field name="total_items" string="Total Items"/>
+                            <field name="total_value" widget="monetary" string="Total Value"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+
+    <record id="action_inventory_costing_wizard" model="ir.actions.act_window">
+        <field name="name">Inventory &amp; Costing Report</field>
+        <field name="res_model">inventory.costing.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_inventory_costing_wizard_form"/>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_report_inventory_costing"
+              name="Inventory &amp; Costing Report"
+              parent="menu_accounting_print_reports"
+              action="action_inventory_costing_wizard"
+              sequence="42"/>
+ 
+    <!-- <record id="view_wip_valuation_wizard_form" model="ir.ui.view">
+        <field name="name">wip.valuation.wizard.form</field>
+        <field name="model">wip.valuation.wizard</field>
+        <field name="arch" type="xml">
+            <form string="WIP Valuation Report">
+                <sheet>
+                    <group>
+                        <field name="start_date"/>
+                        <field name="end_date"/>
+                    </group>
+
+                    <group>
+                        <field name="product_id"/>
+                        <field name="product_category_id"/>
+                    </group>
+
+                    <footer>
+                        <button name="action_print_wip_report" type="object" string="Generate PDF" class="btn-primary"/>
+                        <button string="Cancel" special="cancel" class="btn-secondary"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record> -->
+
+
+    <record id="view_wip_valuation_wizard_form" model="ir.ui.view">
+        <field name="name">wip.valuation.wizard.form</field>
+        <field name="model">wip.valuation.wizard</field>
+        <field name="arch" type="xml">
+            <form string="WIP Valuation Report">
+                <header>
+                    <button name="action_generate_wip_data" type="object" string="Generate" class="btn-primary"/>
+                    <button name="action_print_wip_report" type="object" string="Print" class="btn-secondary" invisible="not has_data"/>
+                    <button string="Cancel" class="btn-link" special="cancel"/>
+                </header>
+                
+                <sheet>
+                    <!-- Add has_data as an invisible field -->
+                    <field name="has_data" invisible="1"/>
+                    
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_generate_wip_data" type="object" string="Generate" class="oe_stat_button" icon="fa-refresh"/>
+                    </div>
+                    
+                    <div class="oe_title">
+                        <h1>WIP Valuation Report</h1>
+                        <h3>Generate Work in Progress valuation report</h3>
+                    </div>
+                    
+                    <group>
+                        <group string="Date Range">
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                        
+                        <group string="Product Filters">
+                            <field name="product_id"/>
+                            <field name="product_category_id"/>
+                        </group>
+                    </group>
+                    
+                    <!-- Report Preview Section -->
+                    <div class="oe_title" invisible="not has_data">
+                        <h3>Report Preview</h3>
+                    </div>
+                    
+                    <div invisible="not has_data">
+                        <field name="report_data_html" nolabel="1" widget="html"/>
+                    </div>
+                    
+                    <!-- Summary Section -->
+                    <div class="oe_title" invisible="not has_data">
+                        <h3>Summary</h3>
+                    </div>
+                    
+                    <group invisible="not has_data">
+                        <group>
+                            <field name="total_items" string="Total Items"/>
+                            <field name="total_wip_value" widget="monetary" string="Total WIP Value"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <record id="action_wip_valuation_wizard" model="ir.actions.act_window">
+        <field name="name">WIP Valuation Report</field>
+        <field name="res_model">wip.valuation.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="view_wip_valuation_wizard_form"/>
+    </record>
+    <menuitem id="menu_report_wip_valuation"
+            name="WIP Valuation Report"
+            parent="menu_accounting_print_reports"
+            action="action_wip_valuation_wizard"
+            sequence="43"/>
+
+    <record id="action_report_customer_ledger" model="ir.actions.act_window">
+        <field name="name">Customer Ledger</field>
+        <field name="res_model">account.move.line</field>
+        <field name="view_mode">tree,pivot,graph</field>
+        <field name="domain">[('account_id.internal_group', '=', 'receivable'), ('parent_state', '=', 'posted')]</field>
+        <field name="context">{'search_default_filter_unreconciled': 1, 'group_by': ['partner_id']}</field>
+    </record>
+
+    <record id="action_report_collection_register" model="ir.actions.act_window">
+        <field name="name">Collection Register</field>
+        <field name="res_model">account.payment</field>
+        <field name="view_mode">tree,pivot,graph</field>
+        <field name="domain">[('payment_type', '=', 'inbound'), ('state', '=', 'posted')]</field>
+        <field name="context">{'search_default_this_month': 1, 'group_by': ['date:month', 'partner_id']}</field>
+    </record>
+
+</odoo>

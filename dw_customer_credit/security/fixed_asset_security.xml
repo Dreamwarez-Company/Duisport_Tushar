@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Access rights for Fixed Asset Register Wizard -->
+    <record id="access_fixed_asset_register_wizard" model="ir.model.access">
+        <field name="name">dw_customer_credit.fixed_asset_register_wizard</field>
+        <field name="model_id" ref="model_fixed_asset_register_wizard"/>
+        <field name="group_id" ref="base.group_user"/>
+        <field name="perm_read">1</field>
+        <field name="perm_write">0</field>
+        <field name="perm_create">0</field>
+        <field name="perm_unlink">0</field>
+    </record>
+    
+    <record id="access_fixed_asset_register_wizard_account" model="ir.model.access">
+        <field name="name">dw_customer_credit.fixed_asset_register_wizard.account</field>
+        <field name="model_id" ref="model_fixed_asset_register_wizard"/>
+        <field name="group_id" ref="account.group_account_user"/>
+        <field name="perm_read">1</field>
+        <field name="perm_write">1</field>
+        <field name="perm_create">1</field>
+        <field name="perm_unlink">0</field>
+    </record>
+    
+    <record id="access_fixed_asset_register_wizard_manager" model="ir.model.access">
+        <field name="name">dw_customer_credit.fixed_asset_register_wizard.manager</field>
+        <field name="model_id" ref="model_fixed_asset_register_wizard"/>
+        <field name="group_id" ref="base.group_system"/>
+        <field name="perm_read">1</field>
+        <field name="perm_write">1</field>
+        <field name="perm_create">1</field>
+        <field name="perm_unlink">1</field>
+    </record>
+
+
+    <!-- Access rights for Depreciation Sheet Wizard -->
+    <record id="access_depreciation_sheet_wizard" model="ir.model.access">
+        <field name="name">dw_customer_credit.depreciation_sheet_wizard</field>
+        <field name="model_id" ref="model_depreciation_sheet_wizard"/>
+        <field name="group_id" ref="base.group_user"/>
+        <field name="perm_read">1</field>
+        <field name="perm_write">0</field>
+        <field name="perm_create">0</field>
+        <field name="perm_unlink">0</field>
+    </record>
+    
+    <record id="access_depreciation_sheet_wizard_account" model="ir.model.access">
+        <field name="name">dw_customer_credit.depreciation_sheet_wizard.account</field>
+        <field name="model_id" ref="model_depreciation_sheet_wizard"/>
+        <field name="group_id" ref="account.group_account_user"/>
+        <field name="perm_read">1</field>
+        <field name="perm_write">1</field>
+        <field name="perm_create">1</field>
+        <field name="perm_unlink">0</field>
+    </record>
+    
+    <record id="access_depreciation_sheet_wizard_manager" model="ir.model.access">
+        <field name="name">dw_customer_credit.depreciation_sheet_wizard.manager</field>
+        <field name="model_id" ref="model_depreciation_sheet_wizard"/>
+        <field name="group_id" ref="base.group_system"/>
+        <field name="perm_read">1</field>
+        <field name="perm_write">1</field>
+        <field name="perm_create">1</field>
+        <field name="perm_unlink">1</field>
+    </record>
+
+
+
+<!-- ===================================CWIP======================================= -->
+
+    <!-- Access rights for CWIP Report Wizard -->
+    <record id="access_cwip_report_wizard" model="ir.model.access">
+        <field name="name">dw_customer_credit.cwip_report_wizard</field>
+        <field name="model_id" ref="model_cwip_report_wizard"/>
+        <field name="group_id" ref="base.group_user"/>
+        <field name="perm_read">1</field>
+        <field name="perm_write">0</field>
+        <field name="perm_create">0</field>
+        <field name="perm_unlink">0</field>
+    </record>
+
+    <record id="access_cwip_report_wizard_account" model="ir.model.access">
+        <field name="name">dw_customer_credit.cwip_report_wizard.account</field>
+        <field name="model_id" ref="model_cwip_report_wizard"/>
+        <field name="group_id" ref="account.group_account_user"/>
+        <field name="perm_read">1</field>
+        <field name="perm_write">1</field>
+        <field name="perm_create">1</field>
+        <field name="perm_unlink">0</field>
+    </record>
+
+    <record id="access_cwip_report_wizard_manager" model="ir.model.access">
+        <field name="name">dw_customer_credit.cwip_report_wizard.manager</field>
+        <field name="model_id" ref="model_cwip_report_wizard"/>
+        <field name="group_id" ref="base.group_system"/>
+        <field name="perm_read">1</field>
+        <field name="perm_write">1</field>
+        <field name="perm_create">1</field>
+        <field name="perm_unlink">1</field>
+    </record>
+
+    
+</odoo>

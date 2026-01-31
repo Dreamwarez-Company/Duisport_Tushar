@@ -1,0 +1,27 @@
+<odoo>
+    <data>
+        <!-- Inherit Sale Order Form -->
+        <record id="view_sale_order_form_inherit_dreamwarez" model="ir.ui.view">
+            <field name="name">sale.order.form.dreamwarez</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <!-- <field name="arch" type="xml">
+                <xpath expr="//field[@name='partner_id']" position="after">
+                    <field name="lead_seq" readonly="1"/>
+                </xpath>
+            </field> -->
+        </record>
+
+        <!-- Inherit Sale Order Tree -->
+        <record id="view_sale_order_tree_inherit_dreamwarez" model="ir.ui.view">
+            <field name="name">sale.order.tree.dreamwarez</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_sales_order_filter"/>
+            <!-- <field name="arch" type="xml">
+                <xpath expr="//field[@name='name']" position="after">
+                    <field name="lead_seq"/>
+                </xpath>
+            </field> -->
+        </record>
+    </data>
+</odoo>

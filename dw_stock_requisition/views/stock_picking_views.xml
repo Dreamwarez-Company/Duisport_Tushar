@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_picking_form_requisition_inherit" model="ir.ui.view">
+            <field name="name">stock.picking.form.requisition.inherit</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="arch" type="xml">
+
+                
+                <field name="partner_id" position="after">
+                    <field name="requisition_number" string="Requisition Number"/>
+                    <field name="requisition_date" string="Requisition Date"/>
+                </field>
+
+                
+                <field name="origin" position="after">
+                    <field name="created_by" string="Created By"/>
+                </field>
+                
+              
+
+            </field>
+        </record>
+    </data>
+</odoo>

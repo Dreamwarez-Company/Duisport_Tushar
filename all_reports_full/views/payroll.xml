@@ -1,0 +1,372 @@
+<odoo>
+    <!-- =======================
+         Salary Sheet
+         ======================= -->
+    <record id="view_salary_sheet_wizard" model="ir.ui.view">
+        <field name="name">salary.sheet.wizard.form</field>
+        <field name="model">salary.sheet.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Salary Sheet">
+                <group>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                    <field name="employee_ids" widget="many2many_tags"/>
+                </group>
+                <footer>
+                    <button name="action_view_report"
+                        type="object"
+                        string="View Report"
+                        class="btn-secondary"/>
+                    <button name="action_print_salary_sheet" type="object" string="Print PDF" class="btn-primary"/>
+                    <button special="cancel" string="Cancel"/>
+</footer>
+                     <separator string="Preview"/>
+            <field name="preview_ids" nolabel="1">
+                <tree create="0" delete="0">
+                    <field name="employee"/>
+                    <field name="department"/>
+                    <field name="basic"/>
+                    <field name="hra"/>
+                    <field name="da"/>
+                    <field name="gross"/>
+                    <field name="pf"/>
+                    <field name="esi"/>
+                    <field name="pt"/>
+                    <field name="tds"/>
+                    <field name="net"/>
+                </tree>
+            </field>
+               
+            </form>
+        </field>
+    </record>
+
+    <record id="action_salary_sheet_wizard" model="ir.actions.act_window">
+        <field name="name">Salary Sheet</field>
+        <field name="res_model">salary.sheet.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <template id="salary_sheet_template">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h2 class="text-center">Salary Sheet</h2>
+                    <p>
+                        <strong>Period:</strong> <t t-esc="date_from"/> to <t t-esc="date_to"/>
+                    </p>
+
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Code</th>
+                                <th>Department</th>
+                                <th>Job</th>
+                                <th>Basic</th>
+                                <th>HRA</th>
+                                <th>DA</th>
+                                <th>Conveyance</th>
+                                <th>Medical</th>
+                                <th>Special</th>
+                                <th>OT</th>
+                                <th>Other Earnings</th>
+                                <th>Gross</th>
+                                <th>PF</th>
+                                <th>ESI</th>
+                                <th>PT</th>
+                                <th>TDS</th>
+                                <th>Other Deductions</th>
+                                <th>Net Pay</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="rows" t-as="r">
+                                <tr>
+                                    <td><t t-esc="r['employee_name']"/></td>
+                                    <td><t t-esc="r['employee_code']"/></td>
+                                    <td><t t-esc="r['department']"/></td>
+                                    <td><t t-esc="r['job_title']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['basic']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['hra']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['da']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['conveyance']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['medical']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['special']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['overtime']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['other_earn']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['gross']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['pf']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['esi']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['pt']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['tds']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['other_ded']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['net']"/></td>
+                                </tr>
+                            </t>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4"><strong>Totals</strong></td>
+                                <td class="text-end"><strong><t t-esc="'%.2f' % totals['basic']"/></strong></td>
+                                <td class="text-end"><strong><t t-esc="'%.2f' % totals['hra']"/></strong></td>
+                                <td class="text-end"><strong><t t-esc="'%.2f' % totals['da']"/></strong></td>
+                                <td class="text-end"><strong><t t-esc="'%.2f' % totals['conveyance']"/></strong></td>
+                                <td class="text-end"><strong><t t-esc="'%.2f' % totals['medical']"/></strong></td>
+                                <td class="text-end"><strong><t t-esc="'%.2f' % totals['special']"/></strong></td>
+                                <td class="text-end"><strong><t t-esc="'%.2f' % totals['overtime']"/></strong></td>
+                                <td class="text-end"><strong><t t-esc="'%.2f' % totals['other_earn']"/></strong></td>
+                                <td class="text-end"><strong><t t-esc="'%.2f' % totals['gross']"/></strong></td>
+                                <td class="text-end"><strong><t t-esc="'%.2f' % totals['pf']"/></strong></td>
+                                <td class="text-end"><strong><t t-esc="'%.2f' % totals['esi']"/></strong></td>
+                                <td class="text-end"><strong><t t-esc="'%.2f' % totals['pt']"/></strong></td>
+                                <td class="text-end"><strong><t t-esc="'%.2f' % totals['tds']"/></strong></td>
+                                <td class="text-end"><strong><t t-esc="'%.2f' % totals['other_ded']"/></strong></td>
+                                <td class="text-end"><strong><t t-esc="'%.2f' % totals['net']"/></strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <record id="salary_sheet_report_action" model="ir.actions.report">
+        <field name="name">Salary Sheet</field>
+        <field name="model">salary.sheet.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">all_reports_full.salary_sheet_template</field>
+        <field name="report_file">all_reports_full.salary_sheet_template</field>
+        <field name="print_report_name">Salary Sheet</field>
+    </record>
+
+
+    <menuitem
+    id="menu_payroll_reports_root"
+    name="Print Reports"
+    parent="hr.menu_hr_root"
+    sequence="100"/>
+
+
+    <menuitem id="menu_salary_sheet"
+              name="Salary Sheet"
+              parent="menu_payroll_reports_root"
+              action="action_salary_sheet_wizard"
+              sequence="10"/>
+
+    <!-- =======================
+         PF / ESI / PT Summary
+         ======================= -->
+    <record id="view_pf_esi_pt_wizard" model="ir.ui.view">
+        <field name="name">pf.esi.pt.summary.wizard.form</field>
+        <field name="model">pf.esi.pt.summary.wizard</field>
+        <field name="arch" type="xml">
+            <form string="PF / ESI / PT Summary">
+                <group>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                    <field name="employee_ids" widget="many2many_tags"/>
+                </group>
+               <footer>
+                    <button name="action_view_report"
+                        type="object"
+                        string="View Report"
+                        class="btn-secondary"/>
+                    <button name="action_print_pf_esi_pt" type="object" string="Print PDF" class="btn-primary"/>
+                    <button special="cancel" string="Cancel"/>
+              </footer>
+
+                    <separator string="Preview"/>
+            <field name="preview_ids" nolabel="1">
+                <tree create="0" delete="0">
+                    <field name="employee"/>
+                    <field name="pf"/>
+                    <field name="esi"/>
+                    <field name="pt"/>
+                </tree>
+            </field>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_pf_esi_pt_wizard" model="ir.actions.act_window">
+        <field name="name">PF / ESI / PT Summary</field>
+        <field name="res_model">pf.esi.pt.summary.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <template id="pf_esi_pt_summary_template">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h2 class="text-center">PF / ESI / PT Summary</h2>
+                    <p><strong>Period:</strong> <t t-esc="date_from"/> to <t t-esc="date_to"/></p>
+
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>PF Wages</th>
+                                <th>Employee PF</th>
+                                <th>Employer PF</th>
+                                <th>EPS</th>
+                                <th>ESI Wages</th>
+                                <th>Employee ESI</th>
+                                <th>Employer ESI</th>
+                                <th>PT</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="rows" t-as="r">
+                                <tr>
+                                    <td><t t-esc="r['employee'].name"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['pf_wages']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['pf_emp']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['pf_emp_er']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['eps']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['esi_wages']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['esi_emp']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['esi_er']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['pt']"/></td>
+                                </tr>
+                            </t>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td><strong>Grand Total</strong></td>
+                                <td class="text-end"><strong><t t-esc="'%.2f' % grand['pf_emp']"/></strong></td>
+                                <td class="text-end"><strong><t t-esc="'%.2f' % grand['pf_emp']"/></strong></td>
+                                <td class="text-end"><strong><t t-esc="'%.2f' % grand['pf_emp_er']"/></strong></td>
+                                <td class="text-end"><strong><t t-esc="'%.2f' % grand['eps']"/></strong></td>
+                                <td class="text-end"><strong><t t-esc="'%.2f' % grand['pf_emp']"/></strong></td>
+                                <td class="text-end"><strong><t t-esc="'%.2f' % grand['esi_emp']"/></strong></td>
+                                <td class="text-end"><strong><t t-esc="'%.2f' % grand['esi_er']"/></strong></td>
+                                <td class="text-end"><strong><t t-esc="'%.2f' % grand['pt']"/></strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <record id="pf_esi_pt_summary_report_action" model="ir.actions.report">
+        <field name="name">PF ESI PT Summary</field>
+        <field name="model">pf.esi.pt.summary.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">all_reports_full.pf_esi_pt_summary_template</field>
+        <field name="report_file">all_reports_full.pf_esi_pt_summary_template</field>
+        <field name="print_report_name">PF ESI PT Summary</field>
+    </record>
+
+    <menuitem id="menu_pf_esi_pt_summary"
+              name="PF / ESI / PT Summary"
+              parent="menu_payroll_reports_root"
+              action="action_pf_esi_pt_wizard"
+              sequence="11"/>
+
+    <!-- =======================
+         Gratuity and Leave Provision
+         ======================= -->
+    <record id="view_gratuity_leave_wizard" model="ir.ui.view">
+        <field name="name">gratuity.leave.provision.wizard.form</field>
+        <field name="model">gratuity.leave.provision.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Gratuity and Leave Provision">
+                <group>
+                    <field name="as_of_date"/>
+                    <field name="employee_ids" widget="many2many_tags"/>
+                </group>
+                <footer>
+                    <button name="action_view_report"
+                        type="object"
+                        string="View Report"
+                        class="btn-secondary"/>
+                    <button name="action_print_gratuity_leave" type="object" string="Print PDF" class="btn-primary"/>
+                    <button special="cancel" string="Cancel"/>
+                    </footer>
+                            <separator string="Preview"/>
+            <field name="preview_ids" nolabel="1">
+                <tree create="0" delete="0">
+                    <field name="employee"/>
+                    <field name="years"/>
+                    <field name="basic"/>
+                    <field name="gratuity"/>
+                </tree>
+            </field>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_gratuity_leave_wizard" model="ir.actions.act_window">
+        <field name="name">Gratuity and Leave Provision</field>
+        <field name="res_model">gratuity.leave.provision.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <template id="gratuity_leave_provision_template">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h2 class="text-center">Gratuity and Leave Provision</h2>
+                    <p><strong>As of:</strong> <t t-esc="as_of"/></p>
+
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Hire Date</th>
+                                <th>Years Service</th>
+                                <th>Basic</th>
+                                <th>Gratuity</th>
+                                <th>Leave Balance</th>
+                                <th>Per Day Salary</th>
+                                <th>Leave Provision</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="rows" t-as="r">
+                                <tr>
+                                    <td><t t-esc="r['employee'].name"/></td>
+                                    <td><t t-esc="r['hire_date']"/></td>
+                                    <td class="text-end"><t t-esc="r['years_service']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['basic']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['gratuity']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['leave_balance']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['per_day_salary']"/></td>
+                                    <td class="text-end"><t t-esc="'%.2f' % r['leave_provision']"/></td>
+                                </tr>
+                            </t>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4"><strong>Grand Totals</strong></td>
+                                <td class="text-end"><strong><t t-esc="'%.2f' % grand['gratuity']"/></strong></td>
+                                <td colspan="2"></td>
+                                <td class="text-end"><strong><t t-esc="'%.2f' % grand['leave_provision']"/></strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <record id="gratuity_leave_provision_report_action" model="ir.actions.report">
+        <field name="name">Gratuity and Leave Provision</field>
+        <field name="model">gratuity.leave.provision.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">all_reports_full.gratuity_leave_provision_template</field>
+        <field name="report_file">all_reports_full.gratuity_leave_provision_template</field>
+        <field name="print_report_name">Gratuity and Leave Provision</field>
+    </record>
+
+    <menuitem id="menu_gratuity_leave_provision"
+              name="Gratuity and Leave Provision"
+              parent="menu_payroll_reports_root"
+              action="action_gratuity_leave_wizard"
+              sequence="12"/>
+</odoo>

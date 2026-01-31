@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Chart of Accounts Report Form View -->
+    <record id="view_chart_of_accounts_report_form" model="ir.ui.view">
+        <field name="name">chart.of.accounts.report.form</field>
+        <field name="model">chart.of.accounts.report</field>
+        <field name="arch" type="xml">
+            <form string="Chart of Accounts Report">
+                <sheet>
+                    <group>
+                        <separator string="Chart of Accounts Report"/>
+                    </group>
+                    
+                    <group>
+                        <group>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                        <group>
+                            <field name="show_entries"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Report Data">
+                            <field name="line_ids">
+                                <tree decoration-bf="is_account == True" decoration-muted="is_account == False">
+                                    <!-- Account columns -->
+                                    <field name="is_account" invisible="1"/>
+                                    <field name="account_code"/>
+                                    <field name="account_name"/>
+                                    <field name="account_type"/>
+                                    <field name="reconcile"/>
+                                    <field name="entry_count" string="Entries"/>
+                                    
+                                    <!-- Entry columns -->
+                                    <field name="entry_date"/>
+                                    <field name="entry_reference"/>
+                                    <field name="entry_label"/>
+                                    <field name="entry_partner"/>
+                                    <field name="entry_debit" sum="Total Debit"/>
+                                    <field name="entry_credit" sum="Total Credit"/>
+                                    <field name="entry_balance" sum="Balance"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                
+                <footer>
+                    <button string="View Report" type="object" name="action_view_report" class="btn-primary"/>
+                    <button string="Download Excel" type="object" name="action_download_xlsx" class="btn-success"/>
+                    <button string="Download PDF" type="object" name="action_download_pdf" class="btn-info"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Chart of Accounts Report Action -->
+    <record id="action_chart_of_accounts_report" model="ir.actions.act_window">
+        <field name="name">Chart of Accounts</field>
+        <field name="res_model">chart.of.accounts.report</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_chart_of_accounts_report" 
+              name="Chart of Accounts" 
+              parent="account.menu_finance_reports" 
+              action="action_chart_of_accounts_report" 
+              sequence="30"/>
+
+    <!-- PDF Report Definition -->
+    <record id="report_chart_of_accounts_pdf" model="ir.actions.report">
+        <field name="name">Chart of Accounts PDF</field>
+        <field name="model">chart.of.accounts.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">all_reports_full.chart_of_accounts_pdf_template</field>
+        <field name="report_file">all_reports_full.chart_of_accounts_pdf_template</field>
+        <field name="binding_model_id" ref="model_chart_of_accounts_report"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- PDF Template -->
+    <template id="chart_of_accounts_pdf_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Chart of Accounts Report</h2>
+                        <p><strong>Period:</strong> <span t-esc="o.date_from"/> to <span t-esc="o.date_to"/></p>
+                        <!-- <p><strong>Generated on:</strong> <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M:%S')"/></p> -->
+                        
+                        <t t-set="accounts" t-value="o.env['account.account'].search([], order='code')"/>
+                        <t t-foreach="accounts" t-as="acc">
+                            <t t-set="acc_type"  t-value="acc.account_type or ''"/>
+                            
+                            <!-- Account Header -->
+                            <h4 class="mt-4" style="background-color: #f0f0f0; padding: 8px;">
+                                <span t-esc="acc.display_name or ''"/> - <span t-esc="acc.name or ''"/>
+                                <small style="margin-left: 20px;">Type: <span t-esc="acc_type or ''"/></small>
+                                <small style="margin-left: 20px;">Reconcile: <span t-esc="'Yes' if acc.reconcile else 'No'"/></small>
+                            </h4>
+                            
+                            <!-- Journal Entries -->
+                            <t t-set="move_lines" t-value="o.env['account.move.line'].search([
+                                ('account_id', '=', acc.id),
+                                ('date', '&gt;=', o.date_from),
+                                ('date', '&lt;=', o.date_to),
+                                ('parent_state', '=', 'posted')
+                            ], order='date, id')"/>
+                            
+                            <t t-if="move_lines">
+                                <table class="table table-sm table-bordered mt-2">
+                                    <thead style="background-color: #e8e8e8;">
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Reference</th>
+                                            <th>Label</th>
+                                            <th>Partner</th>
+                                            <th class="text-right">Debit</th>
+                                            <th class="text-right">Credit</th>
+                                            <th class="text-right">Balance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="move_lines" t-as="line">
+                                            <tr>
+                                                <td><span t-esc="line.date or ''"/></td>
+                                                <td><span t-esc="line.move_id.name or ''"/></td>
+                                                <td><span t-esc="line.name or ''"/></td>
+                                                <td><span t-esc="line.partner_id.name or ''"/></td>
+                                                <td class="text-right"><span t-esc="'%.2f' % (line.debit or 0.0)"/></td>
+                                                <td class="text-right"><span t-esc="'%.2f' % (line.credit or 0.0)"/></td>
+                                                <td class="text-right"><span t-esc="'%.2f' % ((line.debit or 0.0) - (line.credit or 0.0))"/></td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                    <tfoot style="background-color: #f9f9f9; font-weight: bold;">
+                                        <tr>
+                                            <td colspan="4" class="text-right">Total:</td>
+                                            <td class="text-right"><span t-esc="'%.2f' % sum(line.debit or 0.0 for line in move_lines)"/></td>
+                                            <td class="text-right"><span t-esc="'%.2f' % sum(line.credit or 0.0 for line in move_lines)"/></td>
+                                            <td class="text-right"><span t-esc="'%.2f' % (sum(line.debit or 0.0 for line in move_lines) - sum(line.credit or 0.0 for line in move_lines))"/></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </t>
+                            <t t-else="">
+                                <p class="text-muted ml-3">No entries in this period</p>
+                            </t>
+                        </t>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

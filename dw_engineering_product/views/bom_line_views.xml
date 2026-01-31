@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Only inherit the BOM Form View to add availability column to BOM lines -->
+    <record id="view_bom_form_inherit_engineering" model="ir.ui.view">
+        <field name="name">mrp.bom.form.inherit.engineering</field>
+        <field name="model">mrp.bom</field>
+        <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
+        <field name="arch" type="xml">
+            <!-- Add availability column to BOM lines tree view -->
+            <xpath expr="//field[@name='bom_line_ids']/tree" position="inside">
+                <field name="product_availability" string="Availability" widget="badge" 
+                       options="{'background_color:product_availability':'Available:success,Low Stock:warning,Out of Stock:danger,No Product:muted'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- add to BOM tree view to see it in list view -->
+    <record id="view_bom_tree_inherit_availability" model="ir.ui.view">
+        <field name="name">mrp.bom.tree.inherit.availability</field>
+        <field name="model">mrp.bom</field>
+        <field name="inherit_id" ref="mrp.mrp_bom_tree_view"/>
+        <field name="arch" type="xml">
+            <field name="code" position="after">
+                <field name="availability_status" string="Availability" widget="badge" 
+                       options="{'background_color:availability_status':'Fully Available:success,Partially Available:warning,Not Available:danger,Unknown:muted'}"/>
+            </field>
+        </field>
+    </record>
+</odoo>

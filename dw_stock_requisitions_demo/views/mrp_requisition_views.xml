@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View for Manufacturing Department -->
+    <record id="view_dw_mrp_requisition_tree_manufacturing" model="ir.ui.view">
+        <field name="name">dw.mrp.requisition.tree.manufacturing</field>
+        <field name="model">dw.mrp.requisition</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="date"/>
+                <field name="manufacturing_order_id"/>
+                <field name="department"/>
+                <field name="requested_by"/>
+                <field name="state" widget="badge"/>
+                <field name="required_date"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Tree View for Inventory Department -->
+    <record id="view_dw_mrp_requisition_tree_inventory" model="ir.ui.view">
+        <field name="name">dw.mrp.requisition.tree.inventory</field>
+        <field name="model">dw.mrp.requisition</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="date"/>
+                <field name="manufacturing_order_id"/>
+                <field name="department"/>
+                <field name="requested_by"/>
+                <field name="state" widget="badge"/>
+                <field name="required_date"/>
+                <field name="internal_transfer_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Search Views -->
+    <record id="view_dw_mrp_requisition_search_manufacturing" model="ir.ui.view">
+        <field name="name">dw.mrp.requisition.search.manufacturing</field>
+        <field name="model">dw.mrp.requisition</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="manufacturing_order_id"/>
+                <field name="department"/>
+                <filter name="draft" string="My Drafts" domain="[('state','=','draft'),('requested_by','=',uid)]"/>
+                <filter name="submitted" string="Submitted" domain="[('state','=','submitted')]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_dw_mrp_requisition_search_inventory" model="ir.ui.view">
+        <field name="name">dw.mrp.requisition.search.inventory</field>
+        <field name="model">dw.mrp.requisition</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="manufacturing_order_id"/>
+                <field name="department"/>
+                <filter name="submitted" string="To Process" domain="[('state','=','submitted')]"/>
+                <filter name="ready" string="Ready for Transfer" domain="[('state','=','ready_for_transfer')]"/>
+                <filter name="requested" string="Requested Other Location" domain="[('state','=','requested_other_location')]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Form View for All Users (Single View with Group-Based Buttons) -->
+    <record id="view_dw_mrp_requisition_form" model="ir.ui.view">
+        <field name="name">dw.mrp.requisition.form</field>
+        <field name="model">dw.mrp.requisition</field>
+        <field name="arch" type="xml">
+            <form>
+                <!-- <header>
+                    <button name="action_submit_to_store" string="Submit to Store" type="object" class="btn-primary" 
+                        groups="dw_stock_requisitions_demo.group_manufacturing_team"
+                        invisible="state != 'draft'"/>
+                    
+                    <button name="action_ready_for_internal_transfer" string="Ready for Internal Transfer" type="object" class="btn-primary" 
+                        groups="dw_stock_requisitions_demo.group_inventory_team" 
+                        invisible="state != 'submitted'"/>
+                    
+                    <button name="action_request_to_another_location" string="Request to Another Location" type="object" class="btn-secondary" 
+                        groups="dw_stock_requisitions_demo.group_inventory_team"
+                        invisible="state != 'submitted'"/>
+
+                    <button name="action_create_purchase_order" string="Create Purchase Order RFQ" type="object" class="btn-primary" 
+                        groups="dw_stock_requisitions_demo.group_inventory_team" 
+                        invisible="state != 'requested_other_location'"/>
+                    
+                    <button name="action_set_draft" string="Reset to Draft" type="object" class="btn-secondary"
+                        invisible="state == 'draft'"/>
+                    
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,ready_for_transfer,requested_other_location"/>
+                </header> -->
+                <header>
+                    <!-- <button name="action_submit_to_store" string="Submit to Store" type="object" class="btn-primary" 
+                        groups="dw_stock_requisitions_demo.group_manufacturing_team"/> -->
+                    <button name="action_submit_to_store" string="Submit to Store" type="object" class="btn-primary" 
+                        groups="dw_stock_requisitions_demo.group_manufacturing_team"
+                        invisible="state != 'draft'"/>
+ 
+                    <button name="action_ready_for_internal_transfer" string="Ready for Internal Transfer" type="object" class="btn-primary" groups="dw_stock_requisitions_demo.group_inventory_team" invisible="context.get('default_state', state) != 'submitted'"/>
+                    <!-- <button name="action_ready_for_internal_transfer" string="Ready for Internal Transfer" type="object" class="btn-primary" 
+                        groups="dw_stock_requisitions_demo.group_inventory_team" 
+                        invisible="state != 'submitted'"/> -->
+                    <!-- <button name="action_request_to_another_location" string="Request to Another Location" type="object" class="btn-secondary" groups="dw_stock_requisitions_demo.group_inventory_team"/> -->
+                    <button name="action_request_to_another_location" string="Request to Another Location" type="object" class="btn-secondary" 
+                        groups="dw_stock_requisitions_demo.group_inventory_team"
+                        invisible="state != 'submitted'"/>
+
+                   
+                    <button name="action_create_purchase_order" string="Create Purchase Order RFQ" type="object" class="btn-primary" 
+                        groups="dw_stock_requisitions_demo.group_inventory_team" 
+                        invisible="state != 'requested_other_location'"/>
+                    
+                    <button name="action_set_draft" string="Reset to Draft" type="object" class="btn-secondary"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,ready_for_transfer,requested_other_location"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="date"/>
+                            <field name="department" required="1"/>
+                            <field name="required_date" required="1"/>
+                            <field name="manufacturing_order_id" readonly="1" force_save="1"/>
+                        </group>
+                        <group>
+                            <field name="requested_by"/>
+                            <field name="company_id"/>
+                            <field name="total_items" widget="statinfo"/>
+                            <field name="total_quantity" widget="statinfo"/>
+                        </group>
+                    </group>
+                    
+                    <!-- Location Fields Controlled by Groups -->
+                    <group>
+                        <group>
+                            <field name="source_location_id" required="1" groups="dw_stock_requisitions_demo.group_inventory_team"/>
+                            
+                            <field name="destination_location_id" required="1" groups="dw_stock_requisitions_demo.group_inventory_team"/>
+                        </group>
+                        <group>
+                           
+                            <field name="requested_location_id" groups="dw_stock_requisitions_demo.group_inventory_team"/>
+                            <field name="internal_transfer_id" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Requested Items">
+                            <field name="requisition_line_ids">
+                                <tree editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="product_id"/>
+                                    <field name="description"/>
+                                    <field name="quantity"/>
+                                    <field name="uom_id"/>
+                                    <field name="available_qty" readonly="1" options="{'editable': false, 'edit': false}"/>
+                                    <field name="notes"/>
+                                </tree>
+                            </field>
+                        </page>
+                        
+                        <page string="Notes">
+                            <field name="notes" nolabel="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action for Manufacturing Department -->
+    <record id="action_dw_mrp_requisition_manufacturing" model="ir.actions.act_window">
+        <field name="name">Manufacturing Requisitions</field>
+        <field name="res_model">dw.mrp.requisition</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_dw_mrp_requisition_tree_manufacturing"/>
+        <field name="search_view_id" ref="view_dw_mrp_requisition_search_manufacturing"/>
+        <field name="context">{'search_default_draft': 1, 'group_by': []}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first manufacturing requisition!
+            </p>
+        </field>
+    </record>
+
+    <!-- Action for Inventory Department -->
+    <record id="action_dw_mrp_requisition_inventory" model="ir.actions.act_window">
+        <field name="name">Inventory Requisitions</field>
+        <field name="res_model">dw.mrp.requisition</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_dw_mrp_requisition_tree_inventory"/>
+        <field name="search_view_id" ref="view_dw_mrp_requisition_search_inventory"/>
+        <field name="context">{'search_default_submitted': 1, 'group_by': []}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Process manufacturing requisitions!
+            </p>
+        </field>
+    </record>
+
+    <!-- Action for Inventory Users from Manufacturing Module -->
+    <record id="action_dw_mrp_requisition_inventory_from_manufacturing" model="ir.actions.act_window">
+        <field name="name">Inventory Requisitions from Manufacturing</field>
+        <field name="res_model">dw.mrp.requisition</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_dw_mrp_requisition_form"/>
+        <field name="context">{'search_default_submitted': 1, 'group_by': []}</field>
+    </record>
+</odoo>
+
+
+
+<!-- <?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <record id="view_dw_mrp_requisition_tree_manufacturing" model="ir.ui.view">
+        <field name="name">dw.mrp.requisition.tree.manufacturing</field>
+        <field name="model">dw.mrp.requisition</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="date"/>
+                <field name="manufacturing_order_id"/>
+                <field name="department"/>
+                <field name="requested_by"/>
+                <field name="state" widget="badge"/>
+                <field name="required_date"/>
+            </tree>
+        </field>
+    </record>
+
+   
+    <record id="view_dw_mrp_requisition_tree_inventory" model="ir.ui.view">
+        <field name="name">dw.mrp.requisition.tree.inventory</field>
+        <field name="model">dw.mrp.requisition</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="date"/>
+                <field name="manufacturing_order_id"/>
+                <field name="department"/>
+                <field name="requested_by"/>
+                <field name="state" widget="badge"/>
+                <field name="required_date"/>
+                <field name="internal_transfer_id"/>
+            </tree>
+        </field>
+    </record>
+
+   
+    <record id="view_dw_mrp_requisition_search_manufacturing" model="ir.ui.view">
+        <field name="name">dw.mrp.requisition.search.manufacturing</field>
+        <field name="model">dw.mrp.requisition</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="manufacturing_order_id"/>
+                <field name="department"/>
+                <filter name="draft" string="My Drafts" domain="[('state','=','draft'),('requested_by','=',uid)]"/>
+                <filter name="submitted" string="Submitted" domain="[('state','=','submitted')]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_dw_mrp_requisition_search_inventory" model="ir.ui.view">
+        <field name="name">dw.mrp.requisition.search.inventory</field>
+        <field name="model">dw.mrp.requisition</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="manufacturing_order_id"/>
+                <field name="department"/>
+                <filter name="submitted" string="To Process" domain="[('state','=','submitted')]"/>
+                <filter name="ready" string="Ready for Transfer" domain="[('state','=','ready_for_transfer')]"/>
+                <filter name="requested" string="Requested Other Location" domain="[('state','=','requested_other_location')]"/>
+            </search>
+        </field>
+    </record>
+
+   
+    <record id="view_dw_mrp_requisition_form" model="ir.ui.view">
+        <field name="name">dw.mrp.requisition.form</field>
+        <field name="model">dw.mrp.requisition</field>
+        <field name="arch" type="xml">
+            <form>
+                <header> 
+                    <button name="action_submit_to_store" string="Submit to Store" type="object" class="btn-primary" 
+                        groups="dw_stock_requisitions_demo.group_manufacturing_team"/>
+                    
+                    <button name="action_ready_for_internal_transfer" string="Ready for Internal Transfer" type="object" class="btn-primary" groups="dw_stock_requisitions_demo.group_inventory_team" invisible="context.get('default_state', state) != 'submitted'"/>
+                    <button name="action_request_to_another_location" string="Request to Another Location" type="object" class="btn-secondary" groups="dw_stock_requisitions_demo.group_inventory_team"/>
+                   
+                    <button name="action_create_purchase_order" string="Create Purchase Order" type="object" class="btn-primary" 
+                        groups="dw_stock_requisitions_demo.group_inventory_team" 
+                        invisible="state != 'requested_other_location'"/>
+                    <button name="action_set_draft" string="Reset to Draft" type="object" class="btn-secondary"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,ready_for_transfer,requested_other_location"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="date"/>
+                            <field name="department" required="1"/>
+                            <field name="required_date" required="1"/>
+                            <field name="manufacturing_order_id" readonly="1" force_save="1"/>
+                        </group>
+                        <group>
+                            <field name="requested_by"/>
+                            <field name="company_id"/>
+                            <field name="total_items" widget="statinfo"/>
+                            <field name="total_quantity" widget="statinfo"/>
+                        </group>
+                    </group>
+                    
+                   
+                    <group>
+                        <group>
+                            <field name="source_location_id" required="1" groups="dw_stock_requisitions_demo.group_inventory_team"/>
+                            
+                            <field name="destination_location_id" required="1" groups="dw_stock_requisitions_demo.group_inventory_team"/>
+                        </group>
+                        <group>
+                           
+                            <field name="requested_location_id" groups="dw_stock_requisitions_demo.group_inventory_team"/>
+                            <field name="internal_transfer_id" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Requested Items">
+                            <field name="requisition_line_ids">
+                                <tree editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="product_id"/>
+                                    <field name="description"/>
+                                    <field name="quantity"/>
+                                    <field name="uom_id"/>
+                                    <field name="available_qty" readonly="1" options="{'editable': false, 'edit': false}"/>
+                                    <field name="notes"/>
+                                </tree>
+                            </field>
+                        </page>
+                        
+                        <page string="Notes">
+                            <field name="notes" nolabel="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    
+    <record id="action_dw_mrp_requisition_manufacturing" model="ir.actions.act_window">
+        <field name="name">Manufacturing Requisitions</field>
+        <field name="res_model">dw.mrp.requisition</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_dw_mrp_requisition_tree_manufacturing"/>
+        <field name="search_view_id" ref="view_dw_mrp_requisition_search_manufacturing"/>
+        <field name="context">{'search_default_draft': 1, 'group_by': []}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first manufacturing requisition!
+            </p>
+        </field>
+    </record>
+
+
+    <record id="action_dw_mrp_requisition_inventory" model="ir.actions.act_window">
+        <field name="name">Inventory Requisitions</field>
+        <field name="res_model">dw.mrp.requisition</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_dw_mrp_requisition_tree_inventory"/>
+        <field name="search_view_id" ref="view_dw_mrp_requisition_search_inventory"/>
+        <field name="context">{'search_default_submitted': 1, 'group_by': []}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Process manufacturing requisitions!
+            </p>
+        </field>
+    </record>
+
+   
+    <record id="action_dw_mrp_requisition_inventory_from_manufacturing" model="ir.actions.act_window">
+        <field name="name">Inventory Requisitions from Manufacturing</field>
+        <field name="res_model">dw.mrp.requisition</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_dw_mrp_requisition_form"/>
+        <field name="context">{'search_default_submitted': 1, 'group_by': []}</field>
+    </record>
+
+ -->

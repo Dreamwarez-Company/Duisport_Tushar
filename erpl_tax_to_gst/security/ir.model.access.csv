@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_erpl_tax_to_gst_wizard_user,erpl.tax.to.gst.wizard.user,model_erpl_tax_to_gst_wizard,base.group_user,1,1,1,0
+access_erpl_tax_to_gst_wizard_accountant,erpl.tax.to.gst.wizard.accountant,model_erpl_tax_to_gst_wizard,account.group_account_user,1,1,1,0
+access_erpl_tax_to_gst_wizard_manager,erpl.tax.to.gst.wizard.manager,model_erpl_tax_to_gst_wizard,account.group_account_manager,1,1,1,1
+

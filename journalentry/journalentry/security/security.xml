@@ -1,0 +1,5 @@
+<odoo>
+    <record id="group_journal_voucher_user" model="res.groups">
+        <field name="name">Journal Voucher User</field>
+    </record>
+</odoo>

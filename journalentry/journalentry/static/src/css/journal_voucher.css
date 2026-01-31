@@ -1,0 +1,23 @@
+/* Add this file in your module: static/src/css/journal_voucher.css */
+
+.o_form_view .o_form_sheet .oe_button_box {
+    float: right;
+    margin-bottom: 0.5rem;
+}
+
+.o_form_view .o_form_sheet .oe_title {
+    margin-bottom: 1rem;
+}
+
+.o_form_view .o_form_sheet .o_row {
+    margin: 1rem 0;
+}
+
+.o_form_view .o_form_sheet .o_form_textarea {
+    min-height: 60px;
+}
+
+/* Radio button styling */
+.o_radio_input {
+    margin-right: 10px;
+}

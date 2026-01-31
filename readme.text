@@ -1,0 +1,79 @@
+mfg_flow_integration 
+
+group = store department : adding a “Store Department” group is the right way to control access to this “Manufacture or Purchase” action in Odoo.
+
+We’ll create:
+
+✅ A user group called “Store Department”
+
+✅ Access rights so only members of that group can use the wizard
+
+✅ Optional: Add it as a visible group in Settings → Users → Groups
+
+
+  
+
+product_vendor_rfq
+
+
+group = rfq group : Users in the RFQ Department can manage RFQs and vendor quotes
+
+
+
+Ashitosh
+1) Engineering Team : Only Engineering Details Access (Engineering Module)
+2) Management Team : See the Cost Prise Mgnt Field 
+3) Production Team : BOM Access
+
+
+tushar
+
+Admin - Have all access
+Sales Team - CRM access 
+Quality Check Team - For QC access
+
+
+
+rushikesh:
+    I have created 3 user group 
+1-Sales management - for the customer credit only manager can approve the cridit 
+2-Manufacturing - manufacturing team only see the ready for internal transfer button 
+3- manufacturing - he can see only the submit to store button
+
+
+users  |  group  | purpose
+
+store1 | store department | action confirm on quotation
+rfq    | rfq depart       | to create multiple RFQ for vendor
+eng_team  | enginerig team | for doing function of engi analysis (getting error)
+prod_team | prod team | BOm access
+mgmt_team | management Team | to see cost price management field.
+sales_team | sales team | Crm access ( error)
+sales_admin | sales admin | all acess of crm + sales
+inventory  |INventory | for operating inventory group ; it is doing quality check too, 
+
+
+
+
+
+
+
+STORE GROUP :
+
+1. confim the quotation/ create MO and RFQ( PO).
+2. Only he can create the order, not confirm the PO. for confirming the PO. Purchase team is responsible.
+
+Purchase department: 
+
+1. all access of purchase with multi vendor RFQ workflow.
+
+
+Inventory:
+
+1. Acess to whole inventory module.
+2. all operation types, responsible for sending the products for quality Check.
+
+
+
+Manufacturing and Production team.
+

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_journal_voucher_form" model="ir.ui.view">
+        <field name="name">journal.voucher.form</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            
+            <xpath expr="//field[@name='partner_id'][@nolabel='1']" position="attributes">
+                <attribute name="invisible">0</attribute>
+            </xpath>
+            
+            <xpath expr="//label[@for='partner_id']" position="replace">
+                <label for="partner_id" string="Partner"/>
+            </xpath>
+            
+            <xpath expr="//div[@class='o_col' and @invisible]" position="attributes">
+                <attribute name="invisible">0</attribute>
+            </xpath>
+            
+            <xpath expr="//group[@id='header_left_group']" position="inside">
+                <div class="o_form_label">Accounting Date</div>
+                <field name="date" nolabel="1"/>
+                
+                <div class="o_form_label">Default Type</div>
+                <field name="voucher_type" nolabel="1" widget="radio" options="{'horizontal': true}"/>
+                
+                <div class="o_form_label">Mode</div>
+                <field name="mode" nolabel="1"/>
+                
+                <div class="o_form_label">Is Cheque</div>
+                <field name="is_cheque" nolabel="1"/>
+                
+                <div class="o_form_label">Cheque Ref</div>
+                <field name="cheque_ref" nolabel="1" options="{'invisible': [('is_cheque', '=', False)]}"/>
+                
+                <div class="o_form_label">Form Status</div>
+                <field name="form_status" nolabel="1"/>
+            </xpath>
+            
+            <xpath expr="//group[@id='header_right_group']" position="inside">
+                <div class="o_form_label">Memo</div>
+                <field name="narration" placeholder="Enter memo here..." widget="textarea" nolabel="1"/>
+                
+                <div class="o_form_label">Salesperson</div>
+                <field name="salesperson_id" nolabel="1"/>
+                
+                <div class="o_form_label">Sales Team</div>
+                <field name="sales_team_id" nolabel="1"/>
+                
+                <div class="o_form_label">Salesperson(s)</div>
+                <field name="salesperson_ids" nolabel="1" widget="many2many_tags"/>
+            </xpath>
+            
+            <xpath expr="//page[@name='aml_tab']" position="attributes">
+
+                <attribute name="string">Voucher Entry</attribute>
+            </xpath>
+            
+            <xpath expr="//page[@name='invoice_tab']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            
+            <!-- Show custom amount and dr_cr fields -->
+            <xpath expr="//field[@name='line_ids']/tree//field[@name='debit']" position="replace">
+                <field name="dr_cr" string="Dr/Cr" widget="radio" options="{'horizontal': true}"/>
+                <field name="amount" string="Amount"/>
+            </xpath>
+            
+            <!-- Keep both debit and credit fields but make them invisible -->
+            <!-- They will be populated by onchange methods based on amount and dr_cr -->
+            <xpath expr="//field[@name='line_ids']/tree//field[@name='credit']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            
+        </field>
+        
+    </record>
+</odoo>
+
+
+<!-- <odoo>
+    <record id="view_journal_voucher_form" model="ir.ui.view">
+        <field name="name">journal.voucher.form</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            
+            <xpath expr="//field[@name='partner_id'][@nolabel='1']" position="attributes">
+                <attribute name="invisible">0</attribute>
+            </xpath>
+            
+            <xpath expr="//label[@for='partner_id']" position="replace">
+                <label for="partner_id" string="Partner"/>
+            </xpath>
+            
+            <xpath expr="//div[@class='o_col' and @invisible]" position="attributes">
+                <attribute name="invisible">0</attribute>
+            </xpath>
+            
+            <xpath expr="//group[@id='header_left_group']" position="inside">
+                <div class="o_form_label">Accounting Date</div>
+                <field name="date" nolabel="1"/>
+                
+                
+                <div class="o_form_label">Default Type</div>
+                <field name="voucher_type" nolabel="1" widget="radio" options="{'horizontal': true}"/>
+                
+                <div class="o_form_label">Mode</div>
+                <field name="mode" nolabel="1"/>
+                
+                <div class="o_form_label">Is Cheque</div>
+                <field name="is_cheque" nolabel="1"/>
+                
+                <div class="o_form_label">Cheque Ref</div>
+                <field name="cheque_ref" nolabel="1" options="{'invisible': [('is_cheque', '=', False)]}"/>
+                
+                <div class="o_form_label">Form Status</div>
+                <field name="form_status" nolabel="1"/>
+            </xpath>
+            
+            <xpath expr="//group[@id='header_right_group']" position="inside">
+                <div class="o_form_label">Memo</div>
+                <field name="narration" placeholder="Enter memo here..." widget="textarea" nolabel="1"/>
+                
+                <div class="o_form_label">Salesperson</div>
+                <field name="salesperson_id" nolabel="1"/>
+                
+                <div class="o_form_label">Sales Team</div>
+                <field name="sales_team_id" nolabel="1"/>
+                
+                <div class="o_form_label">Salesperson(s)</div>
+                <field name="salesperson_ids" nolabel="1" widget="many2many_tags"/>
+            </xpath>
+            
+            <xpath expr="//page[@name='aml_tab']" position="attributes">
+                <attribute name="string">Voucher Entry</attribute>
+            </xpath>
+            
+            <xpath expr="//page[@name='invoice_tab']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            
+            <xpath expr="//field[@name='line_ids']/tree//field[@name='debit']" position="replace">
+                <field name="amount" string="Amount"/>
+                <field name="dr_cr" string="Dr/Cr" widget="radio" options="{'horizontal': true}"/>
+            </xpath>
+            
+            <xpath expr="//field[@name='line_ids']/tree//field[@name='credit']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            
+        </field>
+    </record>
+</odoo>
+ -->
+

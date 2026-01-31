@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_purchase_order_form_inherit_custom_fields" model="ir.ui.view">
+        <field name="name">purchase.order.form.inherit.custom.fields</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Insert inside the same group as Payment Terms -->
+            <xpath expr="//field[@name='payment_term_id']/ancestor::group" position="inside">
+
+                <group string="Logistics Information" col="2">
+                    <!-- New custom fields -->
+                    <field name="other_references"/>
+                    <field name="dispatched_through"/>
+                    <field name="destination"/>
+                    <field name="terms_of_delivery"/>
+
+                </group>
+
+            </xpath>
+
+        </field>
+    </record>
+
+
+    <record id="view_purchase_order_form_annex1" model="ir.ui.view">
+        <field name="name">purchase.order.form.annex1</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//notebook" position="inside">
+                <page string="Commercial Terms &amp; Conditions">
+                    <group>
+                        <field name="commercial_terms"
+                               widget="html"
+                               placeholder="Type Commercial Terms &amp; Conditions here..."
+                               readonly="state == 'done'"/>
+                    </group>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+
+    <record id="view_purchase_order_form_ship_to" model="ir.ui.view">
+        <field name="name">purchase.order.form.ship.to</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//sheet/group[1]" position="after">
+
+                <group string="Shipping Information" col="2">
+
+                    <field name="ship_to_name"/>
+                    <field name="ship_to_gstin"/>
+
+                    <field name="ship_to_street"/>
+                    <field name="ship_to_street2"/>
+
+                    <field name="ship_to_city"/>
+                    <field name="ship_to_state_id"/>
+                    <field name="ship_to_zip"/>
+
+                </group>
+
+            </xpath>
+
+        </field>
+    </record>
+
+
+    <!-- Hide default Purchase Order report from Print menu -->
+    <record id="purchase.action_report_purchase_order" model="ir.actions.report">
+        <field name="binding_model_id" eval="False"/>
+    </record>
+
+</odoo>

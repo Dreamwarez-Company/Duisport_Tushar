@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Customer Aging Report Form View -->
+    <record id="view_customer_aging_report_form" model="ir.ui.view">
+        <field name="name">customer.aging.report.form</field>
+        <field name="model">customer.aging.report</field>
+        <field name="arch" type="xml">
+            <form string="Customer Aging Report">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="end_date"/>
+                            <field name="partner_id" placeholder="Leave empty for all customers"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Report Data">
+                            <field name="line_ids">
+                                <tree>
+                                    <field name="partner_name"/>
+                                    <field name="total_due" sum="Total Due"/>
+                                    <field name="bucket_0_30" sum="Total 0-30"/>
+                                    <field name="bucket_31_60" sum="Total 31-60"/>
+                                    <field name="bucket_61_90" sum="Total 61-90"/>
+                                    <field name="bucket_91_180" sum="Total 91-180"/>
+                                    <field name="bucket_181_365" sum="Total 181-365"/>
+                                    <field name="bucket_365_plus" sum="Total 365+"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                
+                <footer>
+                    <button string="View Report" type="object" name="action_view_report" class="btn-primary"/>
+                    <button string="Download Excel" type="object" name="action_download_xlsx" class="btn-success"/>
+                    <button string="Download PDF" type="object" name="action_download_pdf" class="btn-info"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Customer Aging Report Action -->
+    <record id="action_customer_aging_report" model="ir.actions.act_window">
+        <field name="name">Customer Aging</field>
+        <field name="res_model">customer.aging.report</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_customer_aging_report" 
+              name="Customer Aging" 
+              parent="account.menu_finance_reports" 
+              action="action_customer_aging_report" 
+              sequence="40"/>
+
+    <!-- PDF Report Definition -->
+    <record id="report_customer_aging_pdf" model="ir.actions.report">
+        <field name="name">Customer Aging PDF</field>
+        <field name="model">customer.aging.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">all_reports_full.customer_aging_pdf_template</field>
+        <field name="report_file">all_reports_full.customer_aging_pdf_template</field>
+        <field name="binding_model_id" ref="model_customer_aging_report"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- PDF Template -->
+    <template id="customer_aging_pdf_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Customer Aging Report</h2>
+                        <p><strong>As of Date:</strong> <span t-esc="o.end_date"/></p>
+                        <t t-if="o.partner_id">
+                            <p><strong>Customer:</strong> <span t-esc="o.partner_id.name"/></p>
+                        </t>
+                        
+                        <table class="table table-bordered table-sm mt-4">
+                            <thead style="background-color: #f0f0f0;">
+                                <tr>
+                                    <th>Customer</th>
+                                    <th class="text-right">Total Due</th>
+                                    <th class="text-right">0-30 Days</th>
+                                    <th class="text-right">31-60 Days</th>
+                                    <th class="text-right">61-90 Days</th>
+                                    <th class="text-right">91-180 Days</th>
+                                    <th class="text-right">181-365 Days</th>
+                                    <th class="text-right">365+ Days</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="grand_total" t-value="0"/>
+                                <t t-set="grand_0_30" t-value="0"/>
+                                <t t-set="grand_31_60" t-value="0"/>
+                                <t t-set="grand_61_90" t-value="0"/>
+                                <t t-set="grand_91_180" t-value="0"/>
+                                <t t-set="grand_181_365" t-value="0"/>
+                                <t t-set="grand_365_plus" t-value="0"/>
+                                
+                                <t t-foreach="o.get_report_data()" t-as="partner_data">
+                                    <t t-set="grand_total" t-value="grand_total + partner_data['total']"/>
+                                    <t t-set="grand_0_30" t-value="grand_0_30 + partner_data['buckets'][0]"/>
+                                    <t t-set="grand_31_60" t-value="grand_31_60 + partner_data['buckets'][1]"/>
+                                    <t t-set="grand_61_90" t-value="grand_61_90 + partner_data['buckets'][2]"/>
+                                    <t t-set="grand_91_180" t-value="grand_91_180 + partner_data['buckets'][3]"/>
+                                    <t t-set="grand_181_365" t-value="grand_181_365 + partner_data['buckets'][4]"/>
+                                    <t t-set="grand_365_plus" t-value="grand_365_plus + partner_data['buckets'][5]"/>
+                                    
+                                    <tr>
+                                        <td><span t-esc="partner_data['partner'].name"/></td>
+                                        <td class="text-right"><span t-esc="'%.2f' % partner_data['total']"/></td>
+                                        <td class="text-right"><span t-esc="'%.2f' % partner_data['buckets'][0]"/></td>
+                                        <td class="text-right"><span t-esc="'%.2f' % partner_data['buckets'][1]"/></td>
+                                        <td class="text-right"><span t-esc="'%.2f' % partner_data['buckets'][2]"/></td>
+                                        <td class="text-right"><span t-esc="'%.2f' % partner_data['buckets'][3]"/></td>
+                                        <td class="text-right"><span t-esc="'%.2f' % partner_data['buckets'][4]"/></td>
+                                        <td class="text-right"><span t-esc="'%.2f' % partner_data['buckets'][5]"/></td>
+                                    </tr>
+                                </t>
+                                
+                                <tr style="font-weight: bold; background-color: #e9ecef;">
+                                    <td>Total</td>
+                                    <td class="text-right"><span t-esc="'%.2f' % grand_total"/></td>
+                                    <td class="text-right"><span t-esc="'%.2f' % grand_0_30"/></td>
+                                    <td class="text-right"><span t-esc="'%.2f' % grand_31_60"/></td>
+                                    <td class="text-right"><span t-esc="'%.2f' % grand_61_90"/></td>
+                                    <td class="text-right"><span t-esc="'%.2f' % grand_91_180"/></td>
+                                    <td class="text-right"><span t-esc="'%.2f' % grand_181_365"/></td>
+                                    <td class="text-right"><span t-esc="'%.2f' % grand_365_plus"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

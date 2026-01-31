@@ -1,0 +1,138 @@
+<odoo>
+    <!-- Wizard View -->
+    <record id="view_customer_ledger_report_wizard" model="ir.ui.view">
+        <field name="name">Customer Ledger Wizard</field>
+        <field name="model">customer.ledger.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Customer Ledger Report">
+                <group>
+                    <group>
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                    </group>
+                    <group>
+                        <field name="partner_ids" widget="many2many_tags"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_print_pdf" type="object" string="Print PDF" class="btn-primary"/>
+                    <button special="cancel" string="Cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Wizard Action -->
+    <record id="action_customer_ledger_report_wizard" model="ir.actions.act_window">
+        <field name="name">Customer Ledger Report</field>
+        <field name="res_model">customer.ledger.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_customer_ledger_report"
+              name="Customer Ledger"
+              parent="account.account_reports_management_menu"
+              action="action_customer_ledger_report_wizard"
+              sequence="21"/>
+
+    <!-- PDF Report Action -->
+    <record id="action_customer_ledger_report_pdf" model="ir.actions.report">
+        <field name="name">Customer Ledger Report</field>
+        <field name="model">customer.ledger.report.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">all_reports_full.report_customer_ledger</field>
+        <field name="report_file">all_reports_full.report_customer_ledger</field>
+        <field name="binding_model_id" ref="model_customer_ledger_report_wizard"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- Report Template -->
+    <template id="report_customer_ledger_document">
+        <t t-call="web.external_layout">
+            <div class="page">
+                <h2>Customer Ledger Report</h2>
+                <p>
+                    <strong>Period:</strong>
+                    <span t-field="o.date_from"/> to <span t-field="o.date_to"/>
+                </p>
+
+                <!-- CRITICAL: Loop through ALL customers -->
+                <t t-set="customers_data" t-value="o.get_report_data()"/>
+                
+                <t t-foreach="customers_data" t-as="customer_data">
+                    <!-- Each customer section -->
+                    <div style="page-break-inside: avoid; margin-top: 30px;">
+                        <h3 t-esc="customer_data['customer_name']"/>
+                        
+                        <p>
+                            <strong>Opening Balance:</strong>
+                            <span t-esc="'%.2f' % customer_data['opening_balance']"/>
+                        </p>
+
+                        <!-- Transaction table -->
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Reference</th>
+                                    <th>Journal</th>
+                                    <th>Description</th>
+                                    <th class="text-right">Debit</th>
+                                    <th class="text-right">Credit</th>
+                                    <th class="text-right">Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="customer_data['entries']" t-as="entry">
+                                    <tr>
+                                        <td t-esc="entry['date']"/>
+                                        <td t-esc="entry['ref']"/>
+                                        <td t-esc="entry['journal']"/>
+                                        <td t-esc="entry['description']"/>
+                                        <td class="text-right" t-esc="'%.2f' % entry['debit']"/>
+                                        <td class="text-right" t-esc="'%.2f' % entry['credit']"/>
+                                        <td class="text-right" t-esc="'%.2f' % entry['balance']"/>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="4"><strong>Total</strong></td>
+                                    <td class="text-right">
+                                        <strong t-esc="'%.2f' % customer_data['total_debit']"/>
+                                    </td>
+                                    <td class="text-right">
+                                        <strong t-esc="'%.2f' % customer_data['total_credit']"/>
+                                    </td>
+                                    <td class="text-right">
+                                        <strong t-esc="'%.2f' % customer_data['closing_balance']"/>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                        <p>
+                            <strong>Closing Balance:</strong>
+                            <span t-esc="'%.2f' % customer_data['closing_balance']"/>
+                        </p>
+                    </div>
+                </t>
+                
+                <!-- If no customers found -->
+                <t t-if="not customers_data">
+                    <p>No customer data found for the selected period.</p>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <template id="report_customer_ledger">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="all_reports_full.report_customer_ledger_document"/>
+            </t>
+        </t>
+    </template>
+</odoo>

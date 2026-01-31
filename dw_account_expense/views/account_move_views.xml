@@ -1,0 +1,13 @@
+<odoo>
+    <record id="view_account_move_form_expense_tag" model="ir.ui.view">
+        <field name="name">account.move.form.expense.tag</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <!-- Add Expense Tag after Invoice Date -->
+            <xpath expr="//field[@name='invoice_date']" position="after">
+                <field name="x_expense_tag_id" placeholder="Select Expense Tag"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

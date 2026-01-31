@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    
+    <!-- Define the custom category first -->
+    <record id="module_category_crm_access" model="ir.module.category">
+        <field name="name">CRM Access</field>
+        <field name="sequence">10</field> 
+    </record>
+    
+    <record id="group_crm_admin" model="res.groups">
+        <field name="name">Admin</field>
+        <field name="category_id" ref="dw_crm.module_category_crm_access"/>
+    </record>
+
+    <record id="group_crm_sales_team" model="res.groups">
+        <field name="name">Sales Team</field>
+        <field name="category_id" ref="dw_crm.module_category_crm_access"/>
+    </record>
+
+</odoo>
+    

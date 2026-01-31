@@ -1,0 +1,22 @@
+
+<odoo>
+    <record id="view_itc_tree" model="ir.ui.view">
+        <field name="name">gst.itc.reversal.tree</field>
+        <field name="model">gst.itc.reversal</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="period_month"/>
+                <field name="period_year"/>
+                <field name="reversal_amount"/>
+            </tree>
+        </field>
+    </record>
+    <record id="action_itc" model="ir.actions.act_window">
+        <field name="name">GST ITC Reversal</field>
+        <field name="res_model">gst.itc.reversal</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_india_compliance" name="India Compliance" groups = "group_admin"/>
+    <menuitem id="menu_itc" name="GST ITC Reversal" parent="menu_india_compliance"  groups = "group_admin" action="action_itc"/>
+</odoo>

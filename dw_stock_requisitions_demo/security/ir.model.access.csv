@@ -1,0 +1,12 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_stock_move_inventory_team,access.stock.move,stock.model_stock_move,dw_stock_requisitions_demo.group_inventory_team,1,1,1,0
+access_product_product_inventory_team,access.product.product,product.model_product_product,dw_stock_requisitions_demo.group_inventory_team,1,0,0,0
+access_stock_quant_inventory_team,access.stock.quant,stock.model_stock_quant,dw_stock_requisitions_demo.group_inventory_team,1,1,0,0
+
+access_dw_mrp_requisition_user,dw.mrp.requisition.user,model_dw_mrp_requisition,base.group_user,1,1,1,0
+access_dw_mrp_requisition_inventory_team,dw.mrp.requisition.inventory.team,model_dw_mrp_requisition,dw_stock_requisitions_demo.group_inventory_team,1,1,1,1
+access_dw_mrp_requisition_line_user,dw.mrp.requisition.line.user,model_dw_mrp_requisition_line,base.group_user,1,1,1,0
+access_dw_mrp_requisition_line_inventory_team,dw.mrp.requisition.line.inventory.team,model_dw_mrp_requisition_line,dw_stock_requisitions_demo.group_inventory_team,1,1,1,1
+
+access_dw_mrp_requisition_manufacturing,dw.mrp.requisition.manufacturing,model_dw_mrp_requisition,dw_stock_requisitions_demo.group_manufacturing_team,1,1,1,1
+

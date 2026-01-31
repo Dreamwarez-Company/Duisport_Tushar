@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Journal Register Report Form View -->
+    <record id="view_journal_register_report_form" model="ir.ui.view">
+        <field name="name">journal.register.report.form</field>
+        <field name="model">journal.register.report</field>
+        <field name="arch" type="xml">
+            <form string="Journal Register Report">
+                <sheet>
+                    <group>
+                        <separator string="Journal Register Report"/>
+                    </group>
+                    
+                    <group>
+                        <group>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                        <group>
+                            <field name="journal_ids" widget="many2many_tags"/>
+                            <field name="target_move"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Report Data">
+                            <field name="line_ids">
+                                <tree decoration-bf="is_header == True" decoration-muted="is_header == False">
+                                    <field name="is_header" invisible="1"/>
+                                    <field name="move_id" invisible="1"/>
+                                    <field name="journal_id" invisible="1"/>
+                                    <field name="partner_id" invisible="1"/>
+                                    
+                                    <!-- Header columns -->
+                                    <field name="move_date"/>
+                                    <field name="move_name"/>
+                                    <field name="journal_name"/>
+                                    <field name="partner_name"/>
+                                    <field name="reference"/>
+                                    <field name="state"/>
+                                    
+                                    <!-- Line columns -->
+                                    <field name="account_code"/>
+                                    <field name="account_name"/>
+                                    <field name="line_name"/>
+                                    <field name="debit" sum="Total Debit"/>
+                                    <field name="credit" sum="Total Credit"/>
+                                    <field name="balance" sum="Balance"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                
+                <footer>
+                    <button string="View Report" type="object" name="action_view_report" class="btn-primary"/>
+                    <button string="Download Excel" type="object" name="action_download_xlsx" class="btn-success"/>
+                    <button string="Download PDF" type="object" name="action_download_pdf" class="btn-info"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Journal Register Report Action -->
+    <record id="action_journal_register_report" model="ir.actions.act_window">
+        <field name="name">Journal Register</field>
+        <field name="res_model">journal.register.report</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_journal_register_report" 
+              name="Journal Register" 
+              parent="account.menu_finance_reports" 
+              action="action_journal_register_report" 
+              sequence="31"/>
+
+    <!-- PDF Report Definition -->
+    <record id="report_journal_register_pdf" model="ir.actions.report">
+        <field name="name">Journal Register PDF</field>
+        <field name="model">journal.register.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">all_reports_full.journal_register_pdf_template</field>
+        <field name="report_file">all_reports_full.journal_register_pdf_template</field>
+        <field name="binding_model_id" ref="model_journal_register_report"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- PDF Template -->
+    <template id="journal_register_pdf_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Journal Register Report</h2>
+                        <p><strong>Period:</strong> <span t-esc="o.date_from or ''"/> to <span t-esc="o.date_to or ''"/></p>
+                        <p><strong>Journals:</strong> <span t-esc="', '.join(o.journal_ids.mapped('name'))"/></p>
+                        <p><strong>Target Moves:</strong> <span t-esc="dict(o._fields['target_move'].selection).get(o.target_move, o.target_move)"/></p>
+                        <p><strong>Generated on:</strong> <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M:%S')"/></p>
+                        
+                        <!-- Build domain for journal entries -->
+                        <t t-set="domain" t-value="[
+                            ('journal_id', 'in', o.journal_ids.ids),
+                            ('date', '&gt;', o.date_from),
+                            ('date', '&lt;', o.date_to)
+                        ]"/>
+                        <t t-if="o.target_move == 'posted'" t-set="domain" t-value="domain + [('state', '=', 'posted')]"/>
+                        
+                        <!-- Get journal entries -->
+                        <t t-set="journal_entries" t-value="o.env['account.move'].search(domain, order='date, name')"/>
+                        
+                        <t t-set="grand_total_debit" t-value="0.0"/>
+                        <t t-set="grand_total_credit" t-value="0.0"/>
+                        
+                        <t t-foreach="journal_entries" t-as="move">
+                            <!-- Journal Entry Header -->
+                            <div class="mt-4" style="background-color: #f0f0f0; padding: 8px; border: 1px solid #ddd;">
+                                <strong>
+                                    <span t-esc="move.date or ''"/> - 
+                                    <span t-esc="move.name or ''"/> - 
+                                    <span t-esc="move.journal_id.name or ''"/>
+                                    <t t-if="move.partner_id">
+                                        - Partner: <span t-esc="move.partner_id.name or ''"/>
+                                    </t>
+                                    <t t-if="move.ref">
+                                        - Ref: <span t-esc="move.ref or ''"/>
+                                    </t>
+                                    - Status: <span t-esc="dict(move._fields['state'].selection).get(move.state, move.state or '')"/>
+                                </strong>
+                            </div>
+                            
+                            <!-- Journal Entry Lines -->
+                            <table class="table table-sm table-bordered mt-2">
+                                <thead style="background-color: #e8e8e8;">
+                                    <tr>
+                                        <th>Account</th>
+                                        <th>Label</th>
+                                        <th>Partner</th>
+                                        <th class="text-right">Debit</th>
+                                        <th class="text-right">Credit</th>
+                                        <th class="text-right">Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-set="move_debit" t-value="0.0"/>
+                                    <t t-set="move_credit" t-value="0.0"/>
+                                    
+                                    <t t-foreach="move.line_ids" t-as="line">
+                                        <tr>
+                                            <td><span t-esc="(line.account_id.code or '') + ' - ' + (line.account_id.name or '')"/></td>
+                                            <td><span t-esc="line.name or ''"/></td>
+                                            <td><span t-esc="line.partner_id.name if line.partner_id else ''"/></td>
+                                            <td class="text-right"><span t-esc="'%.2f' % (line.debit or 0.0)"/></td>
+                                            <td class="text-right"><span t-esc="'%.2f' % (line.credit or 0.0)"/></td>
+                                            <td class="text-right"><span t-esc="'%.2f' % ((line.debit or 0.0) - (line.credit or 0.0))"/></td>
+                                        </tr>
+                                        
+                                        <t t-set="move_debit" t-value="move_debit + (line.debit or 0.0)"/>
+                                        <t t-set="move_credit" t-value="move_credit + (line.credit or 0.0)"/>
+                                    </t>
+                                </tbody>
+                                <tfoot style="background-color: #f9f9f9; font-weight: bold;">
+                                    <tr>
+                                        <td colspan="3" class="text-right">Entry Total:</td>
+                                        <td class="text-right"><span t-esc="'%.2f' % move_debit"/></td>
+                                        <td class="text-right"><span t-esc="'%.2f' % move_credit"/></td>
+                                        <td class="text-right"><span t-esc="'%.2f' % (move_debit - move_credit)"/></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            
+                            <t t-set="grand_total_debit" t-value="grand_total_debit + move_debit"/>
+                            <t t-set="grand_total_credit" t-value="grand_total_credit + move_credit"/>
+                        </t>
+                        
+                        <!-- Grand Total -->
+                        <div class="mt-4" style="background-color: #d0d0d0; padding: 10px; border: 2px solid #999;">
+                            <table class="table table-sm mb-0">
+                                <tr>
+                                    <td style="width: 50%; text-align: right;"><strong>GRAND TOTAL:</strong></td>
+                                    <td style="width: 16.66%; text-align: right;"><strong><span t-esc="'%.2f' % grand_total_debit"/></strong></td>
+                                    <td style="width: 16.66%; text-align: right;"><strong><span t-esc="'%.2f' % grand_total_credit"/></strong></td>
+                                    <td style="width: 16.66%; text-align: right;"><strong><span t-esc="'%.2f' % (grand_total_debit - grand_total_credit)"/></strong></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,22 @@
+<odoo>
+  <record id="view_partner_form_specific_tax" model="ir.ui.view">
+    <field name="name">res.partner.form.specific.tax</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="base.view_partner_form"/>
+    <field name="arch" type="xml">
+      <sheet position="inside">
+        
+        <group string="Vendor Tax Settings">
+            <!-- <field name="tds_section"/> -->
+          <field name="vendor_specific_tax_id"/>
+        </group>
+
+        <group string="Customer Tax Settings">
+          <!-- <field name="tcs_section"/> -->
+          <field name="customer_specific_tax_id"/>
+        </group>
+
+      </sheet>
+    </field>
+  </record>
+</odoo>

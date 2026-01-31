@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_engineering_team_user,Engineering Team User,model_product_template,dw_engineering_product.group_engineering_team,1,1,1,1
+access_management_team_user,Management Team User,model_product_template,dw_engineering_product.group_management_team,1,1,1,1
+access_engineering_team_bom,Engineering Team BOM Access,mrp.model_mrp_bom,dw_engineering_product.group_engineering_team,1,1,1,1
+access_production_team_bom,Production Team BOM Access,mrp.model_mrp_bom,dw_engineering_product.group_production_team,1,1,1,1

@@ -1,0 +1,22 @@
+{
+    'name': 'Product Vendor RFQ',
+    'version': '1.0',
+    'category': 'Purchases',
+    'summary': 'Manage vendor RFQs directly from product form',
+    'depends': ['base', 'mail','purchase', 'product'],
+    'data': [
+        'security/groups.xml',
+        'security/ir.model.access.csv',
+        'views/product_vendor_rfq_views.xml',
+        'views/vendor_form_view.xml',
+        'views/email_temp.xml',
+        'views/menus.xml',
+        'views/purchase_order_view.xml',
+        'views/comparision_view.xml',
+        # 'views/vendor_msme_list.xml',
+        # 'views/vendor_msme.xml',
+    ],
+    'installable': True,
+    'application': False,
+    'license': 'LGPL-3',
+}

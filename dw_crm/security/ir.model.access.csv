@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_crm_lead_admin,CRM Lead Admin,model_crm_lead,dw_crm.group_crm_admin,1,1,1,1
+access_crm_lead_sales_team,CRM Lead Sales Team,model_crm_lead,,1,1,1,1
+access_crm_stage_sales_team,CRM Stage Sales Team,model_crm_stage,,1,1,1,1
+access_department_time_tracking_user,Department Time Tracking User,model_department_time_tracking,,1,1,1,0

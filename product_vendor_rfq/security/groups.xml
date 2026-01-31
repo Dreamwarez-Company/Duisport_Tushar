@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- RFQ Department Group -->
+    <record id="group_rfq_department" model="res.groups">
+        <field name="name">RFQ Department</field>
+        <field name="category_id" ref="base.module_category_inventory"/>
+        <field name="comment">Users in the RFQ Department can manage RFQs and vendor quotes.</field>
+    </record>
+</odoo>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Sequence for Onboarding References -->
+        <record id="seq_res_partner_onboarding" model="ir.sequence">
+            <field name="name">Customer Onboarding</field>
+            <field name="code">res.partner.onboarding</field>
+            <field name="prefix">ONB/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

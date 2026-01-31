@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Wizard Form View -->
+    <record id="view_manufacture_or_purchase_wizard_form" model="ir.ui.view">
+        <field name="name">manufacture.or.purchase.wizard.form</field>
+        <field name="model">manufacture.or.purchase.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Product Not Available">
+                <group>
+                    <!-- Hidden link to Sale Order -->
+                    <field name="sale_order_id" invisible="1"/>
+                    
+                    <!-- Message about unavailable products - Single Line -->
+                    <field name="warning_message" readonly="1" colspan="2"/>
+                    
+                    <!-- Action choice (radio buttons) -->
+                    <label for="action_type" string="Action"/>
+                    <field name="action_type" widget="radio" required="1" nolabel="1"/>
+                </group>
+                
+                <!-- Footer Buttons -->
+                <footer>
+                    <button name="action_proceed" string="Proceed" type="object" class="btn-primary"/>
+                    <button string="Cancel" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Action to open wizard -->
+    <record id="action_manufacture_or_purchase_wizard" model="ir.actions.act_window">
+        <field name="name">Select Action</field>
+        <field name="res_model">manufacture.or.purchase.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_sale_order_id': active_id}</field>
+    </record>
+</odoo>

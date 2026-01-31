@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- Sequence for RFQ -->
+        <record id="seq_rfq_request" model="ir.sequence">
+            <field name="name">RFQ Sequence</field>
+            <field name="code">rfq.request</field>
+            <field name="prefix">RFQ/</field>
+            <field name="padding">5</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+        </record>
+
+        <!-- Email Template for RFQ -->
+        <record id="email_template_rfq" model="mail.template">
+            <field name="name">RFQ: Send to Vendor</field>
+            <field name="model_id" ref="model_rfq_vendor_quote"/>
+            <field name="subject">Request for Quotation - {{ object.rfq_id.name }}</field>
+            <field name="email_from">{{ (object.rfq_id.create_uid.email_formatted or user.email_formatted) }}</field>
+            <field name="email_to">{{ object.vendor_id.email }}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2 style="color: #875A7B;">Request for Quotation</h2>
+                    
+                    <p>Dear <strong>{{ object.vendor_id.name }}</strong>,</p>
+                    
+                    <p>We would like to request a quotation for the following product:</p>
+                    
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                        <tr style="background-color: #f5f5f5;">
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">RFQ Number</th>
+                            <td style="border: 1px solid #ddd; padding: 8px;">{{ object.rfq_id.name }}</td>
+                        </tr>
+                        <tr>
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Product</th>
+                            <td style="border: 1px solid #ddd; padding: 8px;">{{ object.product_id.name }}</td>
+                        </tr>
+                        <tr style="background-color: #f5f5f5;">
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Quantity</th>
+                            <td style="border: 1px solid #ddd; padding: 8px;">{{ object.quantity }} {{ object.product_id.uom_id.name }}</td>
+                        </tr>
+                        <tr t-if="object.rfq_id.deadline">
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Deadline</th>
+                            <td style="border: 1px solid #ddd; padding: 8px;">{{ object.rfq_id.deadline }}</td>
+                        </tr>
+                    </table>
+                    
+                    <p t-if="object.rfq_id.description">
+                        <strong>Description:</strong><br/>
+                        {{ object.rfq_id.description }}
+                    </p>
+                    
+                    <p>Please provide your best quotation including:</p>
+                    <ul>
+                        <li>Unit Price</li>
+                        <li>Delivery Time</li>
+                        <li>Payment Terms</li>
+                    </ul>
+                    
+                    <p>
+                        <a href="/my/quotes/{{ object.id }}" 
+                           style="background-color: #875A7B; color: white; padding: 10px 20px; 
+                                  text-decoration: none; border-radius: 5px; display: inline-block;">
+                            Submit Your Quote
+                        </a>
+                    </p>
+                    
+                    <p>Thank you for your cooperation.</p>
+                    
+                    <p>
+                        Best regards,<br/>
+                        <strong>{{ object.rfq_id.create_uid.name }}</strong><br/>
+                        {{ object.rfq_id.create_uid.company_id.name }}
+                    </p>
+                </div>
+            </field>
+        </record>
+
+    </data>
+</odoo>

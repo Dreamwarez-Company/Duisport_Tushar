@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="cashflow_wizard_lines_template">
+        <t t-if="has_data">
+            <table class="table table-striped table-bordered o_list_view" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">Date</th>
+                        <th style="width: 45%;">Description</th>
+                        <th style="width: 20%; text-align: right;">Inflow</th>
+                        <th style="width: 20%; text-align: right;">Outflow</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-set="lines" t-value="get_cashflow_lines()"/>
+                    <t t-set="total_inflow" t-value="0"/>
+                    <t t-set="total_outflow" t-value="0"/>
+                    
+                    <t t-foreach="lines" t-as="line">
+                        <t t-set="inflow" t-value="line.get('inflow', 0)"/>
+                        <t t-set="outflow" t-value="line.get('outflow', 0)"/>
+                        <t t-set="total_inflow" t-value="total_inflow + inflow"/>
+                        <t t-set="total_outflow" t-value="total_outflow + outflow"/>
+                        
+                        <tr>
+                            <td><span t-esc="line.get('date', '')"/></td>
+                            <td><span t-esc="line.get('description', '')"/></td>
+                            <td style="text-align: right;">
+                                <span t-esc="'%.2f' % inflow"/>
+                            </td>
+                            <td style="text-align: right;">
+                                <span t-esc="'%.2f' % outflow"/>
+                            </td>
+                        </tr>
+                    </t>
+                    
+                    <!-- Totals Row -->
+                    <tr class="fw-bold" style="border-top: 2px solid #000;">
+                        <td colspan="2" style="text-align: right;">Total:</td>
+                        <td style="text-align: right;">
+                            <span t-esc="'%.2f' % total_inflow"/>
+                        </td>
+                        <td style="text-align: right;">
+                            <span t-esc="'%.2f' % total_outflow"/>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </t>
+    </template>
+</odoo>

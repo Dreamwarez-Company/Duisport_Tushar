@@ -1,0 +1,36 @@
+
+<odoo>
+    <record id="tds_194c_ind" model="tds.section.master">
+        <field name="name">Payment to Contractor (Individual/HUF)</field>
+        <field name="code">194C</field>
+        <field name="rate">1</field>
+        <field name="residency">yes</field>
+        <field name="short_note">Contract payment to individual/HUF</field>
+    </record>
+
+    <record id="tds_194j_prof" model="tds.section.master">
+        <field name="name">Professional Fees</field>
+        <field name="code">194J</field>
+        <field name="rate">10</field>
+        <field name="residency">yes</field>
+        <field name="short_note">Professional or consultancy services</field>
+    </record>
+
+    <record id="tds_195_nr" model="tds.section.master">
+        <field name="name">Payment to Non-Resident</field>
+        <field name="code">195</field>
+        <field name="rate">20</field>
+        <field name="residency">no</field>
+        <field name="short_note">Any sum payable to non-resident</field>
+    </record>
+
+    <record id="tds_194q_goods" model="tds.section.master">
+        <field name="name">Purchase of Goods</field>
+        <field name="code">194Q</field>
+        <field name="rate">0.1</field>
+        <field name="residency">yes</field>
+        <field name="short_note">Goods purchase exceeding 50 Lakhs</field>
+    </record>
+
+
+</odoo>

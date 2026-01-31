@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Manufacturing Department Menu -->
+    <menuitem 
+        id="menu_dw_mrp_requisition_manufacturing" 
+        name="Requisition" 
+        parent="mrp.menu_mrp_manufacturing"
+        action="action_dw_mrp_requisition_manufacturing"
+        sequence="24"
+    />
+    
+    <!-- Inventory Department Menu -->
+    <menuitem 
+        id="menu_dw_mrp_requisition_inventory" 
+        name="Requisition" 
+        parent="stock.menu_stock_root"
+        action="action_dw_mrp_requisition_inventory"
+        sequence="15"
+    />
+</odoo>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+ 
+    <record id="view_fixed_asset_register_wizard_form" model="ir.ui.view">
+        <field name="name">fixed.asset.register.wizard.form</field>
+        <field name="model">fixed.asset.register.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Fixed Asset Register Report">
+                <sheet>
+                    <group>
+                        <group>
+                            <label for="date_as_of" string="As of Date" />
+                            <field name="date_as_of"/>
+                            
+                            
+                            
+                            <label for="state" string="Status" />
+                            <field name="state" widget="radio"/>
+                            
+                            <label for="category_id" string="Asset Category" />
+                            <field name="category_id"/>
+                            
+                            <label for="partner_id" string="Vendor/Customer" />
+                            <field name="partner_id"/>
+                            
+                            <label for="asset_code" string="Asset Code" />
+                            <field name="asset_code"/>
+                        </group>
+                        <group>
+                            <label string="Date Range"/>
+                            <label for="acquisition_date_from" string="Acquisition Date From" />
+                            <field name="acquisition_date_from"/>
+                            
+                            <label for="acquisition_date_to" string="Acquisition Date To" />
+                            <field name="acquisition_date_to"/>
+                            
+                            <separator/>
+                            
+                            <label string="Value Range"/>
+                            <label for="min_value" string="Minimum Value" />
+                            <field name="min_value"/>
+                            
+                            <label for="max_value" string="Maximum Value" />
+                            <field name="max_value"/>
+                            
+                            <separator/>
+                            
+                            <label string="Sort Options"/>
+                            <label for="sort_by" string="Sort By" />
+                            <field name="sort_by"/>
+                            
+                            <label for="sort_order" string="Sort Order" />
+                            <field name="sort_order"/>
+                        </group>
+                    </group>
+                    <footer>
+                        <button name="action_print_fixed_asset_register" string="Generate PDF Report" type="object" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_fixed_asset_register_wizard" model="ir.actions.act_window">
+        <field name="name">Fixed Asset Register Report</field>
+        <field name="res_model">fixed.asset.register.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" eval="False"/>
+    </record>
+</odoo>
+

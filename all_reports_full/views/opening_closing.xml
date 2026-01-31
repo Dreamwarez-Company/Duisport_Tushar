@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Wizard Form -->
+    <record id="view_opening_closing_wizard" model="ir.ui.view">
+        <field name="name">opening.closing.report.wizard.form</field>
+        <field name="model">opening.closing.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Opening / Closing Balance Report">
+                <group>
+                    <field name="start_date"/>
+                    <field name="end_date"/>
+                    <field name="report_format"/>
+                </group>
+                <footer>
+                    <button string="Export" type="object" name="action_export" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Menu + Action -->
+    <record id="action_opening_closing_wizard" model="ir.actions.act_window">
+        <field name="name">Opening / Closing Balance</field>
+        <field name="res_model">opening.closing.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_opening_closing"
+              name="Opening/Closing Balance"
+              parent="all_reports_full.menu_reports_root"
+              action="action_opening_closing_wizard"/>
+
+    <!-- PDF Report Action -->
+    <record id="opening_closing_pdf" model="ir.actions.report">
+        <field name="name">Opening and Closing Balance</field>
+        <field name="model">opening.closing.report.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">all_reports_full.opening_closing_template</field>
+        <field name="report_file">all_reports_full.opening_closing_template</field>
+        <field name="binding_model_id" ref="model_opening_closing_report_wizard"/>
+        <field name="binding_type">report</field>
+    </record>
+
+
+
+
+
+
+
+    <template id="opening_closing_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Opening andClosing Balance Report</h2>
+                        <p>
+                            From: <strong><t t-esc="o.start_date"/></strong>
+                            To: <strong><t t-esc="o.end_date"/></strong>
+                        </p>
+
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Account Code</th>
+                                    <th>Account Name</th>
+                                    <th class="text-right">Opening</th>
+                                    <th class="text-right">Debit</th>
+                                    <th class="text-right">Credit</th>
+                                    <th class="text-right">Closing</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="o._get_balance_data()" t-as="acc">
+                                    <tr>
+                                        <td><t t-esc="acc['account'].code"/></td>
+                                        <td><t t-esc="acc['account'].name"/></td>
+                                        <td class="text-right"><t t-esc="'%.2f' % acc['opening']"/></td>
+                                        <td class="text-right"><t t-esc="'%.2f' % acc['debit']"/></td>
+                                        <td class="text-right"><t t-esc="'%.2f' % acc['credit']"/></td>
+                                        <td class="text-right"><t t-esc="'%.2f' % acc['closing']"/></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

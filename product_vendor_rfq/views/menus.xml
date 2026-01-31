@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Root Menu -->
+    <menuitem id="menu_rfq_root" 
+              name="RFQ Management" 
+              sequence="10"/>
+
+    <!-- RFQ Submenu -->
+    <menuitem id="menu_rfq_request" 
+              name="RFQ" 
+              parent="menu_rfq_root" 
+              action="action_rfq_request" 
+              sequence="10"/>
+
+    <!-- Vendor Quotes Submenu -->
+    <menuitem id="menu_rfq_vendor_quote" 
+              name="Vendor Quotes" 
+              parent="menu_rfq_root" 
+              action="action_rfq_vendor_quote" 
+              sequence="20"/>
+
+</odoo>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <template id="external_layout_remove_odoo"
+              inherit_id="report.external_layout">
+
+        <!-- Replace company name in header -->
+        <xpath expr="//t[@t-esc='company.name']" position="replace">
+            <h2>Dreamwarez</h2>
+        </xpath>
+
+        <!-- Remove footer branding completely -->
+        <xpath expr="//div[contains(@class,'footer')]" position="replace">
+            <div class="footer"/>
+        </xpath>
+
+    </template>
+
+</odoo>

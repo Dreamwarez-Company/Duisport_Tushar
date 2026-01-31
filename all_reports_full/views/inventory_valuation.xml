@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inventory Valuation Report Form View -->
+    <record id="view_inventory_valuation_report_form" model="ir.ui.view">
+        <field name="name">inventory.valuation.report.form</field>
+        <field name="model">inventory.valuation.report</field>
+        <field name="arch" type="xml">
+            <form string="Inventory Valuation Report">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                        <group>
+                            <field name="product_id" placeholder="Leave empty for all products"/>
+                            <field name="categ_id" placeholder="Leave empty for all categories"/>
+                            <field name="total_value" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Report Data">
+                            <field name="line_ids">
+                                <tree>
+                                    <field name="product_name"/>
+                                    <field name="sku"/>
+                                    <field name="category"/>
+                                    <field name="qty_in" sum="Total In"/>
+                                    <field name="qty_out" sum="Total Out"/>
+                                    <field name="qty_on_hand" sum="Total Qty"/>
+                                    <field name="unit_cost"/>
+                                    <field name="total_value" sum="Total Value"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                
+                <footer>
+                    <button string="View Report" type="object" name="action_view_report" class="btn-primary"/>
+                    <button string="Download Excel" type="object" name="action_download_xlsx" class="btn-success"/>
+                    <button string="Download PDF" type="object" name="action_download_pdf" class="btn-info"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Inventory Valuation Report Action -->
+    <record id="action_inventory_valuation_report" model="ir.actions.act_window">
+        <field name="name">Inventory Valuation</field>
+        <field name="res_model">inventory.valuation.report</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_inventory_valuation_report" 
+              name="Inventory Valuation" 
+              parent="stock.menu_warehouse_report" 
+              action="action_inventory_valuation_report" 
+              sequence="10"/>
+
+    <!-- PDF Report Definition -->
+    <record id="report_inventory_valuation_pdf" model="ir.actions.report">
+        <field name="name">Inventory Valuation PDF</field>
+        <field name="model">inventory.valuation.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">all_reports_full.inventory_valuation_pdf_template</field>
+        <field name="report_file">all_reports_full.inventory_valuation_pdf_template</field>
+        <field name="binding_model_id" ref="model_inventory_valuation_report"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- PDF Template -->
+    <template id="inventory_valuation_pdf_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Inventory Valuation Report</h2>
+                        <p><strong>From Date:</strong> <span t-esc="o.date_from"/> <strong>To Date:</strong> <span t-esc="o.date_to"/></p>
+                        <t t-if="o.product_id">
+                            <p><strong>Product:</strong> <span t-esc="o.product_id.name"/></p>
+                        </t>
+                        <t t-if="o.categ_id">
+                            <p><strong>Category:</strong> <span t-esc="o.categ_id.name"/></p>
+                        </t>
+                        
+                        <table class="table table-bordered table-sm mt-4">
+                            <thead style="background-color: #f0f0f0;">
+                                <tr>
+                                    <th>Product</th>
+                                    <th>SKU</th>
+                                    <th>Category</th>
+                                    <th class="text-right">Qty In</th>
+                                    <th class="text-right">Qty Out</th>
+                                    <th class="text-right">Qty on Hand</th>
+                                    <th class="text-right">Unit Cost</th>
+                                    <th class="text-right">Total Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="total_value" t-value="0"/>
+                                <t t-set="total_qty_in" t-value="0"/>
+                                <t t-set="total_qty_out" t-value="0"/>
+                                <t t-set="total_qty_hand" t-value="0"/>
+                                
+                                <t t-foreach="o.line_ids" t-as="line">
+                                    <t t-set="total_value" t-value="total_value + line.total_value"/>
+                                    <t t-set="total_qty_in" t-value="total_qty_in + line.qty_in"/>
+                                    <t t-set="total_qty_out" t-value="total_qty_out + line.qty_out"/>
+                                    <t t-set="total_qty_hand" t-value="total_qty_hand + line.qty_on_hand"/>
+                                    
+                                    <tr>
+                                        <td><span t-esc="line.product_name"/></td>
+                                        <td><span t-esc="line.sku"/></td>
+                                        <td><span t-esc="line.category"/></td>
+                                        <td class="text-right"><span t-esc="'%.2f' % line.qty_in"/></td>
+                                        <td class="text-right"><span t-esc="'%.2f' % line.qty_out"/></td>
+                                        <td class="text-right"><span t-esc="'%.2f' % line.qty_on_hand"/></td>
+                                        <td class="text-right"><span t-esc="'%.2f' % line.unit_cost"/></td>
+                                        <td class="text-right"><span t-esc="'%.2f' % line.total_value"/></td>
+                                    </tr>
+                                </t>
+                                
+                                <tr style="font-weight: bold; background-color: #e9ecef;">
+                                    <td colspan="3" class="text-right">Total:</td>
+                                    <td class="text-right"><span t-esc="'%.2f' % total_qty_in"/></td>
+                                    <td class="text-right"><span t-esc="'%.2f' % total_qty_out"/></td>
+                                    <td class="text-right"><span t-esc="'%.2f' % total_qty_hand"/></td>
+                                    <td></td>
+                                    <td class="text-right"><span t-esc="'%.2f' % total_value"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_partner_form_inherit_onboarding" model="ir.ui.view">
+            <field name="name">res.partner.form.inherit.onboarding</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                    <field name="onboarding_ids" invisible="1"/>
+                    <field name="requires_onboarding" invisible="1"/>
+                    <field name="active_onboarding_id" invisible="1"/>
+                    <field name="credit_limit_reached" invisible="1"/>
+                </field>
+                <div name="button_box" position="inside">
+                    <button name="action_view_onboarding" type="object" 
+                            string="Onboarding History" class="btn-secondary"
+                            invisible="not onboarding_ids"/>
+                </div>
+                <page name="sales_purchases" position="inside">
+                    <div invisible="not requires_onboarding">
+                        <div class="alert alert-warning">
+                            <strong>This customer requires credit onboarding.</strong>
+                            <button name="action_create_onboarding" type="object" 
+                                    string="Start Onboarding" class="btn-primary"/>
+                        </div>
+                    </div>
+                    
+                    <div invisible="not active_onboarding_id">
+                        <div class="o_form_label">Current Onboarding Status:</div>
+                        <field name="active_onboarding_id" widget="statusbar" options="{'clickable': '1'}"/>
+                    </div>
+                    <div invisible="not credit_limit_reached">
+                        <div class="alert alert-danger">
+                            <strong>Credit Limit Reached:</strong> No further invoices can be created for this customer.
+                        </div>
+                    </div>
+                </page>
+            </field>
+        </record>
+    </data>
+</odoo>

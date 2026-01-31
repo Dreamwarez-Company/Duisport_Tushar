@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Action to open Quality Checks for a Picking -->
+        <record id="action_quality_checks_picking" model="ir.actions.act_window">
+            <field name="name">Quality Checks</field>
+            <field name="res_model">dw.quality.check</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('picking_id', '=', active_id)]</field>
+            <field name="context">{'default_picking_id': active_id, 'search_default_picking_id': active_id}</field>
+        </record>
+
+        <!-- Inherit Stock Picking Form View to Add QC Buttons and Fields -->
+        <record id="view_picking_form_qc_inherit" model="ir.ui.view">
+            <field name="name">stock.picking.form.qc.inherit</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="priority" eval="100"/>
+            <field name="arch" type="xml">
+                <xpath expr="//header" position="inside">
+                    <field name="show_qc_button" invisible="1"/>
+                    <button name="action_send_for_qc"
+                            type="object"
+                            string="Send for Quality Check"
+                            class="btn-primary"
+                            invisible="not show_qc_button"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_reports_root" name="Reports Center" groups="group_admin" sequence="10"/>
+    <menuitem id="menu_reports_accounting" name="Accounting Reports" parent="menu_reports_root" sequence="1"/>
+    <menuitem id="menu_reports_sales" name="Sales Reports" parent="menu_reports_root" sequence="2"/>
+    <menuitem id="menu_reports_purchase" name="Purchase Reports" parent="menu_reports_root" sequence="3"/>
+    <menuitem id="menu_reports_inventory" name="Inventory Reports" parent="menu_reports_root" sequence="4"/>
+    <menuitem id="menu_reports_mrp" name="Manufacturing Reports" parent="menu_reports_root" sequence="5"/>
+    <menuitem id="menu_reports_hr" name="HR and Payroll Reports" parent="menu_reports_root" sequence="6"/>
+</odoo>

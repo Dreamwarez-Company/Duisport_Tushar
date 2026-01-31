@@ -1,0 +1,40 @@
+<odoo>
+    <!-- Tree View of MSME Vendors -->
+    <record id="view_msme_vendor_tree" model="ir.ui.view">
+        <field name="name">msme.vendor.tree</field>
+        <field name="model">res.partner</field>
+        <field name="arch" type="xml">
+            <tree string="MSME Vendors">
+                <!-- <header>
+                    <button name="action_download_msme_list"
+                            type="object"
+                            string="Download MSME List"
+                            class="btn-primary"/>
+                </header> -->
+                <field name="name" string="Vendor Name"/>
+                <field name="udyam_number_user" string="Udyam Reg. No."/>
+                <field name="vat" string="GSTIN"/>
+                <field name="l10n_in_pan" string="PAN"/>
+                <field name="phone" string="Phone"/>
+                <field name="email" string="Email"/>
+            </tree>
+        </field>
+    </record>
+   
+    <!-- Action - UPDATED to use your custom view -->
+    <record id="action_msme_vendor_list" model="ir.actions.act_window">
+        <field name="name">MSME Vendors</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="view_msme_vendor_tree"/>
+        <field name="domain">[("is_msme_user","=",True), ("supplier_rank", ">", 0)]</field>
+        <field name="context">{'search_default_is_msme_user': 1}</field>
+    </record>
+
+    <!-- Menu Item under Accounting > Vendors -->
+    <menuitem id="menu_msme_vendors"
+              name="MSME Vendors"
+              parent="account.menu_finance_entries"
+              action="action_msme_vendor_list"
+              sequence="35"/>
+</odoo>

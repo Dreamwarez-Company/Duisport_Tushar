@@ -1,0 +1,25 @@
+<odoo>
+    <record id="view_expense_tag_tree" model="ir.ui.view">
+        <field name="name">expense.tag.tree</field>
+        <field name="model">expense.tag</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_expense_tag_form" model="ir.ui.view">
+        <field name="name">expense.tag.form</field>
+        <field name="model">expense.tag</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,21 @@
+<odoo>
+    <record id="voucher_receipt" model="voucher.type">
+        <field name="name">Receipt</field>
+        <field name="code">receipt</field>
+    </record>
+
+    <record id="voucher_payment" model="voucher.type">
+        <field name="name">Payment</field>
+        <field name="code">payment</field>
+    </record>
+
+    <record id="voucher_contra" model="voucher.type">
+        <field name="name">Contra</field>
+        <field name="code">contra</field>
+    </record>
+
+    <record id="voucher_journal" model="voucher.type">
+        <field name="name">Journal</field>
+        <field name="code">journal</field>
+    </record>
+</odoo>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    
+    <!-- Define the custom category first -->
+    <record id="module_category_qc_access" model="ir.module.category">
+        <field name="name">Quality Check Access</field>
+        <!-- <field name="sequence">9</field>  -->
+    </record>
+    
+    <record id="group_quality_check" model="res.groups">
+        <field name="name">Quality Check Team</field>
+        <field name="category_id" ref="dw_quality_check.module_category_qc_access"/>
+    </record>
+
+    <record id="group_purchase_team" model="res.groups">
+        <field name="name">Purchase Team</field>
+        <field name="category_id" ref="dw_quality_check.module_category_qc_access"/>
+    </record>
+    
+</odoo>
+    

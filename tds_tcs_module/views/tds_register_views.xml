@@ -1,0 +1,127 @@
+<!-- views/tds_register_views.xml -->
+
+<odoo>
+    <!-- TDS Register Form View -->
+    <record id="view_tds_register_form" model="ir.ui.view">
+        <field name="name">tds.register.form</field>
+        <field name="model">tds.register</field>
+        <field name="arch" type="xml">
+            <form string="TDS Register">
+                <header>
+                    <button name="action_generate_report" string="Generate Report" 
+                            type="object" class="oe_highlight" 
+                            invisible="state == 'confirmed'"/>
+                    <button name="action_print_report" string="Print Report" 
+                            type="object" class="oe_highlight" 
+                            invisible="state == 'draft'"/>
+                    <button name="action_reset_to_draft" string="Reset to Draft" 
+                            type="object" 
+                            invisible="state == 'draft'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="tds_section_id"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="TDS Details">
+                            <field name="line_ids" readonly="state == 'confirmed'">
+                                <tree>
+                                    <field name="invoice_date"/>
+                                    <field name="invoice_number"/>
+                                    <field name="partner_id"/>
+                                    <field name="pan_number"/>
+                                    <field name="tds_section_code"/>
+                                    <field name="tds_rate"/>
+                                    <field name="taxable_amount" sum="Total Taxable Amount"/>
+                                    <field name="tds_amount" sum="Total TDS Amount"/>
+                                    <field name="invoice_amount" sum="Total Invoice Amount"/>
+                                </tree>
+                            </field>
+                        </page>
+                        
+                        <page string="Summary">
+                            <group>
+                                <group>
+                                    <field name="total_taxable_amount" readonly="1"/>
+                                    <field name="total_tds_amount" readonly="1"/>
+                                    <field name="total_invoice_amount" readonly="1"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- TDS Register Tree View -->
+    <record id="view_tds_register_tree" model="ir.ui.view">
+        <field name="name">tds.register.tree</field>
+        <field name="model">tds.register</field>
+        <field name="arch" type="xml">
+            <tree string="TDS Register">
+                <field name="name"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="partner_id"/>
+                <field name="tds_section_id"/>
+                <field name="total_taxable_amount"/>
+                <field name="total_tds_amount"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- TDS Register Search View -->
+    <record id="view_tds_register_search" model="ir.ui.view">
+        <field name="name">tds.register.search</field>
+        <field name="model">tds.register</field>
+        <field name="arch" type="xml">
+            <search string="TDS Register">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="tds_section_id"/>
+                <filter string="Draft" name="draft" domain="[('state','=','draft')]"/>
+                <filter string="Confirmed" name="confirmed" domain="[('state','=','confirmed')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Status" name="group_state" context="{'group_by':'state'}"/>
+                    <filter string="Vendor" name="group_partner" context="{'group_by':'partner_id'}"/>
+                    <filter string="TDS Section" name="group_section" context="{'group_by':'tds_section_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- TDS Register Action -->
+    <record id="action_tds_register" model="ir.actions.act_window">
+        <field name="name">TDS Register</field>
+        <field name="res_model">tds.register</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a TDS Register Report
+            </p>
+            <p>
+                Generate TDS register reports for specific periods to track TDS deductions.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_tds_register"
+              name="TDS Register"
+              parent="account.menu_finance_reports"
+              action="action_tds_register"
+              sequence="50"/>
+
+</odoo>

@@ -1,0 +1,15 @@
+<odoo>
+    <record id="view_purchase_order_form_inherit_store" model="ir.ui.view">
+        <field name="name">purchase.order.form.inherit.store</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_rfq_send']" position="attributes">
+                <attribute name="groups">purchase.group_purchase_user</attribute>
+            </xpath>
+            <xpath expr="//button[@name='button_confirm']" position="attributes">
+                <attribute name="groups">purchase.group_purchase_user</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

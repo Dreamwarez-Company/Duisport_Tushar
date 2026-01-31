@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_tax_to_gst_wizard_form" model="ir.ui.view">
+        <field name="name">erpl.tax.to.gst.wizard.form</field>
+        <field name="model">erpl.tax.to.gst.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Convert Tax to GST">
+                <sheet>
+                    <group>
+                        <group string="Conversion Options">
+                            <field name="conversion_type"/>
+                            <field name="tax_ids" invisible="[('conversion_type', '!=', 'selected')]" required="[('conversion_type', '=', 'selected')]" 
+                                   widget="many2many_tags" options="{'no_create': True}"/>
+                            <field name="tax_group_ids" invisible="[('conversion_type', '!=', 'selected')]" 
+                                   widget="many2many_tags" options="{'no_create': True}"/>
+                        </group>
+                        <group string="Update Options">
+                            <field name="update_tax_name"/>
+                            <field name="update_tax_description"/>
+                            <field name="convert_tax_groups"/>
+                            <field name="update_tax_group_name" invisible="[('convert_tax_groups', '=', False)]"/>
+                        </group>
+                    </group>
+                    <group string="Information" class="oe_read_only" invisible="[('result_message', '=', False)]">
+                        <field name="result_message" widget="text" nolabel="1"/>
+                    </group>
+                    <group string="How It Works" class="oe_read_only">
+                        <div class="alert alert-info" role="alert">
+                            <p><strong>This wizard will convert your taxes to GST format:</strong></p>
+                            <ul>
+                                <li>Replaces "Tax" with "GST" in tax names</li>
+                                <li>Replaces "Tax" and "VAT" with "GST" in tax descriptions</li>
+                                <li>Replaces "Tax" with "GST" in tax group names</li>
+                                <li>You can convert all taxes or select specific ones</li>
+                                <li>Use Preview Mode to see changes before applying</li>
+                            </ul>
+                            <p><strong>Note:</strong> This operation modifies your tax records. Make sure to backup your database before proceeding.</p>
+                        </div>
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="Preview" name="action_preview" type="object" class="btn-secondary"/>
+                    <button string="Convert to GST" name="action_convert" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_tax_to_gst_wizard" model="ir.actions.act_window">
+        <field name="name">Convert Tax to GST</field>
+        <field name="res_model">erpl.tax.to.gst.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

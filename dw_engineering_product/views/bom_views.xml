@@ -1,0 +1,27 @@
+<odoo>
+    <!-- Inherit BOM Tree View -->
+    <record id="view_bom_tree_inherit_engineering" model="ir.ui.view">
+        <field name="name">mrp.bom.tree.inherit.engineering</field>
+        <field name="model">mrp.bom</field>
+        <field name="inherit_id" ref="mrp.mrp_bom_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="attributes">
+                <attribute name="default_order">product_tmpl_id asc</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Inherit BOM Search View -->
+    <record id="view_bom_search_inherit_engineering" model="ir.ui.view">
+        <field name="name">mrp.bom.search.inherit.engineering</field>
+        <field name="model">mrp.bom</field>
+        <field name="inherit_id" ref="mrp.view_mrp_bom_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <filter name="filter_by_type" string="BOM Type" context="{'group_by': 'type'}"/>
+                <filter name="filter_by_product" string="Product" context="{'group_by': 'product_tmpl_id'}"/>
+                <filter name="filter_by_reference" string="Reference" domain="[('code','!=',False)]"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

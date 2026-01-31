@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Action -->
+        <record id="action_res_partner_onboarding" model="ir.actions.act_window">
+            <field name="name">Customer Onboarding</field>
+            <field name="res_model">res.partner.onboarding</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'search_default_draft': 1}</field>
+        </record>
+
+        <!-- Menu -->
+        <!-- <menuitem id="menu_customer_onboarding" name="Customer Onboarding" 
+                  parent="sale.sale_menu_root" action="action_res_partner_onboarding"/>
+         -->
+        <menuitem id="menu_customer_onboarding" 
+                  name="Customer Onboarding" 
+                  parent="sale.sale_menu_root" 
+                  action="action_res_partner_onboarding"
+                  groups="dw_crm.group_crm_sales_team"/>
+
+                  
+        <!-- Tree View -->
+        <record id="view_res_partner_onboarding_tree" model="ir.ui.view">
+            <field name="name">res.partner.onboarding.tree</field>
+            <field name="model">res.partner.onboarding</field>
+            <field name="arch" type="xml">
+                <tree string="Customer Onboarding">
+                    <field name="name"/>
+                    <field name="partner_id"/>
+                    <field name="credit_limit"/>
+                    <field name="state"/>
+                    <field name="onboarding_team_id"/>
+                    <field name="onboarding_date"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Form View -->
+        <record id="view_res_partner_onboarding_form" model="ir.ui.view">
+            <field name="name">res.partner.onboarding.form</field>
+            <field name="model">res.partner.onboarding</field>
+            <field name="arch" type="xml">
+                <form string="Customer Onboarding Form">
+                    <header>
+                        <button name="action_submit" string="Submit for Approval" type="object" 
+                                class="btn-primary" invisible="state != 'draft'"/>
+                        <!-- <button name="action_approve" string="Approve" type="object" 
+                                class="btn-primary" invisible="state != 'submitted'"/> -->
+                        <button name="action_approve" string="Approve" type="object"
+                                class="btn-primary"
+                                groups="dw_customer_credit.group_res_partner_onboarding_manager"
+                                invisible="state != 'submitted'"/>
+                        <button name="action_reject" string="Reject" type="object" 
+                                class="btn-secondary" invisible="state != 'submitted'"/>
+                        <button name="action_activate" string="Activate Customer" type="object" 
+                                class="btn-primary" invisible="state != 'approved'"/>
+                        <button name="action_draft" string="Reset to Draft" type="object" 
+                                class="btn-secondary" invisible="state != 'rejected'"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,submitted,approved,rejected,active"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                                <field name="state"/>
+                                <field name="partner_id" required="1"/>
+                            </group>
+                            <group>
+                                <field name="onboarding_date"/>
+                                <field name="onboarding_team_id"/>
+                                <field name="approved_by" readonly="1"/>
+                                <field name="approved_date" readonly="1"/>
+                            </group>
+                        </group>
+                        
+                        <group string="Credit Information">
+                            <group>
+                                <field name="credit_limit" required="1"/>
+                                <!-- <field name="credit_days" required="1"/> -->
+                                <field name="payment_term_id" required="1"/>
+                            </group>
+                            <group>
+                                <field name="risk_assessment"/>
+                                <field name="reason_for_onboarding" placeholder="Explain the business reason for this customer..."/>
+                            </group>
+                        </group>
+                        
+                        <group string="Approval Information" invisible="state != 'rejected'">
+                            <field name="rejection_reason" nolabel="1"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>
