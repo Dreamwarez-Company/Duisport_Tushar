@@ -93,15 +93,24 @@
                         groups="dw_stock_requisition.group_inventory_team"
                         invisible="state != 'submitted'"/>
                                                                             
-                    <!-- <button name="action_create_purchase_order" string="Submit to Purchase (MAIN VIEW)" type="object" class="btn-primary" 
-                        groups="dw_stock_requisition.group_inventory_team,base.group_erp_manager" 
-                        invisible="state != 'requested_other_location'"/> -->
-                    <button name="action_create_purchase_order"
+                    
+                   
+                <!-- Submit to Purchase -->
+                <button name="action_submit_to_purchase"
                         string="Submit to Purchase"
                         type="object"
                         class="btn-primary"
                         groups="dw_stock_requisition.group_inventory_team,base.group_erp_manager"
                         invisible="state != 'requested_other_location'"/>
+
+                <!-- Create RFQ -->
+                <!-- <button name="action_create_purchase_order"
+                        string="Create RFQ"
+                        type="object"
+                        class="btn-success"
+                        groups="purchase.group_purchase_user,base.group_erp_manager"
+                        invisible="state != 'submitted_to_purchase'"/> -->
+
 
 
                     
@@ -114,7 +123,7 @@
                         groups="dw_stock_requisition.group_manufacturing_team"
                         invisible="state != 'draft'"/>
                     
-                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,ready_for_transfer,requested_other_location"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,ready_for_transfer,requested_other_location,submitted_to_purchase,rfq_created"/>
                 </header>
                 <sheet>
                     <div class="oe_title">

@@ -30,6 +30,12 @@ class AccountMove(models.Model):
     contact_person = fields.Char(string="Contact Person")
     delivery_address = fields.Text(string="Delivery Address")
 
+   
+   
+   
+   
+   
+   
     freight_charge_x = fields.Float(string="Freight Charge")
     packing_charge_x = fields.Float(string="Packing Charge")
 
@@ -128,3 +134,77 @@ class AccountMove(models.Model):
 
 
         return super()._get_report_base_filename()
+    
+
+
+
+
+
+
+
+class StockPicking(models.Model):
+    _inherit = 'stock.picking'
+
+    is_consignee_same_as_biling = fields.Boolean(
+        string="Is Consignee Same as Customer"
+    )
+    billing_address = fields.Many2one(
+        'res.partner',
+        string="Billing Address"
+    )
+
+    delivery_challan_no = fields.Char(string="Delivery Challan No")
+    challan_date = fields.Date(string="Challan Date")
+
+    transport_name = fields.Char(string="Transport Name")
+    transport_mode = fields.Selection(
+        [('road', 'Road'), ('air', 'Air'), ('sea', 'Sea'), ('rail', 'Rail')],
+        string="Transport Mode"
+    )
+    vehicle_no = fields.Char(string="Vehicle No")
+    eway_bill_no = fields.Char(string="E-Way Bill No")
+
+    challan_type = fields.Selection(
+        [('foc', 'FOC'), ('paid', 'Paid')],
+        string="Challan Type"
+    )
+
+    contact_person = fields.Char(string="Contact Person")
+    delivery_address = fields.Text(string="Delivery Address")
+
+
+    @api.onchange('is_consignee_same_as_biling', 'partner_id')
+    def _onchange_consignee_same_as_billing(self):
+        """
+        If consignee is same as customer:
+        - auto set billing address
+        - auto copy address to delivery address
+        """
+        for picking in self:
+            # Apply ONLY for Delivery Orders
+            if picking.picking_type_code != 'outgoing':
+                continue
+
+            if picking.is_consignee_same_as_biling and picking.partner_id:
+                picking.billing_address = picking.partner_id
+
+                # Build formatted address
+                address = picking.partner_id._display_address()
+                picking.delivery_address = address
+
+            elif not picking.is_consignee_same_as_biling:
+                picking.billing_address = False
+                picking.delivery_address = False
+
+
+
+
+
+class L10nInEwaybill(models.Model):
+    _inherit = 'l10n.in.ewaybill'
+
+
+    def action_print(self):
+        self.ensure_one()
+
+        return self.env.ref('all_reports_full.action_report_delivery_challan_ewaybill').report_action(self)

@@ -6,4 +6,17 @@
         <field name="category_id" ref="base.module_category_inventory"/>
         <field name="comment">Users in the RFQ Department can manage RFQs and vendor quotes.</field>
     </record>
+
+    <record id="rfq_request_user_write_rule" model="ir.rule">
+    <field name="name">RFQ: Allow owner to write</field>
+    <field name="model_id" ref="model_rfq_request"/>
+    <field name="domain_force">[('create_uid', '=', user.id)]</field>
+    <field name="perm_write" eval="True"/>
+    <field name="perm_read" eval="True"/>
+    <field name="perm_create" eval="False"/>
+    <field name="perm_unlink" eval="False"/>
+</record>
+
+
+
 </odoo>

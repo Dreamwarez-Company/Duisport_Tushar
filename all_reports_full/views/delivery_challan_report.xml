@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-        <!-- Custom Paper Format for Fixed Height -->
+    <!-- Custom Paper Format for A4 -->
     <record id="paperformat_delivery_challan" model="report.paperformat">
         <field name="name">Delivery Challan A4</field>
         <field name="default" eval="False"/>
@@ -18,79 +18,11 @@
         <field name="dpi">96</field>
     </record>
 
-
-    <!-- Report Action Definition -->
-    <record id="action_report_delivery_challan" model="ir.actions.report">
-        <field name="name">Delivery Challan</field>
-        <field name="model">account.move</field>
-        <field name="report_type">qweb-pdf</field>
-        <field name="report_name">all_reports_full.report_delivery_challan_document</field>
-        <field name="report_file">all_reports_full.report_delivery_challan_document</field>
-        <field name="binding_model_id" ref="account.model_account_move"/>
-        <field name="binding_type">report</field>
-        <field name="print_report_name">'Delivery_Challan_%s' % (object.name)</field>
-        <field name="paperformat_id" ref="all_reports_full.paperformat_delivery_challan"/>
-    </record>
-
-
-    <!-- Custom Header Template for Delivery Challan -->
-    <!-- <template id="delivery_challan_header">
-        <div class="header" style="margin-bottom: 0px;">
-            <img src="/all_reports_full/static/src/img/header1.png" 
-                 alt="Company Header" 
-                 style="width: 100%; height: auto; border: 1px solid #000; display: block;"/>
-        </div>
-    </template> -->
-
-    <template id="delivery_challan_header">
-    <div style="width:100%; border:1px solid #000; padding:10px; box-sizing:border-box;">
-        <table style="width:100%; border-collapse:collapse;">
-            <tr>
-                <!-- LEFT SIDE -->
-                <td style="width:65%; vertical-align:top;">
-                    <div style="font-size:20px; font-weight:bold;">
-                        Duisport Packing Logistics India Pvt. Ltd.
-                    </div>
-                    <div style="font-size:13px; margin-bottom:8px;">
-                        The Optimum Packaging For Every Shipment – The Optimum Service For Every Customer
-                    </div>
-
-                    <div style="font-size:13px; line-height:1.6;">
-                        Plot No. PAP-V-58, Chakan MIDC Phase II<br/>
-                        Wasuli, Khed, Pune 410501 Maharashtra, India.<br/>
-                        <strong>GSTIN :</strong> 27AAECD5705A1Z5<br/>
-                        <strong>CIN :</strong> U20299PN2013FTC146359
-                    </div>
-                </td>
-
-                <!-- RIGHT SIDE -->
-                <td style="width:35%; vertical-align:top; text-align:right;">
-                    <img src="/all_reports_full/static/src/img/logo.png"
-                         style="max-height:70px; margin-bottom:10px;"/>
-
-                    <div style="font-size:13px; line-height:1.6; text-align:left;">
-                        <strong>Contact Person :</strong><br/>
-                        <strong>Contact No :</strong><br/>
-                        <strong>Telephone :</strong><br/>
-                        <strong>Email :</strong><br/>
-                        <strong>Website :</strong> www.packinglogistics.de
-                    </div>
-                </td>
-            </tr>
-        </table>
-    </div>
-</template>
-
-
     <!-- Main Report Template -->
-    <template id="report_delivery_challan_document">
+    <template id="report_delivery_challan">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
                 <t t-call="web.basic_layout">
-                    <!-- <t t-call="web.basic_layout"> -->
-    <!-- <t t-set="report_header" t-value="'all_reports_full.delivery_challan_header'"/>
-    <t t-set="data_report_margin_top" t-value="55"/> -->
-                    
                     <div class="page" style="page-break-after: always;">
                         <style>
                             @page {
@@ -200,7 +132,6 @@
                                 page-break-inside: avoid;
                             }
                             
-                            /* Ensure header repeats on each page */
                             thead {
                                 display: table-header-group;
                             }
@@ -210,51 +141,67 @@
                             }
                         </style>
 
-                        <!-- Header Image -->
+                        <!-- Header Image and Company Details -->
                         <div>
                             <img src="/all_reports_full/static/src/img/header1.png" 
                                  alt="Company Header" 
                                  style="width: 100%; height: auto; border: 1px solid #000;"/>
 
-                                <table style="width: 100%;"><tr>
-<!-- LEFT SIDE -->
-<td width="65%" style="vertical-align:top; padding:8px; border-left:1px solid #000;">
-<div style="line-height:1.6;">
-<strong>Plot No. PAP-V-58, Chakan MIDC Phase II</strong><br/>
-Wasuli, Khed, Pune 410501 Maharashtra, India.<br/>
-<strong>GSTIN :</strong> 27AAECD5705A1Z5<br/>
-<strong>CIN :</strong> U20299PN2013FTC146359
-</div>
-</td>
+                            <table style="width: 100%;">
+                                <tr>
+                                    <!-- LEFT SIDE - Company Address -->
+                                    <td width="65%" style="vertical-align:top; padding:8px; border-left:1px solid #000;">
+                                        <div style="line-height:1.6;">
+                                            <strong>Plot No. PAP-V-58, Chakan MIDC Phase II</strong><br/>
+                                            Wasuli, Khed, Pune 410501 Maharashtra, India.<br/>
+                                            <strong>GSTIN :</strong> 27AAECD5705A1Z5<br/>
+                                            <strong>CIN :</strong> U20299PN2013FTC146359
+                                        </div>
+                                    </td>
 
+                                    <!-- RIGHT SIDE - Contact Details -->
+                                    <td width="35%" style="vertical-align:top; padding:8px; border-right:1px solid #000; text-align:right;">
+                                        <div style="line-height:1.6;">
+                                            <strong>Contact Person :</strong>
+                                            <span t-if="o.picking_id" t-esc="o.picking_id.company_id.partner_id.name or ''"/>
+                                            <span t-if="not o.picking_id and o.company_id" t-esc="o.company_id.partner_id.name or ''"/><br/>
 
-<!-- RIGHT SIDE -->
-<td width="35%" style="vertical-align:top; padding:8px;border-right:1px solid #000; text-align:right;">
-<div style="line-height:1.6;">
-<strong>Contact Person :</strong>
-<span t-esc="o.company_id.partner_id.name or ''"/><br/>
+                                            <strong>Contact No :</strong>
+                                            <t t-if="o.picking_id">
+                                                <span t-esc="o.picking_id.company_id.partner_id.mobile or o.picking_id.company_id.partner_id.phone or ''"/>
+                                            </t>
+                                            <t t-if="not o.picking_id and o.company_id">
+                                                <span t-esc="o.company_id.partner_id.mobile or o.company_id.partner_id.phone or ''"/>
+                                            </t><br/>
 
+                                            <strong>Telephone :</strong>
+                                            <t t-if="o.picking_id">
+                                                <span t-esc="o.picking_id.company_id.partner_id.phone or ''"/>
+                                            </t>
+                                            <t t-if="not o.picking_id and o.company_id">
+                                                <span t-esc="o.company_id.partner_id.phone or ''"/>
+                                            </t><br/>
 
-<strong>Contact No :</strong>
-<span t-esc="o.company_id.partner_id.mobile or o.company_id.partner_id.phone or ''"/><br/>
+                                            <strong>Email :</strong>
+                                            <t t-if="o.picking_id">
+                                                <span t-esc="o.picking_id.company_id.partner_id.email or ''"/>
+                                            </t>
+                                            <t t-if="not o.picking_id and o.company_id">
+                                                <span t-esc="o.company_id.partner_id.email or ''"/>
+                                            </t><br/>
 
-
-<strong>Telephone :</strong>
-<span t-esc="o.company_id.partner_id.phone or ''"/><br/>
-
-
-<strong>Email :</strong>
-<span t-esc="o.company_id.partner_id.email or ''"/><br/>
-
-
-<strong>Website :</strong>
-<span t-esc="o.company_id.website or ''"/>
-</div>
-</td>
-</tr>
-</table>
+                                            <strong>Website :</strong>
+                                            <t t-if="o.picking_id">
+                                                <span t-esc="o.picking_id.company_id.website or ''"/>
+                                            </t>
+                                            <t t-if="not o.picking_id and o.company_id">
+                                                <span t-esc="o.company_id.website or ''"/>
+                                            </t>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
                         </div>
-                            
 
                         <table class="delivery-challan-table">
                             <!-- TITLE ROW -->
@@ -266,32 +213,53 @@ Wasuli, Khed, Pune 410501 Maharashtra, India.<br/>
                             <tr>
                                 <td colspan="6">
                                     <span class="label-bold">Customer Name : </span>
-                                    <span t-if="o.partner_id" t-field="o.partner_id.name"/>
+                                    <t t-if="o.picking_id">
+                                        <span t-field="o.picking_id.partner_id.name"/>
+                                    </t>
+                                    <t t-if="not o.picking_id and o.customer_name">
+                                        <span t-esc="o.customer_name"/>
+                                    </t>
                                 </td>
                                 <td colspan="4">
                                     <span class="label-bold">Challan Date : </span>
-                                    <span t-if="o.challan_date" t-field="o.challan_date" t-options='{"widget": "date", "format": "dd/MM/yyyy"}'/>
+                                    <t t-if="o.picking_id and o.picking_id.challan_date">
+                                        <span t-field="o.picking_id.challan_date" t-options='{"widget": "date", "format": "dd/MM/yyyy"}'/>
+                                    </t>
+                                    <t t-if="not o.picking_id and o.document_date">
+                                        <span t-field="o.document_date" t-options='{"widget": "date", "format": "dd/MM/yyyy"}'/>
+                                    </t>
                                 </td>
                             </tr>
 
-                            <!-- ROW 2: Company Address & E-Way No -->
+                            <!-- ROW 2: Customer Address & E-Way No -->
                             <tr>
                                 <td colspan="6">
-                                    <span class="label-bold">Company Address : </span>
-                                    <div t-if="o.partner_id" style="margin-top: 3px;">
-                                        <span t-if="o.partner_id.street" t-field="o.partner_id.street"/>
-                                        <span t-if="o.partner_id.street2"><br/><span t-field="o.partner_id.street2"/></span>
-                                        <br t-if="o.partner_id.street or o.partner_id.street2"/>
-                                        <span t-if="o.partner_id.city" t-field="o.partner_id.city"/><t t-if="o.partner_id.city and (o.partner_id.state_id or o.partner_id.zip)">, </t>
-                                        <span t-if="o.partner_id.state_id" t-field="o.partner_id.state_id.name"/>
-                                        <span t-if="o.partner_id.zip"> - <span t-field="o.partner_id.zip"/></span>
-                                        <br t-if="o.partner_id.country_id"/>
-                                        <span t-if="o.partner_id.country_id" t-field="o.partner_id.country_id.name"/>
+                                    <span class="label-bold">Customer Address : </span>
+                                    <div style="margin-top: 3px;">
+                                        <t t-if="o.picking_id">
+                                            <t t-set="partner" t-value="o.picking_id.partner_id"/>
+                                            <span t-if="partner.street" t-field="partner.street"/>
+                                            <span t-if="partner.street2"><br/><span t-field="partner.street2"/></span>
+                                            <br t-if="partner.street or partner.street2"/>
+                                            <span t-if="partner.city" t-field="partner.city"/><t t-if="partner.city and (partner.state_id or partner.zip)">, </t>
+                                            <span t-if="partner.state_id" t-field="partner.state_id.name"/>
+                                            <span t-if="partner.zip"> - <span t-field="partner.zip"/></span>
+                                            <br t-if="partner.country_id"/>
+                                            <span t-if="partner.country_id" t-field="partner.country_id.name"/>
+                                        </t>
+                                        <t t-if="not o.picking_id and o.customer_address">
+                                            <span t-esc="o.customer_address"/>
+                                        </t>
                                     </div>
                                 </td>
                                 <td colspan="4">
                                     <span class="label-bold">E-Way No. : </span>
-                                    <span t-if="o.eway_bill_no" t-field="o.eway_bill_no"/>
+                                    <t t-if="o.ewaybill_id and o.ewaybill_id.name">
+                                        <span t-field="o.ewaybill_id.name"/>
+                                    </t>
+                                    <t t-if="not o.ewaybill_id and o.picking_id and o.picking_id.eway_bill_no">
+                                        <span t-field="o.picking_id.eway_bill_no"/>
+                                    </t>
                                 </td>
                             </tr>
 
@@ -299,11 +267,21 @@ Wasuli, Khed, Pune 410501 Maharashtra, India.<br/>
                             <tr>
                                 <td colspan="6">
                                     <span class="label-bold">Contact Person : </span>
-                                    <span t-if="o.contact_person" t-field="o.contact_person"/>
+                                    <t t-if="o.picking_id">
+                                        <span t-if="o.picking_id.partner_id.contact_person" t-field="o.picking_id.partner_id.contact_person"/>
+                                    </t>
+                                    <t t-if="not o.picking_id and o.contact_person">
+                                        <span t-esc="o.contact_person"/>
+                                    </t>
                                 </td>
                                 <td colspan="4">
                                     <span class="label-bold">Transport Name : </span>
-                                    <span t-if="o.transport_name" t-field="o.transport_name"/>
+                                    <t t-if="o.picking_id and o.picking_id.transport_name">
+                                        <span t-field="o.picking_id.transport_name"/>
+                                    </t>
+                                    <t t-if="not o.picking_id and o.ewaybill_id and o.ewaybill_id.transporter_id">
+                                        <span t-field="o.ewaybill_id.transporter_id.name"/>
+                                    </t>
                                 </td>
                             </tr>
 
@@ -311,19 +289,37 @@ Wasuli, Khed, Pune 410501 Maharashtra, India.<br/>
                             <tr>
                                 <td colspan="6">
                                     <span class="label-bold">Contact Details : </span>
-                                    <t t-if="o.partner_id">
-                                        <span t-if="o.partner_id.phone" t-field="o.partner_id.phone"/>
-                                        <t t-if="o.partner_id.phone and o.partner_id.mobile"> / </t>
-                                        <span t-if="o.partner_id.mobile" t-field="o.partner_id.mobile"/>
+                                    <t t-if="o.picking_id">
+                                        <t t-set="partner" t-value="o.picking_id.partner_id"/>
+                                        <span t-if="partner.phone" t-field="partner.phone"/>
+                                        <t t-if="partner.phone and partner.mobile"> / </t>
+                                        <span t-if="partner.mobile" t-field="partner.mobile"/>
+                                    </t>
+                                    <t t-if="not o.picking_id">
+                                        <span t-if="o.customer_phone" t-esc="o.customer_phone"/>
+                                        <t t-if="o.customer_phone and o.customer_mobile"> / </t>
+                                        <span t-if="o.customer_mobile" t-esc="o.customer_mobile"/>
                                     </t>
                                 </td>
                                 <td colspan="4">
                                     <span class="label-bold">Transport Mode : </span>
-                                    <t t-if="o.transport_mode">
+                                    <t t-if="o.picking_id and o.picking_id.transport_mode">
+                                        <t t-if="o.picking_id.transport_mode == 'road'">Road</t>
+                                        <t t-elif="o.picking_id.transport_mode == 'air'">Air</t>
+                                        <t t-elif="o.picking_id.transport_mode == 'sea'">Sea</t>
+                                        <t t-elif="o.picking_id.transport_mode == 'rail'">Rail</t>
+                                    </t>
+                                    <t t-if="not o.picking_id and o.transport_mode">
                                         <t t-if="o.transport_mode == 'road'">Road</t>
                                         <t t-elif="o.transport_mode == 'air'">Air</t>
                                         <t t-elif="o.transport_mode == 'sea'">Sea</t>
                                         <t t-elif="o.transport_mode == 'rail'">Rail</t>
+                                    </t>
+                                    <t t-if="o.ewaybill_id and o.ewaybill_id.mode">
+                                        <t t-if="o.ewaybill_id.mode == '1'">Road</t>
+                                        <t t-elif="o.ewaybill_id.mode == '2'">Rail</t>
+                                        <t t-elif="o.ewaybill_id.mode == '3'">Air</t>
+                                        <t t-elif="o.ewaybill_id.mode == '4'">Ship</t>
                                     </t>
                                 </td>
                             </tr>
@@ -332,11 +328,24 @@ Wasuli, Khed, Pune 410501 Maharashtra, India.<br/>
                             <tr>
                                 <td colspan="6">
                                     <span class="label-bold">Email Address : </span>
-                                    <span t-if="o.partner_id and o.partner_id.email" t-field="o.partner_id.email"/>
+                                    <t t-if="o.picking_id">
+                                        <span t-if="o.picking_id.partner_id.email" t-field="o.picking_id.partner_id.email"/>
+                                    </t>
+                                    <t t-if="not o.picking_id and o.customer_email">
+                                        <span t-esc="o.customer_email"/>
+                                    </t>
                                 </td>
                                 <td colspan="4">
                                     <span class="label-bold">Vehicle No : </span>
-                                    <span t-if="o.vehicle_no" t-field="o.vehicle_no"/>
+                                    <t t-if="o.picking_id and o.picking_id.vehicle_no">
+                                        <span t-field="o.picking_id.vehicle_no"/>
+                                    </t>
+                                    <t t-if="not o.picking_id and o.vehicle_no">
+                                        <span t-esc="o.vehicle_no"/>
+                                    </t>
+                                    <t t-if="o.ewaybill_id and o.ewaybill_id.vehicle_no">
+                                        <span t-field="o.ewaybill_id.vehicle_no"/>
+                                    </t>
                                 </td>
                             </tr>
 
@@ -344,7 +353,12 @@ Wasuli, Khed, Pune 410501 Maharashtra, India.<br/>
                             <tr>
                                 <td colspan="6">
                                     <span class="label-bold">GSTIN : </span>
-                                    <span t-if="o.partner_id and o.partner_id.vat" t-field="o.partner_id.vat"/>
+                                    <t t-if="o.picking_id">
+                                        <span t-if="o.picking_id.partner_id.vat" t-field="o.picking_id.partner_id.vat"/>
+                                    </t>
+                                    <t t-if="not o.picking_id and o.customer_gstin">
+                                        <span t-esc="o.customer_gstin"/>
+                                    </t>
                                 </td>
                                 <td colspan="4">
                                     <span class="label-bold">Challan Type (Tick on FOC/Paid): </span>
@@ -368,68 +382,90 @@ Wasuli, Khed, Pune 410501 Maharashtra, India.<br/>
                                 <th style="width: 16%;">Total Amount</th>
                             </tr>
 
-                            <!-- ITEMS DATA ROWS - NO EMPTY ROWS -->
+                            <!-- ITEMS DATA ROWS - From stock.move -->
                             <t t-set="line_number" t-value="0"/>
                             <t t-set="total_quantity" t-value="0"/>
+                            <t t-set="sub_total" t-value="0"/>
                             
-                            <t t-foreach="o.invoice_line_ids.filtered(lambda l: l.display_type not in ('line_section', 'line_note'))" t-as="line">
-                                <t t-set="line_number" t-value="line_number + 1"/>
-                                <t t-set="total_quantity" t-value="total_quantity + line.quantity"/>
-                                <tr class="item-row">
-                                    <td class="text-center"><t t-esc="line_number"/></td>
-                                    <td colspan="2" class="text-left">
-                                        <span t-if="line.product_id" t-field="line.product_id.name"/>
-                                        <t t-if="not line.product_id and line.name">
-                                            <span t-field="line.name"/>
-                                        </t>
-                                    </td>
-                                    <td class="text-center">
-                                        <span t-if="line.product_id and line.product_id.l10n_in_hsn_code" 
-                                              t-field="line.product_id.l10n_in_hsn_code"/>
-                                    </td>
-                                    <td class="text-center">
-                                        <span t-field="line.quantity"/>
-                                    </td>
-                                    <td class="text-center">
-                                        <span t-if="line.product_uom_id" t-field="line.product_uom_id.name"/>
-                                    </td>
-                                    <td class="text-right">
-                                        <span t-field="line.price_unit" 
-                                              t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
-                                    </td>
-                                    <td class="text-right">
-                                        <t t-set="line_amount" t-value="line.quantity * line.price_unit"/>
-                                        <span t-esc="'%.2f' % line_amount"/>
-                                    </td>
-                                    <td class="text-right">
-                                        <span t-if="line.discount" t-field="line.discount"/>
-                                        <t t-if="line.discount">%</t>
-                                    </td>
-                                    <td class="text-right">
-                                        <span t-field="line.price_subtotal" 
-                                              t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
-                                    </td>
-                                </tr>
-                            </t>
-
-                                                        <!-- EMPTY ROWS (to make 7 rows total) -->
-                            <!-- <t t-set="empty_rows" t-value="7 - line_number"/>
-                            <t t-if="empty_rows > 0">
-                                <t t-foreach="range(empty_rows)" t-as="idx">
+                            <t t-if="o.picking_id">
+                                <!-- If we have picking_id, iterate through move_ids_without_package -->
+                                <t t-foreach="o.picking_id.move_ids_without_package" t-as="line">
                                     <t t-set="line_number" t-value="line_number + 1"/>
+                                    <t t-set="total_quantity" t-value="total_quantity + (line.quantity or line.product_uom_qty or 0)"/>
+                                    
+                                    <!-- Calculate line price from sale order if available -->
+                                    <t t-set="unit_price" t-value="0"/>
+                                    <t t-set="line_total" t-value="0"/>
+                                    <t t-if="o.picking_id.sale_id">
+                                        <t t-foreach="o.picking_id.sale_id.order_line" t-as="so_line">
+                                            <t t-if="so_line.product_id.id == line.product_id.id">
+                                                <t t-set="unit_price" t-value="so_line.price_unit"/>
+                                                <t t-set="line_total" t-value="so_line.price_subtotal"/>
+                                            </t>
+                                        </t>
+                                    </t>
+                                    <t t-set="sub_total" t-value="sub_total + line_total"/>
+                                    
                                     <tr class="item-row">
                                         <td class="text-center"><t t-esc="line_number"/></td>
-                                        <td colspan="2"></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
+                                        <td colspan="2" class="text-left">
+                                            <span t-field="line.product_id.name"/>
+                                        </td>
+                                        <td class="text-center">
+                                            <span t-if="line.product_id.l10n_in_hsn_code" 
+                                                  t-field="line.product_id.l10n_in_hsn_code"/>
+                                        </td>
+                                        <td class="text-center">
+                                            <span t-esc="'%.2f' % (line.quantity or line.product_uom_qty or 0)"/>
+                                        </td>
+                                        <td class="text-center">
+                                            <span t-if="line.product_uom" t-field="line.product_uom.name"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-esc="'%.2f' % unit_price"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <t t-set="line_amount" t-value="(line.quantity or line.product_uom_qty or 0) * unit_price"/>
+                                            <span t-esc="'%.2f' % line_amount"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <!-- Discount from sale order line if available -->
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-esc="'%.2f' % line_total"/>
+                                        </td>
                                     </tr>
                                 </t>
-                            </t> -->
+                            </t>
+
+                            <t t-if="not o.picking_id and o.move_line_ids">
+                                <!-- Fallback to move_line_ids from delivery.challan.report model -->
+                                <t t-foreach="o.move_line_ids" t-as="line">
+                                    <t t-set="line_number" t-value="line_number + 1"/>
+                                    <t t-set="total_quantity" t-value="total_quantity + (line.quantity or line.product_uom_qty or 0)"/>
+                                    
+                                    <tr class="item-row">
+                                        <td class="text-center"><t t-esc="line_number"/></td>
+                                        <td colspan="2" class="text-left">
+                                            <span t-field="line.product_id.name"/>
+                                        </td>
+                                        <td class="text-center">
+                                            <span t-if="line.product_id.l10n_in_hsn_code" 
+                                                  t-field="line.product_id.l10n_in_hsn_code"/>
+                                        </td>
+                                        <td class="text-center">
+                                            <span t-esc="'%.2f' % (line.quantity or line.product_uom_qty or 0)"/>
+                                        </td>
+                                        <td class="text-center">
+                                            <span t-if="line.product_uom" t-field="line.product_uom.name"/>
+                                        </td>
+                                        <td class="text-right">0.00</td>
+                                        <td class="text-right">0.00</td>
+                                        <td class="text-right"></td>
+                                        <td class="text-right">0.00</td>
+                                    </tr>
+                                </t>
+                            </t>
 
                             <!-- TOTAL QUANTITY ROW -->
                             <tr class="footer-section">
@@ -440,8 +476,13 @@ Wasuli, Khed, Pune 410501 Maharashtra, India.<br/>
                                 <td class="text-right label-bold">Nos.</td>
                                 <td colspan="3" class="text-right label-bold">
                                     Sub Total Amount: 
-                                    <span t-field="o.amount_untaxed" 
-                                          t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    <t t-if="o.picking_id and o.picking_id.sale_id">
+                                        <span t-field="o.picking_id.sale_id.amount_untaxed" 
+                                              t-options='{"widget": "monetary", "display_currency": o.picking_id.sale_id.currency_id}'/>
+                                    </t>
+                                    <t t-if="not o.picking_id or not o.picking_id.sale_id">
+                                        <span t-esc="'%.2f' % sub_total"/>
+                                    </t>
                                 </td>
                             </tr>
 
@@ -455,100 +496,109 @@ Wasuli, Khed, Pune 410501 Maharashtra, India.<br/>
                                     <div><strong>Branch Location :</strong> Aundh</div>
                                     <div>
                                         <strong>Company PAN No. :</strong> 
-                                        <span t-if="o.company_id and o.company_id.vat" t-field="o.company_id.vat"/>
+                                        <t t-if="o.picking_id">
+                                            <span t-if="o.picking_id.company_id.vat" t-field="o.picking_id.company_id.vat"/>
+                                        </t>
+                                        <t t-if="not o.picking_id and o.company_id">
+                                            <span t-if="o.company_id.vat" t-field="o.company_id.vat"/>
+                                        </t>
                                     </div>
                                 </td>
                                 <td colspan="5" class="tax-details" style="vertical-align: top;">
-                                    <!-- Calculate taxes from invoice lines -->
+                                    <!-- Calculate taxes from sale order -->
                                     <t t-set="sgst_amount" t-value="0"/>
                                     <t t-set="cgst_amount" t-value="0"/>
                                     <t t-set="igst_amount" t-value="0"/>
-                                    <t t-set="other_tax_amount" t-value="0"/>
                                     
-                                    <t t-foreach="o.line_ids.filtered(lambda l: l.tax_line_id)" t-as="tax_line">
-                                        <t t-set="tax_name" t-value="tax_line.name or tax_line.tax_line_id.name or ''"/>
-                                        <t t-if="'SGST' in tax_name.upper() or 'S.G.S.T' in tax_name.upper()">
-                                            <t t-set="sgst_amount" t-value="sgst_amount + abs(tax_line.balance)"/>
-                                        </t>
-                                        <t t-elif="'CGST' in tax_name.upper() or 'C.G.S.T' in tax_name.upper()">
-                                            <t t-set="cgst_amount" t-value="cgst_amount + abs(tax_line.balance)"/>
-                                        </t>
-                                        <t t-elif="'IGST' in tax_name.upper() or 'I.G.S.T' in tax_name.upper()">
-                                            <t t-set="igst_amount" t-value="igst_amount + abs(tax_line.balance)"/>
-                                        </t>
-                                        <t t-else="">
-                                            <t t-set="other_tax_amount" t-value="other_tax_amount + abs(tax_line.balance)"/>
+                                    <t t-if="o.picking_id and o.picking_id.sale_id">
+                                        <t t-foreach="o.picking_id.sale_id.order_line" t-as="so_line">
+                                            <t t-foreach="so_line.tax_id" t-as="tax">
+                                                <t t-set="tax_amount" t-value="so_line.price_subtotal * tax.amount / 100"/>
+                                                <t t-if="'SGST' in tax.name.upper() or 'S.G.S.T' in tax.name.upper()">
+                                                    <t t-set="sgst_amount" t-value="sgst_amount + tax_amount"/>
+                                                </t>
+                                                <t t-if="'CGST' in tax.name.upper() or 'C.G.S.T' in tax.name.upper()">
+                                                    <t t-set="cgst_amount" t-value="cgst_amount + tax_amount"/>
+                                                </t>
+                                                <t t-if="'IGST' in tax.name.upper() or 'I.G.S.T' in tax.name.upper()">
+                                                    <t t-set="igst_amount" t-value="igst_amount + tax_amount"/>
+                                                </t>
+                                            </t>
                                         </t>
                                     </t>
                                     
                                     <!-- Display taxes -->
-                                    <t t-if="sgst_amount > 0">
-                                        <div>
-                                            <strong>SGST@:</strong>
-                                            <span style="float: right;">
-                                                <t t-esc="'%.2f' % sgst_amount"/>
-                                            </span>
-                                        </div>
-                                    </t>
-                                    <t t-else="">
-                                        <div><strong>SGST@:</strong> <span style="float: right;">0.00</span></div>
-                                    </t>
+                                    <div>
+                                        <strong>SGST@:</strong>
+                                        <span style="float: right;">
+                                            <t t-esc="'%.2f' % (o.sgst_total or sgst_amount or 0)"/>
+                                        </span>
+                                    </div>
                                     
-                                    <t t-if="cgst_amount > 0">
-                                        <div>
-                                            <strong>CGST@:</strong>
-                                            <span style="float: right;">
-                                                <t t-esc="'%.2f' % cgst_amount"/>
-                                            </span>
-                                        </div>
-                                    </t>
-                                    <t t-else="">
-                                        <div><strong>CGST@:</strong> <span style="float: right;">0.00</span></div>
-                                    </t>
+                                    <div>
+                                        <strong>CGST@:</strong>
+                                        <span style="float: right;">
+                                            <t t-esc="'%.2f' % (o.cgst_total or cgst_amount or 0)"/>
+                                        </span>
+                                    </div>
                                     
-                                    <t t-if="igst_amount > 0">
-                                        <div>
-                                            <strong>IGST@:</strong>
-                                            <span style="float: right;">
-                                                <t t-esc="'%.2f' % igst_amount"/>
-                                            </span>
-                                        </div>
-                                    </t>
-                                    
-                                    <t t-if="other_tax_amount > 0">
-                                        <div>
-                                            <strong>Other Tax:</strong>
-                                            <span style="float: right;">
-                                                <t t-esc="'%.2f' % other_tax_amount"/>
-                                            </span>
-                                        </div>
-                                    </t>
-
+                                    <div t-if="(o.igst_total or igst_amount or 0) > 0">
+                                        <strong>IGST@:</strong>
+                                        <span style="float: right;">
+                                            <t t-esc="'%.2f' % (o.igst_total or igst_amount or 0)"/>
+                                        </span>
+                                    </div>
                                     
                                     <div>
                                         <strong>Freight Charges:</strong>
                                         <span style="float: right;">
-                                            <span t-field="o.freight_charge_x"
-                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                            <t t-if="o.freight_charge">
+                                                <span t-esc="'%.2f' % o.freight_charge"/>
+                                            </t>
+                                            <t t-if="not o.freight_charge and o.picking_id and o.picking_id.sale_id">
+                                                <span t-if="o.picking_id.sale_id.freight_charge_x" 
+                                                      t-esc="'%.2f' % o.picking_id.sale_id.freight_charge_x"/>
+                                                <span t-if="not o.picking_id.sale_id.freight_charge_x">0.00</span>
+                                            </t>
+                                            <t t-if="not o.freight_charge and (not o.picking_id or not o.picking_id.sale_id)">
+                                                0.00
+                                            </t>
                                         </span>
                                     </div>
 
                                     <div>
                                         <strong>Packing &amp; Development Charges:</strong>
                                         <span style="float: right;">
-                                            <span t-field="o.packing_charge_x"
-                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                            <t t-if="o.packing_charge">
+                                                <span t-esc="'%.2f' % o.packing_charge"/>
+                                            </t>
+                                            <t t-if="not o.packing_charge and o.picking_id and o.picking_id.sale_id">
+                                                <span t-if="o.picking_id.sale_id.packing_charge_x" 
+                                                      t-esc="'%.2f' % o.picking_id.sale_id.packing_charge_x"/>
+                                                <span t-if="not o.picking_id.sale_id.packing_charge_x">0.00</span>
+                                            </t>
+                                            <t t-if="not o.packing_charge and (not o.picking_id or not o.picking_id.sale_id)">
+                                                0.00
+                                            </t>
                                         </span>
                                     </div>
-                                    <t t-set="grand_total"
-                                        t-value="(o.amount_total or 0.0)
-                                                    + (o.freight_charge_x or 0.0)
-                                                    + (o.packing_charge_x or 0.0)"/>
+                                    
+                                    <!-- Grand Total Calculation -->
+                                    <t t-set="freight" t-value="o.freight_charge or (o.picking_id and o.picking_id.sale_id and o.picking_id.sale_id.freight_charge_x) or 0"/>
+                                    <t t-set="packing" t-value="o.packing_charge or (o.picking_id and o.picking_id.sale_id and o.picking_id.sale_id.packing_charge_x) or 0"/>
+                                    <t t-set="amount_total" t-value="(o.picking_id and o.picking_id.sale_id and o.picking_id.sale_id.amount_total) or 0"/>
+                                    <t t-set="grand_total" t-value="amount_total + freight + packing"/>
+                                    
                                     <div style="margin-top: 8px; font-size: 14px;">
                                         <strong>Grand Total Amount:</strong>
                                         <span style="float: right;">
-                                            <span t-esc="grand_total"
-                                                t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                            <t t-if="o.grand_total">
+                                                <span t-field="o.grand_total" 
+                                                      t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                            </t>
+                                            <t t-if="not o.grand_total">
+                                                <span t-esc="'%.2f' % grand_total"/>
+                                            </t>
                                         </span>
                                     </div>
                                 </td>
@@ -561,13 +611,16 @@ Wasuli, Khed, Pune 410501 Maharashtra, India.<br/>
                                         Total Amount In Words:
                                     </div>
                                     <div>
-                                        <t t-set="amount_text"
-                                        t-value="o.currency_id.amount_to_text(grand_total)"/>
-                                        <span t-esc="amount_text"/>
+                                        <t t-if="o.amount_in_words">
+                                            <span t-esc="o.amount_in_words"/>
+                                        </t>
+                                        <t t-if="not o.amount_in_words and o.picking_id and o.picking_id.sale_id">
+                                            <t t-set="amount_text" t-value="o.picking_id.sale_id.currency_id.amount_to_text(grand_total)"/>
+                                            <span t-esc="amount_text"/>
+                                        </t>
                                     </div>
                                 </td>
 
-                                
                                 <td colspan="5" class="text-center signature-area">
                                     <div class="label-bold" style="font-size: 14px;">For Duisport Packing Logistics India Pvt. Ltd.</div>
                                     <div style="margin-top: 50px;">
@@ -593,4 +646,18 @@ Wasuli, Khed, Pune 410501 Maharashtra, India.<br/>
             </t>
         </t>
     </template>
+
+    <!-- Report Action Definition -->
+    <record id="action_report_delivery_challan_ewaybill" model="ir.actions.report">
+        <field name="name">Delivery Challan</field>
+        <field name="model">delivery.challan.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">all_reports_full.report_delivery_challan</field>
+        <field name="report_file">all_reports_full.report_delivery_challan</field>
+        <field name="binding_model_id" ref="model_delivery_challan_report"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Delivery_Challan_%s' % (object.picking_id.name if object.picking_id else object.name or 'Challan')</field>
+        <field name="paperformat_id" ref="paperformat_delivery_challan"/>
+    </record>
+
 </odoo>

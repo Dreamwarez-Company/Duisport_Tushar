@@ -209,61 +209,125 @@ class ManufactureOrPurchaseWizard(models.TransientModel):
 
 
 
+    # def _open_purchase_order_form(self, order, request):
+    #     StockQuant = self.env['stock.quant']
+    #     po_lines = []
+
+    #     # Build PO lines
+    #     lines_to_process = request.line_ids if request else order.order_line.filtered(
+    #         lambda l: l.product_id.type == 'product'
+    #     )
+
+    #     for line in lines_to_process:
+    #         product = line.product_id
+    #         qty_needed = line.quantity_needed if request else (
+    #             line.product_uom_qty - StockQuant._get_available_quantity(
+    #                 product, order.warehouse_id.lot_stock_id
+    #             )
+    #         )
+
+    #         if qty_needed > 0:
+    #             supplierinfo = product.seller_ids[:1]
+    #             price = supplierinfo.price if supplierinfo else product.standard_price
+
+    #             po_lines.append({
+    #                 'product_id': product.id,
+    #                 'name': product.display_name,
+    #                 'product_qty': qty_needed,
+    #                 'product_uom': product.uom_id.id,
+    #                 'price_unit': price,
+    #                 'date_planned': fields.Datetime.now(),
+    #             })
+
+    #     # Create PO
+    #     vendor = False
+    #     if po_lines:
+    #         prod = self.env['product.product'].browse(po_lines[0]['product_id'])
+    #         vendor = prod.seller_ids[:1].partner_id.id if prod.seller_ids else False
+
+    #     po = self.env['purchase.order'].create({
+    #         'partner_id': vendor,
+    #         'origin': order.name,
+    #         'order_line': [(0, 0, line) for line in po_lines],
+    #     })
+
+    #     # Link PO to request
+    #     if request:
+    #         request.write({'purchase_order_ids': [(4, po.id)]})
+    #         request.message_post(body=_('Draft Purchase Order %s created') % po.name)
+
+    #     # ----------------------------------------------------
+    #     # TIME TRACKING FIX:
+    #     # CLOSE "MO/PO Created" BEFORE creating "PO Created"
+    #     # ----------------------------------------------------
+    #     last_track = self.env['department.time.tracking'].search([
+    #         ('target_model', '=', f'production.request,{request.id}'),
+    #         ('status', '=', 'in_progress'),
+    #         ('stage_name', '=', 'MO/PO Created')
+    #     ], limit=1, order='start_time desc')
+
+    #     if last_track:
+    #         last_track.write({
+    #             'end_time': fields.Datetime.now(),
+    #             'status': 'done'
+    #         })
+
+    #     # NOW create new stage → PO Created
+    #     self.env['department.time.tracking'].create({
+    #         'target_model': f'production.request,{request.id}',
+    #         'stage_name': 'PO Created',
+    #         'user_id': self.env.user.id,
+    #         'employee_id': self.env.user.employee_id.id if self.env.user.employee_id else False,
+    #         'start_time': fields.Datetime.now(),
+    #         'status': 'in_progress',
+    #         'lead_id': order.opportunity_id.id if order.opportunity_id else False,
+    #     })
+
+    #     # Open PO screen
+    #     return {
+    #         'name': 'Purchase Order',
+    #         'type': 'ir.actions.act_window',
+    #         'res_model': 'purchase.order',
+    #         'res_id': po.id,
+    #         'view_mode': 'form',
+    #         'target': 'current',
+    #     }
+
+
+
     def _open_purchase_order_form(self, order, request):
-        StockQuant = self.env['stock.quant']
-        po_lines = []
+        RFQ = self.env['rfq.request']
 
-        # Build PO lines
-        lines_to_process = request.line_ids if request else order.order_line.filtered(
-            lambda l: l.product_id.type == 'product'
-        )
+        rfq_lines = []
 
-        for line in lines_to_process:
-            product = line.product_id
-            qty_needed = line.quantity_needed if request else (
-                line.product_uom_qty - StockQuant._get_available_quantity(
-                    product, order.warehouse_id.lot_stock_id
-                )
-            )
+        # Build RFQ product lines
+        for line in request.line_ids:
+            if line.quantity_needed > 0:
+                rfq_lines.append((0, 0, {
+                    'product_id': line.product_id.id,
+                    'quantity': line.quantity_needed,
+                    'description': line.product_id.display_name,
+                }))
 
-            if qty_needed > 0:
-                supplierinfo = product.seller_ids[:1]
-                price = supplierinfo.price if supplierinfo else product.standard_price
+        if not rfq_lines:
+            raise UserError(_("No products available to create RFQ."))
 
-                po_lines.append({
-                    'product_id': product.id,
-                    'name': product.display_name,
-                    'product_qty': qty_needed,
-                    'product_uom': product.uom_id.id,
-                    'price_unit': price,
-                    'date_planned': fields.Datetime.now(),
-                })
-
-        # Create PO
-        vendor = False
-        if po_lines:
-            prod = self.env['product.product'].browse(po_lines[0]['product_id'])
-            vendor = prod.seller_ids[:1].partner_id.id if prod.seller_ids else False
-
-        po = self.env['purchase.order'].create({
-            'partner_id': vendor,
-            'origin': order.name,
-            'order_line': [(0, 0, line) for line in po_lines],
+        # Create RFQ
+        rfq = RFQ.sudo().create({
+            'description': f'RFQ created from Production Request {request.name}',
+            'rfq_line_ids': rfq_lines,
         })
 
-        # Link PO to request
-        if request:
-            request.write({'purchase_order_ids': [(4, po.id)]})
-            request.message_post(body=_('Draft Purchase Order %s created') % po.name)
+        # Optional chatter log
+        request.sudo().message_post(
+            body=_("RFQ %s created.") % rfq.name,
+            subtype_xmlid='mail.mt_note'
+        )
 
-        # ----------------------------------------------------
-        # TIME TRACKING FIX:
-        # CLOSE "MO/PO Created" BEFORE creating "PO Created"
-        # ----------------------------------------------------
+        # Optional time tracking close/open
         last_track = self.env['department.time.tracking'].search([
             ('target_model', '=', f'production.request,{request.id}'),
-            ('status', '=', 'in_progress'),
-            ('stage_name', '=', 'MO/PO Created')
+            ('status', '=', 'in_progress')
         ], limit=1, order='start_time desc')
 
         if last_track:
@@ -272,26 +336,48 @@ class ManufactureOrPurchaseWizard(models.TransientModel):
                 'status': 'done'
             })
 
-        # NOW create new stage → PO Created
         self.env['department.time.tracking'].create({
             'target_model': f'production.request,{request.id}',
-            'stage_name': 'PO Created',
+            'stage_name': 'RFQ Created',
             'user_id': self.env.user.id,
             'employee_id': self.env.user.employee_id.id if self.env.user.employee_id else False,
             'start_time': fields.Datetime.now(),
             'status': 'in_progress',
-            'lead_id': order.opportunity_id.id if order.opportunity_id else False,
         })
 
-        # Open PO screen
+        # 🔥 OPEN YOUR RFQ FORM (NOT PURCHASE ORDER)
         return {
-            'name': 'Purchase Order',
+            'name': _('Request for Quotation'),
             'type': 'ir.actions.act_window',
-            'res_model': 'purchase.order',
-            'res_id': po.id,
+            'res_model': 'rfq.request',
+            'res_id': rfq.id,
             'view_mode': 'form',
             'target': 'current',
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

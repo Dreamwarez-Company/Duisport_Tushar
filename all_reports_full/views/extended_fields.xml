@@ -1,50 +1,4 @@
 <odoo>
-
-        <record id="view_move_form_delivery_challan_tab" model="ir.ui.view">
-            <field name="name">account.move.form.delivery.challan.tab</field>
-            <field name="model">account.move</field>
-            <field name="inherit_id" ref="account.view_move_form"/>
-            <field name="arch" type="xml">
-
-
-                        <!-- REQUIRED for modifiers -->
-        <xpath expr="//sheet" position="inside">
-            <field name="state" invisible="1"/>
-        </xpath>
-
-          <xpath expr="//notebook" position="inside">
-            <page string="Delivery Challan"
-                  name="delivery_challan_tab"
-                  invisible="state != 'posted'">
-
-                <group>
-                    <group>
-                        <field name="delivery_challan_no"/>
-                        <field name="challan_date"/>
-                        <field name="challan_type"/>
-                    </group>
-
-                    <group>
-                        <field name="transport_name"/>
-                        <field name="transport_mode"/>
-                        <field name="vehicle_no"/>
-                        <field name="eway_bill_no"/>
-                    </group>
-                </group>
-
-                <group>
-                    <field name="contact_person"/>
-                    <field name="delivery_address"/>
-                </group>
-
-            </page>
-        </xpath>
-
-    </field>
-</record>
-
-
-
         <record id="view_move_form_invoice_line_challan" model="ir.ui.view">
         <field name="name">account.move.form.invoice.line.challan</field>
         <field name="model">account.move</field>
@@ -59,36 +13,36 @@
     </record>
 
     
-<record id="view_move_form_delivery_challan" model="ir.ui.view">
-    <field name="name">account.move.form.delivery.challan</field>
-    <field name="model">account.move</field>
-    <field name="inherit_id" ref="account.view_move_form"/>
-    <field name="arch" type="xml">
+    <record id="view_move_form_delivery_challan" model="ir.ui.view">
+        <field name="name">account.move.form.delivery.challan</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
 
-        <xpath expr="//page[@id='invoice_tab']" position="inside">
-            <group string="Charges">
-                <field name="freight_charge_x"/>
-                <field name="packing_charge_x"/>
+            <xpath expr="//page[@id='invoice_tab']" position="inside">
+                <group string="Charges">
+                    <field name="freight_charge_x"/>
+                    <field name="packing_charge_x"/>
+                </group>
+
+                <!-- fields for credit note details only  -->
+                <group string="Credit Note Details"
+        invisible="move_type not in ('out_refund','in_refund')">
+
+                <field name="buyers_order_no"/>
+                <field name="payment_terms_selection"/>
+                <field name="other_references"/>
+                <field name="credit_dated"/>
+                <field name="dispatch_doc_no"/>
+                <field name="dispatched_through"/>
+                <field name="destination"/>
+                <field name="terms_of_delivery"/>
+
             </group>
+            </xpath>
 
-            <!-- fields for credit note details only  -->
-            <group string="Credit Note Details"
-       invisible="move_type not in ('out_refund','in_refund')">
-
-            <field name="buyers_order_no"/>
-            <field name="payment_terms_selection"/>
-            <field name="other_references"/>
-            <field name="credit_dated"/>
-            <field name="dispatch_doc_no"/>
-            <field name="dispatched_through"/>
-            <field name="destination"/>
-            <field name="terms_of_delivery"/>
-
-        </group>
-        </xpath>
-
-    </field>
-</record>
+        </field>
+    </record>
 
 
       
@@ -138,6 +92,59 @@
 
     </field>
 </record>
+
+
+
+
+
+
+
+    <record id="view_picking_form_delivery_extra" model="ir.ui.view">
+        <field name="name">stock.picking.form.delivery.extra</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+
+            <!-- Insert a new tab BEFORE Operations -->
+            <xpath expr="//notebook/page[@name='operations']" position="before">
+
+                <page string="Delivery Details"
+                      name="delivery_details"
+                      invisible="picking_type_code != 'outgoing'">
+
+                    <group>
+                        <group>
+                            <field name="is_consignee_same_as_biling"/>
+                            <field name="billing_address"
+                                   invisible="is_consignee_same_as_biling"/>
+
+                            <field name="contact_person"/>
+                            <field name="delivery_address"
+                                   readonly="is_consignee_same_as_biling"/>
+                        </group>
+
+                        <group>
+                            <field name="delivery_challan_no"/>
+                            <field name="challan_date"/>
+                            <field name="challan_type"/>
+
+                            <field name="transport_mode"/>
+                            <field name="transport_name"/>
+                            <field name="vehicle_no"/>
+                            <field name="eway_bill_no"/>
+                        </group>
+                    </group>
+
+                </page>
+
+            </xpath>
+
+        </field>
+    </record>
+
+
+
 
 
 

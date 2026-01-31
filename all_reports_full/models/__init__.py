@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from . import extended_fields
 from . import report_center
 from . import opening_closing
 from . import advance_vendor
@@ -20,7 +21,7 @@ from . import general_ledger
 from . import trail_balance
 from . import valuation_report
 from . import journal_register_report
-from . import extended_fields
 from .import report_debit_note 
 from . import purchase_order
 from . import sale_order
+from . import delivery_challan_report

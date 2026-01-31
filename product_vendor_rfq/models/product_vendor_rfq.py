@@ -1,3 +1,4 @@
+from tempfile import template
 from odoo import models, fields, api
 from odoo.exceptions import UserError
 
@@ -25,6 +26,8 @@ class RFQ(models.Model):
         required=True,
         tracking=True
     )
+
+    description = fields.Text('Description')
 
     deadline = fields.Date(string='Deadline', tracking=True)
     is_l1 = fields.Boolean(string="L1 Vendor", default=False)
@@ -56,6 +59,7 @@ class RFQ(models.Model):
 
     state = fields.Selection([
         ('draft', 'Draft'),
+        ('draft_saved', 'Draft (Saved)'),
         ('sent', 'RFQ Sent'),
         ('received', 'Quotes Received'),
         ('confirmed', 'Confirmed'),
@@ -68,8 +72,73 @@ class RFQ(models.Model):
     )
 
    
+    # def action_send_rfq(self):
+    #     for vendor_line in self.vendor_line_ids:
+    #         po = self.env['purchase.order'].create({
+    #             'partner_id': vendor_line.vendor_id.id,
+    #             'rfq_request_id': self.id,
+    #             'origin': self.name,
+    #             'order_line': [
+    #                 (0, 0, {
+    #                     'product_id': l.product_id.id,
+    #                     'product_qty': l.quantity,
+    #                     'product_uom': l.uom_id.id,
+    #                     'price_unit': 0,
+    #                 }) for l in self.rfq_line_ids
+    #             ]
+    #         })
+
+    #         quote = self.env['rfq.vendor.quote'].create({
+    #             'rfq_id': self.id,
+    #             'vendor_id': vendor_line.vendor_id.id,
+    #             'purchase_order_id': po.id,
+    #         })
+
+    #         for line in self.rfq_line_ids:
+    #             self.env['rfq.vendor.quote.line'].create({
+    #                 'quote_id': quote.id,
+    #                 'product_id': line.product_id.id,
+    #                 'quantity': line.quantity,
+    #             })
+
+    #         # -----------------------------
+    #         # SEND EMAIL TO VENDOR
+    #         # -----------------------------
+    #         if vendor_line.vendor_id.email:
+    #             # Get the email template
+    #             template = self.env.ref('product_vendor_rfq.email_template_rfq_to_vendor')
+                
+    #             ctx = {
+    #                 'vendor_name': vendor_line.vendor_id.name,
+    #                 'vendor_email': vendor_line.vendor_id.email,
+    #             }
+    #             template.with_context(ctx).send_mail(
+    #                 self.id,
+    #                 force_send=True,
+    #                 raise_exception=False
+    #             )
+
+    #     self.state = 'sent'
+    
+    def action_save_draft(self):
+        """Save RFQ in draft state ignoring user access rights"""
+
+        # Re-browse with sudo to bypass access rules
+        rfqs = self.sudo()
+
+        rfqs.write({
+            'state': 'draft_saved'
+        })
+
+        return True
+
+
     def action_send_rfq(self):
         for vendor_line in self.vendor_line_ids:
+
+            # -----------------------------
+            # Create Purchase Order
+            # -----------------------------
             po = self.env['purchase.order'].create({
                 'partner_id': vendor_line.vendor_id.id,
                 'rfq_request_id': self.id,
@@ -84,6 +153,9 @@ class RFQ(models.Model):
                 ]
             })
 
+            # -----------------------------
+            # Create Vendor Quote
+            # -----------------------------
             quote = self.env['rfq.vendor.quote'].create({
                 'rfq_id': self.id,
                 'vendor_id': vendor_line.vendor_id.id,
@@ -97,8 +169,84 @@ class RFQ(models.Model):
                     'quantity': line.quantity,
                 })
 
+            # -----------------------------
+            # SEND EMAIL (NO TEMPLATE)
+            # -----------------------------
+            vendor = vendor_line.vendor_id
+
+            if not vendor.email:
+                continue
+
+            # Build product rows
+            rows = ""
+            for line in self.rfq_line_ids:
+                rows += f"""
+                    <tr>
+                        <td>{line.product_id.display_name or ''}</td>
+                        <td align="right">{line.quantity or 0}</td>
+                        <td>{line.uom_id.name or ''}</td>
+                    </tr>
+                """
+
+            body_html = f"""
+            <div style="font-family: Arial, sans-serif;">
+                <p>
+                    Dear <strong>{vendor.name}</strong>,
+                </p>
+
+                <p>
+                    This is the RFQ mail for the below products.
+                    Kindly share your quotation for further process.
+                </p>
+
+                <table border="1" cellpadding="6" cellspacing="0" width="100%"
+                       style="border-collapse: collapse;">
+                    <thead>
+                        <tr style="background-color:#f0f0f0;">
+                            <th align="left">Product</th>
+                            <th align="right">Quantity</th>
+                            <th align="left">UoM</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {rows}
+                    </tbody>
+                </table>
+
+                <p>
+                    Please mention delivery time, payment terms,
+                    and validity in your quotation.
+                </p>
+
+                <br/>
+                <p>
+                    Thanks &amp; Regards,<br/>
+                    {self.env.user.name}<br/>
+                    {self.env.user.company_id.name}
+                </p>
+            </div>
+            """
+
+            mail = self.env['mail.mail'].sudo().create({
+                'subject': f"RFQ: {self.name} - Request for Quotation",
+                'email_from': self.env.user.email_formatted,
+                'email_to': vendor.email,
+                'body_html': body_html,
+            })
+
+            mail.sudo().send()
+
         self.state = 'sent'
     
+    
+    
+    
+    
+    
+    def set_draft(self):
+        self.state = 'draft'
+    
+  
     @api.model
     def create(self, vals):
         if vals.get('name', 'New') == 'New':
@@ -121,6 +269,98 @@ class RFQ(models.Model):
             'view_mode': 'tree,form',
             'domain': [('rfq_id', '=', self.id)],
         }
+
+
+
+    def action_send_rfq_email(self, vendor, vendor_email):
+        """
+        vendor       -> res.partner record
+        vendor_email -> email string
+        """
+
+        self.ensure_one()
+
+        if not vendor_email:
+            raise UserError(_("Vendor email is missing."))
+
+        # -----------------------------
+        # Build product table rows
+        # -----------------------------
+        rows = ""
+        for line in self.rfq_line_ids:
+            rows += f"""
+                <tr>
+                    <td>{line.product_id.display_name or ''}</td>
+                    <td align="right">{line.quantity or 0}</td>
+                    <td>{line.uom_id.name or ''}</td>
+                </tr>
+            """
+
+        # -----------------------------
+        # Email body
+        # -----------------------------
+        body_html = f"""
+        <div style="font-family: Arial, sans-serif;">
+            <p>
+                Dear <strong>{vendor.name or 'Vendor'}</strong>,
+            </p>
+
+            <p>
+                This is the RFQ mail for the below products.
+                Kindly share your quotation for further process.
+            </p>
+
+            <table border="1" cellpadding="6" cellspacing="0" width="100%"
+                   style="border-collapse: collapse;">
+                <thead>
+                    <tr style="background-color:#f0f0f0;">
+                        <th align="left">Product</th>
+                        <th align="right">Quantity</th>
+                        <th align="left">UoM</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {rows}
+                </tbody>
+            </table>
+
+            <p>
+                Please mention delivery time, payment terms,
+                and validity in your quotation.
+            </p>
+
+            <br/>
+            <p>
+                Thanks &amp; Regards,<br/>
+                {self.env.user.name}<br/>
+                {self.env.user.company_id.name}
+            </p>
+        </div>
+        """
+
+        # -----------------------------
+        # Create & send mail
+        # -----------------------------
+        mail = self.env['mail.mail'].create({
+            'subject': f"RFQ: {self.name} - Request for Quotation",
+            'email_from': self.env.user.email_formatted,
+            'email_to': vendor_email,
+            'body_html': body_html,
+        })
+
+        mail.send()
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # =========================================================
@@ -400,46 +640,118 @@ class RFQVendorQuote(models.Model):
     #     # Reject other quotes
     #     (self.rfq_id.vendor_quote_ids - self).write({'state': 'rejected'})
 
+
+
+# working version
+    # def action_confirm_quote(self):
+    #     self.ensure_one()
+
+    #     if self.state != 'received':
+    #         raise UserError("Only received quotes can be confirmed.")
+
+    #     # Confirm this quote
+    #     self.state = 'confirmed'
+    #     self.rfq_id.state = 'confirmed'
+    #     self.rfq_id.confirmed_quote_id = self.id
+
+    #     # Update the purchase order with the quoted prices
+    #     if self.purchase_order_id:
+    #         for line in self.purchase_order_id.order_line:
+    #             # Find matching quote line for the product
+    #             qline = self.quote_line_ids.filtered(lambda q: q.product_id == line.product_id)
+    #             if qline:
+    #                 line.write({'price_unit': qline.unit_price})
+    #         # You can optionally confirm the PO automatically
+    #         # self.purchase_order_id.button_confirm()
+
+    #     # Reject other quotes for this RFQ
+    #     other_quotes = self.rfq_id.vendor_quote_ids.filtered(lambda q: q.id != self.id)
+    #     other_quotes.write({'state': 'rejected'})
+
+    #     # Cancel associated POs of rejected quotes if they exist and are in draft
+    #     for quote in other_quotes:
+    #         if quote.purchase_order_id and quote.purchase_order_id.state == 'draft':
+    #             try:
+    #                 quote.purchase_order_id.button_cancel()
+    #             except Exception as e:
+    #                 quote.purchase_order_id.message_post(
+    #                     body=f"Could not cancel automatically: {str(e)}",
+    #                     subject="Cancellation Note"
+    #                 )
+
+    #     # Optional: Update L1/L2 rankings after confirmation
+    #     self.update_l_rankings()
+
+    #     return True
+
+    
+    
+    
     def action_confirm_quote(self):
         self.ensure_one()
 
         if self.state != 'received':
             raise UserError("Only received quotes can be confirmed.")
 
-        # Confirm this quote
+        # --------------------------------------------------
+        # Confirm Vendor Quote & RFQ
+        # --------------------------------------------------
         self.state = 'confirmed'
         self.rfq_id.state = 'confirmed'
         self.rfq_id.confirmed_quote_id = self.id
 
-        # Update the purchase order with the quoted prices
-        if self.purchase_order_id:
-            for line in self.purchase_order_id.order_line:
-                # Find matching quote line for the product
-                qline = self.quote_line_ids.filtered(lambda q: q.product_id == line.product_id)
-                if qline:
-                    line.write({'price_unit': qline.unit_price})
-            # You can optionally confirm the PO automatically
-            # self.purchase_order_id.button_confirm()
+        po = self.purchase_order_id
 
-        # Reject other quotes for this RFQ
+        # --------------------------------------------------
+        # Update Purchase Order prices
+        # --------------------------------------------------
+        if po:
+            for po_line in po.order_line:
+                qline = self.quote_line_ids.filtered(
+                    lambda q: q.product_id == po_line.product_id
+                )
+                if qline:
+                    po_line.write({'price_unit': qline.unit_price})
+
+            # --------------------------------------------------
+            # CONFIRM PURCHASE ORDER (THIS IS THE KEY PART)
+            # --------------------------------------------------
+            if po.state in ('draft', 'sent'):
+                po.button_confirm()
+
+                po.message_post(
+                    body=f"<p>Purchase Order confirmed based on RFQ <b>{self.rfq_id.name}</b></p>",
+                    subject="PO Confirmed"
+                )
+
+        # --------------------------------------------------
+        # Reject other quotes
+        # --------------------------------------------------
         other_quotes = self.rfq_id.vendor_quote_ids.filtered(lambda q: q.id != self.id)
         other_quotes.write({'state': 'rejected'})
 
-        # Cancel associated POs of rejected quotes if they exist and are in draft
+        # --------------------------------------------------
+        # Cancel other POs
+        # --------------------------------------------------
         for quote in other_quotes:
-            if quote.purchase_order_id and quote.purchase_order_id.state == 'draft':
+            other_po = quote.purchase_order_id
+            if other_po and other_po.state not in ('purchase', 'done', 'cancel'):
                 try:
-                    quote.purchase_order_id.button_cancel()
+                    other_po.button_cancel()
                 except Exception as e:
-                    quote.purchase_order_id.message_post(
+                    other_po.message_post(
                         body=f"Could not cancel automatically: {str(e)}",
                         subject="Cancellation Note"
                     )
 
-        # Optional: Update L1/L2 rankings after confirmation
+        # --------------------------------------------------
+        # Update L1/L2/L3 rankings
+        # --------------------------------------------------
         self.update_l_rankings()
 
         return True
+
+
 
 
     # def _update_l_rankings(self):

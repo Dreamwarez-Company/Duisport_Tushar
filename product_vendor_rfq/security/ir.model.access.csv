@@ -1,7 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_rfq_request_user,rfq.request.user,model_rfq_request,product_vendor_rfq.group_rfq_department,1,1,1,1
-access_rfq_vendor_line_user,rfq.vendor.line.user,model_rfq_vendor_line,product_vendor_rfq.group_rfq_department,1,1,1,1
-access_rfq_vendor_quote_user,rfq.vendor.quote.user,model_rfq_vendor_quote,product_vendor_rfq.group_rfq_department,1,1,1,1
+access_rfq_request,rfq.request,model_rfq_request,product_vendor_rfq.group_rfq_department,1,1,1,1
+access_rfq_vendor_line,rfq.vendor.line,model_rfq_vendor_line,product_vendor_rfq.group_rfq_department,1,1,1,1
+access_rfq_vendor_quote,rfq.vendor.quote,model_rfq_vendor_quote,product_vendor_rfq.group_rfq_department,1,1,1,1
 access_rfq_request_portal,rfq.request.portal,model_rfq_request,product_vendor_rfq.group_rfq_department,1,0,0,0
 access_rfq_vendor_quote_portal,rfq.vendor.quote.portal,model_rfq_vendor_quote,product_vendor_rfq.group_rfq_department,1,1,0,0
 access_rfq_request_store,rfq.request.store,model_rfq_request,product_vendor_rfq.group_rfq_department,1,1,1,1
@@ -9,3 +9,6 @@ access_rfq_vendor_line_store,rfq.vendor.line.store,model_rfq_vendor_line,product
 access_rfq_vendor_quote_store,rfq.vendor.quote.store,model_rfq_vendor_quote,product_vendor_rfq.group_rfq_department,1,1,1,1
 access_rfq_request_line,rfq.request.line,model_rfq_request_line,base.group_user,1,1,1,1
 access_rfq_vendor_quote_line,rfq.vendor.quote.line,model_rfq_vendor_quote_line,,1,1,1,1
+access_rfq_vendor_line_user,rfq.vendor.line.user,model_rfq_vendor_line,base.group_user,1,0,0,0
+access_rfq_vendor_quote_user,rfq.vendor.quote.user,model_rfq_vendor_quote,base.group_user,1,0,0,0
+access_rfq_request_user,rfq.request.user,model_rfq_request,base.group_user,1,0,0,0
