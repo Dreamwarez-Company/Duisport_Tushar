@@ -17,10 +17,10 @@
            
                    <group>
                         <field name="engineering_team_id" readonly="1"/>
-                        <field name="engineer_id" readonly="1" />
-                        <field name="estimation_time" readonly="1"/>
-                        <field name="engineering_notes" readonly="1"/>
-                        <field name="design_ref" readonly="1"
+                        <field name="engineer_id"/>
+                        <field name="estimation_time"/>
+                        <field name="engineering_notes"/>
+                        <field name="design_ref"
                                filename="design_ref_filename"/>
                     </group>
 

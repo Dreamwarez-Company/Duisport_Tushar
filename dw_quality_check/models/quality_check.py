@@ -1,8 +1,5 @@
 from odoo import models, fields, api
 from odoo.exceptions import UserError
-import logging
-
-_logger = logging.getLogger(__name__)
 
 class DwQualityCheck(models.Model):
     _name = 'dw.quality.check'
@@ -178,8 +175,6 @@ class DwQualityCheck(models.Model):
                 rec.qc_status = "done"
                 rec.status = "passed" if rec.passed else "failed"
 
-                rec.mrp_id.qc_state = rec.status
-
                 rec.message_post(
                     body=f"✅ QC Done for Manufacturing Order {mo.name} by {self.env.user.name}"
                 )
@@ -243,14 +238,6 @@ class DwQualityCheck(models.Model):
                     "status": "done",
                     "lead_id": lead_id,
                 })
-
-                related_pickings = self.env['stock.picking'].search([
-                    ('origin', '=', rec.mrp_id.origin),
-                    ('picking_type_code', '=', 'outgoing'),
-                ])
-                if related_pickings:
-                    related_pickings._compute_quality_check_passed_delivery()
-                    _logger.warning("Forced recompute on related deliveries: %s", related_pickings.mapped('name'))
 
                 return True  # MRP flow ends here
 
@@ -329,16 +316,6 @@ class DwQualityCheck(models.Model):
             rec.qc_status = "done"
             rec.message_post(body=f"QC Done by {self.env.user.name}")
             rec._update_picking_qc_state()
-
-            if rec.picking_id:
-                related_outgoing = self.env['stock.picking'].search([
-                    ('move_ids_without_package.purchase_line_id', 'in',
-                    rec.picking_id.move_ids_without_package.mapped('purchase_line_id').ids),
-                    ('picking_type_code', '=', 'outgoing'),
-                ])
-                if related_outgoing:
-                    related_outgoing._compute_quality_check_passed_delivery()
-                    rec.message_post(body=f"Forced recompute on related deliveries: {related_outgoing.mapped('name')}")
 
         return True
 

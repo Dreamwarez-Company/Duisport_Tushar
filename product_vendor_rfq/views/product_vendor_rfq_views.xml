@@ -8,16 +8,31 @@
         <field name="arch" type="xml">
             <form>
                 <header>
+                    <button name="action_save_draft"
+                            string="Save as Draft"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'draft'"/>
+                            
                     <button name="action_send_rfq"
                             string="Send RFQ"
                             type="object"
                             class="oe_highlight"
+                            groups="product_vendor_rfq.group_rfq_  department"
                             invisible="state != 'draft'"/>
 
                     <button name="action_view_comparison"
                             string="View Comparison"
                             type="object"
+                            groups="product_vendor_rfq.group_rfq_department"
                             invisible="state == 'draft'"/>
+
+                    <button name="set_draft"
+                            string="Set Draft"
+                            type="object"
+                            class="oe_highlight"
+                            groups="product_vendor_rfq.group_rfq_department"
+                            />
 
                     <field name="state"
                            widget="statusbar"
@@ -47,7 +62,7 @@
                                     <field name="product_id"/>
                                     <field name="quantity"/>
                                     <field name="uom_id"/>
-                                    <field name="description"/>
+                                    <!-- <field name="description"/> -->
                                 </tree>
                             </field>
                         </page>

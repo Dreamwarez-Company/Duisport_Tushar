@@ -49,3 +49,4 @@ access_journal_register_line_manager,access.journal.register.line.manager,model_
 access_salary_sheet_preview,salary.sheet.preview,model_salary_sheet_preview,base.group_user,1,1,1,1
 access_pf_esi_pt_preview,pf.esi.pt.preview,model_pf_esi_pt_preview,base.group_user,1,1,1,1
 access_gratuity_leave_preview,gratuity.leave.preview,model_gratuity_leave_preview,base.group_user,1,1,1,1
+access_delivery_challan_report,delivery.challan.report,model_delivery_challan_report,base.group_user,1,1,1,0

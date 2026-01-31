@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data noupdate="1">
-        
-        <!-- Sequence for RFQ -->
         <record id="seq_rfq_request" model="ir.sequence">
             <field name="name">RFQ Sequence</field>
             <field name="code">rfq.request</field>
@@ -20,7 +18,7 @@
             <field name="email_from">{{ (object.rfq_id.create_uid.email_formatted or user.email_formatted) }}</field>
             <field name="email_to">{{ object.vendor_id.email }}</field>
             <field name="body_html" type="html">
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="max-width: 600px; margin: 0 auto;">
                     <h2 style="color: #875A7B;">Request for Quotation</h2>
                     
                     <p>Dear <strong>{{ object.vendor_id.name }}</strong>,</p>
@@ -46,11 +44,6 @@
                         </tr>
                     </table>
                     
-                    <p t-if="object.rfq_id.description">
-                        <strong>Description:</strong><br/>
-                        {{ object.rfq_id.description }}
-                    </p>
-                    
                     <p>Please provide your best quotation including:</p>
                     <ul>
                         <li>Unit Price</li>
@@ -60,8 +53,8 @@
                     
                     <p>
                         <a href="/my/quotes/{{ object.id }}" 
-                           style="background-color: #875A7B; color: white; padding: 10px 20px; 
-                                  text-decoration: none; border-radius: 5px; display: inline-block;">
+                        style="background-color: #875A7B; color: white; padding: 10px 20px; 
+                                text-decoration: none; border-radius: 5px; display: inline-block;">
                             Submit Your Quote
                         </a>
                     </p>

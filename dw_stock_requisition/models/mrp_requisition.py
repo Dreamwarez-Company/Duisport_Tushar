@@ -67,7 +67,9 @@ class MrpRequisition(models.Model):
         ('draft', 'Draft'),
         ('submitted', 'Submitted to Store'),
         ('ready_for_transfer', 'Ready for Internal Transfer'),
-        ('requested_other_location', 'Requested to Another Location')
+        ('requested_other_location', 'Requested to Another Location'),
+        ('submitted_to_purchase', 'Submitted to Purchase'),
+        ('rfq_created', 'RFQ Created')
         
     ], string='Status', default='draft')
     
@@ -180,6 +182,8 @@ class MrpRequisition(models.Model):
             requisition.state = 'submitted'
         return True
         
+    
+    
     def action_ready_for_internal_transfer(self):
         """Create Internal Transfer - Only inventory users can process submitted requisitions"""
         for requisition in self:
@@ -485,94 +489,209 @@ class MrpRequisition(models.Model):
     #         }
 
 
-    def action_create_purchase_order(self):
-        """Create and open Purchase Order from requisition - Only inventory users"""
+    # def action_create_purchase_order(self):
+    #     """Create and open Purchase Order from requisition - Only inventory users"""
+    #     for requisition in self:
+    #         if requisition.state != 'requested_other_location':
+    #             raise UserError(_("Only requisitions in 'Requested to Another Location' state can create purchase orders."))
+            
+    #         if not requisition._check_purchase_user_permission():
+    #             raise UserError(_("Only purchase users can create RFQ."))
+            
+    #         if not requisition.requisition_line_ids:
+    #             raise UserError(_("Cannot create purchase order without any items."))
+            
+    #         # Set the flag that this requisition is submitted to purchase
+    #         requisition.is_submitted_to_purchase = True
+            
+    #         # Find a common vendor for all products
+    #         common_partner = False
+    #         vendor_candidates = {}
+            
+    #         # Collect all possible vendors from product suppliers
+    #         for line in requisition.requisition_line_ids:
+    #             if line.product_id.seller_ids:
+    #                 for seller in line.product_id.seller_ids:
+    #                     # Use seller.partner_id instead of seller.name
+    #                     vendor_candidates[seller.partner_id.id] = vendor_candidates.get(seller.partner_id.id, 0) + 1
+            
+    #         # Find the vendor that supplies the most products
+    #         if vendor_candidates:
+    #             common_partner_id = max(vendor_candidates, key=vendor_candidates.get)
+    #             common_partner = self.env['res.partner'].browse(common_partner_id)
+    #         else:
+    #             # If no vendor found, try to get any vendor from the company
+    #             common_partner = self.env['res.partner'].search([
+    #                 ('supplier_rank', '>', 0),
+    #                 ('company_id', 'in', [False, requisition.company_id.id])
+    #             ], limit=1)
+                
+    #             if not common_partner:
+    #                 # If still no vendor, create a temporary one or raise error
+    #                 raise UserError(_("No vendor found. Please set up at least one supplier in the system."))
+            
+    #         # Create purchase order with the found vendor
+    #         purchase_vals = {
+    #             'partner_id': common_partner.id,
+    #             'origin': f"Requisition: {requisition.name}",
+    #             'date_order': fields.Datetime.now(),
+    #             'company_id': requisition.company_id.id,
+    #             'currency_id': common_partner.property_purchase_currency_id.id or requisition.company_id.currency_id.id,
+    #         }
+            
+    #         purchase_order = self.env['purchase.order'].create(purchase_vals)
+            
+    #         # Create purchase order lines
+    #         for line in requisition.requisition_line_ids:
+    #             # Get the supplier info for the product with the selected vendor
+    #             seller = line.product_id._select_seller(
+    #                 partner_id=common_partner,  # Pass the partner recordset, not ID
+    #                 quantity=line.quantity,
+    #                 date=fields.Date.today(),
+    #                 uom_id=line.uom_id
+    #             )
+                
+    #             line_vals = {
+    #                 'order_id': purchase_order.id,
+    #                 'product_id': line.product_id.id,
+    #                 'name': line.description or line.product_id.name,
+    #                 'product_qty': line.quantity,
+    #                 'product_uom': line.uom_id.id,
+    #                 'price_unit': seller.price if seller else line.product_id.standard_price,
+    #                 'date_planned': requisition.required_date or fields.Date.today(),
+    #             }
+    #             self.env['purchase.order.line'].create(line_vals)
+            
+    #         # Return action to open the created purchase order in proper Purchase Order form view
+    #         return {
+    #             'type': 'ir.actions.act_window',
+    #             'name': _('Purchase Order'),
+    #             'res_model': 'purchase.order',
+    #             'res_id': purchase_order.id,
+    #             'view_mode': 'form',
+    #             'view_id': self.env.ref('purchase.purchase_order_form').id,  # Force specific form view
+    #             'target': 'current',
+    #             'context': {
+    #                 'form_view_initial_mode': 'edit',
+    #                 'create': False,
+    #             }
+    #         }z
+
+ 
+
+    def action_submit_to_purchase(self):
+        """Submit requisition to Purchase Team"""
+
         for requisition in self:
             if requisition.state != 'requested_other_location':
-                raise UserError(_("Only requisitions in 'Requested to Another Location' state can create purchase orders."))
-            
-            if not requisition._check_purchase_user_permission():
-                raise UserError(_("Only purchase users can create RFQ."))
-            
-            if not requisition.requisition_line_ids:
-                raise UserError(_("Cannot create purchase order without any items."))
-            
-            # Set the flag that this requisition is submitted to purchase
-            requisition.is_submitted_to_purchase = True
-            
-            # Find a common vendor for all products
-            common_partner = False
-            vendor_candidates = {}
-            
-            # Collect all possible vendors from product suppliers
-            for line in requisition.requisition_line_ids:
-                if line.product_id.seller_ids:
-                    for seller in line.product_id.seller_ids:
-                        # Use seller.partner_id instead of seller.name
-                        vendor_candidates[seller.partner_id.id] = vendor_candidates.get(seller.partner_id.id, 0) + 1
-            
-            # Find the vendor that supplies the most products
-            if vendor_candidates:
-                common_partner_id = max(vendor_candidates, key=vendor_candidates.get)
-                common_partner = self.env['res.partner'].browse(common_partner_id)
-            else:
-                # If no vendor found, try to get any vendor from the company
-                common_partner = self.env['res.partner'].search([
-                    ('supplier_rank', '>', 0),
-                    ('company_id', 'in', [False, requisition.company_id.id])
-                ], limit=1)
-                
-                if not common_partner:
-                    # If still no vendor, create a temporary one or raise error
-                    raise UserError(_("No vendor found. Please set up at least one supplier in the system."))
-            
-            # Create purchase order with the found vendor
-            purchase_vals = {
-                'partner_id': common_partner.id,
-                'origin': f"Requisition: {requisition.name}",
-                'date_order': fields.Datetime.now(),
-                'company_id': requisition.company_id.id,
-                'currency_id': common_partner.property_purchase_currency_id.id or requisition.company_id.currency_id.id,
-            }
-            
-            purchase_order = self.env['purchase.order'].create(purchase_vals)
-            
-            # Create purchase order lines
-            for line in requisition.requisition_line_ids:
-                # Get the supplier info for the product with the selected vendor
-                seller = line.product_id._select_seller(
-                    partner_id=common_partner,  # Pass the partner recordset, not ID
-                    quantity=line.quantity,
-                    date=fields.Date.today(),
-                    uom_id=line.uom_id
-                )
-                
-                line_vals = {
-                    'order_id': purchase_order.id,
-                    'product_id': line.product_id.id,
-                    'name': line.description or line.product_id.name,
-                    'product_qty': line.quantity,
-                    'product_uom': line.uom_id.id,
-                    'price_unit': seller.price if seller else line.product_id.standard_price,
-                    'date_planned': requisition.required_date or fields.Date.today(),
-                }
-                self.env['purchase.order.line'].create(line_vals)
-            
-            # Return action to open the created purchase order in proper Purchase Order form view
-            return {
-                'type': 'ir.actions.act_window',
-                'name': _('Purchase Order'),
-                'res_model': 'purchase.order',
-                'res_id': purchase_order.id,
-                'view_mode': 'form',
-                'view_id': self.env.ref('purchase.purchase_order_form').id,  # Force specific form view
-                'target': 'current',
-                'context': {
-                    'form_view_initial_mode': 'edit',
-                    'create': False,
-                }
-            }
+                raise UserError(_("Only requisitions requested to another location can be sent to Purchase."))
 
+
+            if not (
+                self.env.user.has_group('dw_stock_requisition.group_inventory_team')
+                or self.env.user.has_group('base.group_erp_manager')
+            ):
+                raise UserError(_("You are not allowed to submit this requisition to Purchase."))
+
+            if not requisition.requisition_line_ids:
+                raise UserError(_("Cannot submit requisition without any items."))
+
+
+            requisition.state = 'submitted_to_purchase'
+            requisition.is_submitted_to_purchase = True
+
+            requisition.message_post(
+                body=_("Requisition submitted to Purchase Team.")
+            )
+
+        return True
+
+
+
+    def action_create_purchase_order(self):
+        """Create Custom RFQ instead of standard Purchase RFQ"""
+
+        self.ensure_one()
+
+        if self.state != 'submitted_to_purchase':
+            raise UserError(_("Only requisitions in 'Submitted to Purchase' state can create RFQ."))
+
+        if not self._check_purchase_user_permission():
+            raise UserError(_("Only purchase users can create RFQ."))
+
+        if not self.requisition_line_ids:
+            raise UserError(_("Cannot create RFQ without any items."))
+
+        # --------------------------------------------------
+        # Mark requisition as submitted
+        # --------------------------------------------------
+        self.is_submitted_to_purchase = True
+
+        # --------------------------------------------------
+        # Create RFQ REQUEST
+        # --------------------------------------------------
+        rfq = self.env['rfq.request'].create({
+            # 'description': f"Created from Requisition: {self.name}",
+            'deadline': self.required_date,
+        })
+
+        # --------------------------------------------------
+        # Add Products to RFQ
+        # --------------------------------------------------
+        for line in self.requisition_line_ids:
+            self.env['rfq.request.line'].create({
+                'rfq_id': rfq.id,
+                'product_id': line.product_id.id,
+                'quantity': line.quantity,
+            })
+
+        # --------------------------------------------------
+        # Collect Vendors from Product Suppliers
+        # --------------------------------------------------
+        vendor_ids = set()
+
+        for line in self.requisition_line_ids:
+            for seller in line.product_id.seller_ids:
+                vendor_ids.add(seller.partner_id.id)
+
+        if not vendor_ids:
+            raise UserError(_("No vendors found on selected products."))
+
+        # --------------------------------------------------
+        # Add Vendors to RFQ
+        # --------------------------------------------------
+        for vendor_id in vendor_ids:
+            self.env['rfq.vendor.line'].create({
+                'rfq_id': rfq.id,
+                'vendor_id': vendor_id,
+            })
+
+
+        if self.state != 'submitted_to_purchase':
+            raise UserError(_("Only requisitions submitted to Purchase can create RFQ."))
+
+
+        # --------------------------------------------------
+        # Open CUSTOM RFQ FORM VIEW
+        # --------------------------------------------------
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Request for Quotation'),
+            'res_model': 'rfq.request',
+            'res_id': rfq.id,
+            'view_mode': 'form',
+            'view_id': self.env.ref('product_vendor_rfq.view_rfq_request_form').id,
+            'target': 'current',
+            'context': {
+                'form_view_initial_mode': 'edit',
+                'create': False,
+            }
+        }
+
+
+
+ 
+ 
     def _check_purchase_user_permission(self):
         """Check if current user is purchase user or admin"""
         is_purchase_user = self.env.user.has_group('purchase.group_purchase_user')

@@ -81,9 +81,7 @@
                                                             GSTIN/UIN :
                                                             <span t-esc="o.company_id.vat"/><br/>
                                                             State Name :
-                                                            <span t-esc="o.company_id.state_id.name"/><br/>
-                                                            CIN :
-                                                            <span t-esc="o.company_id.company_registry"/>
+                                                            <span t-esc="o.company_id.state_id.name"/>
                                                         </td>
                                                     </tr>
                                                 </table>

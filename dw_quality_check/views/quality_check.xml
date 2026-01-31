@@ -44,43 +44,15 @@
     </record>
 
     <!-- Inherit Delivery Order form view to show Quality Check Boolean -->
-    <!-- <record id="view_picking_form_inherit_qc_boolean" model="ir.ui.view">
-        <field name="name">stock.picking.form.inherit.qc.boolean</field>
-        <field name="model">stock.picking</field>
-        <field name="inherit_id" ref="stock.view_picking_form"/>
-        <field name="arch" type="xml">
-            <xpath expr="//sheet/group/group" position="inside">
-                <field name="quality_check_passed" readonly="1"/>
-            </xpath>
-        </field>
-    </record> -->
-
     <record id="view_picking_form_inherit_qc_boolean" model="ir.ui.view">
         <field name="name">stock.picking.form.inherit.qc.boolean</field>
         <field name="model">stock.picking</field>
         <field name="inherit_id" ref="stock.view_picking_form"/>
-        <field name="priority" eval="5"/> <!-- High priority to override -->
         <field name="arch" type="xml">
-            <!-- Hidden field in header – FORCES compute on EVERY form load -->
-            <xpath expr="//header" position="inside">
-                <field name="quality_check_passed" invisible="1"/>
-            </xpath>
-
-            <!-- Visible plain checkbox – place in header for reliability -->
-            <xpath expr="//header" position="inside">
-                <field name="quality_check_passed" 
-                    readonly="1" 
-                    nolabel="1" 
-                    class="oe_inline" 
-                    options="{'no_label': true}"/>
-            </xpath>
-
-            <!-- Fallback visible placement if header doesn't show -->
-            <!--
-            <xpath expr="//sheet/group[1]" position="inside">
+            <!-- Add field below the source document area -->
+            <xpath expr="//sheet/group/group" position="inside">
                 <field name="quality_check_passed" readonly="1"/>
             </xpath>
-            -->
         </field>
     </record>
 

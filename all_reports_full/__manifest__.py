@@ -3,7 +3,7 @@
     'version': '17.0.1.0.0',
     'category': 'Reporting',
     'license': 'LGPL-3',
-    'depends': ['base', 'account', 'sale', 'purchase', 'stock', 'product'],
+    'depends': ['base', 'account', 'sale', 'purchase', 'stock', 'product', 'l10n_in_ewaybill_stock'],
     'data': [
         'security/ir.model.access.csv',
         'security/security.xml',
@@ -31,7 +31,7 @@
         'views/valuation_report.xml',
         'views/journal_register_report.xml',
         'views/extended_fields.xml',
-        'views/delivery_challan_report.xml',
+        # 'views/delivery_challan_report.xml',
         'views/credit_note_report.xml',
         'views/report_debit_note.xml',
         'views/purchase_order_view.xml',

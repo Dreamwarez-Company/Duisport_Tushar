@@ -1,12 +1,62 @@
-<odoo>
-    <record id="mail_template_vendor_rfq" model="mail.template">
-        <field name="name">Vendor RFQ Email</field>
-        <field name="model_id" ref="purchase.model_purchase_order"/>
-        <field name="email_from">${object.user_id.email|safe}</field>
-        <field name="subject">RFQ for ${object.order_line[0].product_id.name}</field>
-        <field name="body_html"><![CDATA[
-            <p>Hello ${object.partner_id.name},</p>
-            <p>Please find the RFQ for ${object.order_line[0].product_id.name}.</p>
-        ]]></field>
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="email_template_rfq_to_vendor" model="mail.template">
+        <field name="name">RFQ: Request for Quotation</field>
+        <field name="model_id" ref="model_rfq_request"/>
+
+        <field name="email_from">${user.email_formatted or ''}</field>
+        <field name="email_to">${ctx.get('vendor_email', '')}</field>
+        <field name="subject">RFQ: ${object.name} - Request for Quotation</field>
+
+        <field name="auto_delete" eval="True"/>
+
+        <field name="body_html" type="html">
+            <![CDATA[
+            <div style="font-family: Arial, sans-serif;">
+                <p>
+                    Dear <strong>${ctx.get('vendor_name', 'Vendor')}</strong>,
+                </p>
+
+                <p>
+                    This is the RFQ mail for the below products.
+                    Kindly share your quotation for further process.
+                </p>
+
+                <table border="1" cellpadding="6" cellspacing="0" width="100%"
+                       style="border-collapse: collapse;">
+                    <thead>
+                        <tr style="background-color:#f0f0f0;">
+                            <th align="left">Product</th>
+                            <th align="right">Quantity</th>
+                            <th align="left">UoM</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        % for line in object.rfq_line_ids:
+                        <tr>
+                            <td>${line.product_id.display_name or ''}</td>
+                            <td align="right">${line.quantity or 0}</td>
+                            <td>${line.uom_id.name or ''}</td>
+                        </tr>
+                        % endfor
+                    </tbody>
+                </table>
+
+                <p>
+                    Please mention delivery time, payment terms,
+                    and validity in your quotation.
+                </p>
+
+                <br/>
+                <p>
+                    Thanks &amp; Regards,<br/>
+                    ${user.name}<br/>
+                    ${user.company_id.name}
+                </p>
+            </div>
+            ]]>
+        </field>
     </record>
+
 </odoo>

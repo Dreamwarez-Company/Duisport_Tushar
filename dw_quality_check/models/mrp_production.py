@@ -33,94 +33,94 @@ class MrpProduction(models.Model):
                 rec.qc_state == 'not_required'
             )
 
-    # def action_send_for_qc(self):
-    #     """Triggered when MO is completed and sent for QC."""
-    #     for mo in self:
-    #         _logger.info("========== QC TRIGGERED FOR MO ==========")
-    #         _logger.info(f"MO ID: {mo.id}, Name: {mo.name}, State: {mo.state}")
+    def action_send_for_qc(self):
+        """Triggered when MO is completed and sent for QC."""
+        for mo in self:
+            _logger.info("========== QC TRIGGERED FOR MO ==========")
+            _logger.info(f"MO ID: {mo.id}, Name: {mo.name}, State: {mo.state}")
 
-    #         if mo.state != 'done':
-    #             raise UserError('You can only send completed Manufacturing Orders for Quality Check.')
+            if mo.state != 'done':
+                raise UserError('You can only send completed Manufacturing Orders for Quality Check.')
 
-    #         # -------------------------------------------
-    #         # 1️⃣ CREATE QC RECORD (no picking required)
-    #         # -------------------------------------------
-    #         qc_vals = {
-    #             'mrp_id': mo.id,
-    #             'product_id': mo.product_id.id,
-    #             'quantity': mo.product_qty,
-    #             'remarks': f'QC initiated for Manufacturing Order {mo.name}',
-    #         }
+            # -------------------------------------------
+            # 1️⃣ CREATE QC RECORD (no picking required)
+            # -------------------------------------------
+            qc_vals = {
+                'mrp_id': mo.id,
+                'product_id': mo.product_id.id,
+                'quantity': mo.product_qty,
+                'remarks': f'QC initiated for Manufacturing Order {mo.name}',
+            }
 
-    #         qc = self.env['dw.quality.check'].create(qc_vals)
-    #         _logger.info(f"Created QC Record: {qc.id}")
+            qc = self.env['dw.quality.check'].create(qc_vals)
+            _logger.info(f"Created QC Record: {qc.id}")
 
-    #         mo.message_post(
-    #             body=f"Quality Check {qc.name} created for Manufacturing Order {mo.name}.",
-    #             message_type="comment",
-    #             subtype_xmlid="mail.mt_comment"
-    #         )
+            mo.message_post(
+                body=f"Quality Check {qc.name} created for Manufacturing Order {mo.name}.",
+                message_type="comment",
+                subtype_xmlid="mail.mt_comment"
+            )
 
-    #         mo.qc_state = 'pending'
-    #         mo.show_qc_button = False
+            mo.qc_state = 'pending'
+            mo.show_qc_button = False
 
-    #         # -------------------------------------------
-    #         # 2️⃣ DEPARTMENT TIME TRACKING (MO → QC Initiated)
-    #         # -------------------------------------------
-    #         _logger.info("---- TIME TRACKING (MO QC Initiated) ----")
+            # -------------------------------------------
+            # 2️⃣ DEPARTMENT TIME TRACKING (MO → QC Initiated)
+            # -------------------------------------------
+            _logger.info("---- TIME TRACKING (MO QC Initiated) ----")
 
-    #         # Close previous MO stage (in progress)
-    #         last_track = self.env['department.time.tracking'].search(
-    #             [
-    #                 ('target_model', '=', f'mrp.production,{mo.id}'),
-    #                 ('status', '=', 'in_progress')
-    #             ],
-    #             limit=1,
-    #             order='start_time desc'
-    #         )
+            # Close previous MO stage (in progress)
+            last_track = self.env['department.time.tracking'].search(
+                [
+                    ('target_model', '=', f'mrp.production,{mo.id}'),
+                    ('status', '=', 'in_progress')
+                ],
+                limit=1,
+                order='start_time desc'
+            )
 
-    #         if last_track:
-    #             last_track.write({
-    #                 'end_time': fields.Datetime.now(),
-    #                 'status': 'done'
-    #             })
-    #             _logger.info(f"Closed previous stage: {last_track.stage_name}")
+            if last_track:
+                last_track.write({
+                    'end_time': fields.Datetime.now(),
+                    'status': 'done'
+                })
+                _logger.info(f"Closed previous stage: {last_track.stage_name}")
 
-    #         # Create QC Initiated stage
-    #         self.env['department.time.tracking'].create({
-    #             'target_model': f'mrp.production,{mo.id}',
-    #             'stage_name': 'QC Initiated',
-    #             'user_id': self.env.user.id,
-    #             'employee_id': self.env.user.employee_id.id if self.env.user.employee_id else False,
-    #             'start_time': fields.Datetime.now(),
-    #             'status': 'in_progress',
-    #             'lead_id': mo.sale_order_id.opportunity_id.id 
-    #                 if hasattr(mo, 'sale_order_id') and mo.sale_order_id.opportunity_id 
-    #                 else False,
-    #         })
+            # Create QC Initiated stage
+            self.env['department.time.tracking'].create({
+                'target_model': f'mrp.production,{mo.id}',
+                'stage_name': 'QC Initiated',
+                'user_id': self.env.user.id,
+                'employee_id': self.env.user.employee_id.id if self.env.user.employee_id else False,
+                'start_time': fields.Datetime.now(),
+                'status': 'in_progress',
+                'lead_id': mo.sale_order_id.opportunity_id.id 
+                    if hasattr(mo, 'sale_order_id') and mo.sale_order_id.opportunity_id 
+                    else False,
+            })
 
-    #         _logger.info("Created stage: QC Initiated")
+            _logger.info("Created stage: QC Initiated")
 
-    #     # -------------------------------------------
-    #     # 3️⃣ Return view for QC team
-    #     # -------------------------------------------
-    #     if self.env.user.has_group('dw_quality_check.group_quality_check'):
-    #         return {
-    #             'type': 'ir.actions.act_window',
-    #             'name': 'Quality Checks',
-    #             'res_model': 'dw.quality.check',
-    #             'view_mode': 'tree,form',
-    #             'domain': [('mrp_id', '=', self.id)],
-    #             'target': 'current',
-    #         }
-    #     else:
-    #         return {
-    #             'effect': {
-    #                 'fadeout': 'slow',
-    #                 'message': 'Quality Check has been sent to QC team.',
-    #                 'type': 'rainbow_man',
-    #             }
-    #         }
+        # -------------------------------------------
+        # 3️⃣ Return view for QC team
+        # -------------------------------------------
+        if self.env.user.has_group('dw_quality_check.group_quality_check'):
+            return {
+                'type': 'ir.actions.act_window',
+                'name': 'Quality Checks',
+                'res_model': 'dw.quality.check',
+                'view_mode': 'tree,form',
+                'domain': [('mrp_id', '=', self.id)],
+                'target': 'current',
+            }
+        else:
+            return {
+                'effect': {
+                    'fadeout': 'slow',
+                    'message': 'Quality Check has been sent to QC team.',
+                    'type': 'rainbow_man',
+                }
+            }
 
     def action_send_for_qc(self):
         """Triggered when MO is completed and sent for QC."""
